@@ -5,556 +5,373 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2a1f4d">
 <title>Rate My Throne</title>
+<meta name="description" content="Öffentliche Toiletten in jeder Stadt finden und bewerten – mit der Community von Rate My Throne.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-/* Layout: königliche Kopfleiste, Vollbild-Karte, Infokarte rechts (Handy: oben), runde Kartenknöpfe links unten, Details als Bottom-Sheet */
+/* Layout: dunkler Hero mit großer Krone im Hintergrund, darunter helle Abschnitte in einer 1080px-Spalte, Anmeldung als eigene Karte */
 :root {
-  --royal: #2a1f4d; --royal-2: #3d2f6e; --gold: #e3b341; --gold-deep: #b8871c;
-  --bg: #f5f3fa; --surface: #ffffff; --fg: #1f1a2e; --muted: #6b6480; --line: #e3dfee;
-  --good: #1f9d63; --mid: #e3a21a; --bad: #d14b3a; --none: #8a849b; --warn: #c0392b;
+  --royal: #2a1f4d; --royal-2: #3d2f6e; --royal-3: #1b1433; --gold: #e3b341; --gold-soft: #f3dc9a;
+  --bg: #f5f3fa; --surface: #ffffff; --fg: #1f1a2e; --muted: #6b6480; --line: #e3dfee; --warn: #c0392b; --good: #1f9d63;
   --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --shadow: 0 6px 24px rgba(42, 31, 77, .18);
-  --radius: 16px;
+  --shadow: 0 10px 40px rgba(42, 31, 77, .14);
 }
 @media (prefers-color-scheme: dark) {
   :root { --bg: #15121f; --surface: #211c31; --fg: #efecf7; --muted: #a49cbc; --line: #352e4c;
-    --royal: #1b1433; --royal-2: #2e2454; --shadow: 0 6px 24px rgba(0,0,0,.45); color-scheme: dark; }
+    --shadow: 0 10px 40px rgba(0,0,0,.45); color-scheme: dark; }
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; }
-body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--body); display: flex; flex-direction: column; overflow: hidden; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.6 var(--body); }
+a { color: inherit; }
 button { font: inherit; cursor: pointer; }
-button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h2 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; letter-spacing: -.5px; font-weight: 800; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+.lead { color: var(--muted); max-width: 60ch; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 14px; padding: 14px 22px; font-weight: 700; text-decoration: none; border: 2px solid transparent; }
+.btn.gold { background: var(--gold); color: var(--royal); }
+.btn.gold:hover { background: var(--gold-soft); }
+.btn.ghost { border-color: rgba(255,255,255,.35); color: #fff; }
+.btn.ghost:hover { border-color: #fff; }
+.btn.royal { background: var(--royal); color: #fff; }
+@media (prefers-color-scheme: dark) { .btn.royal { background: var(--gold); color: var(--royal); } }
 
-/* Kopfleiste */
-header { background: var(--royal); color: #fff; display: flex; align-items: center; gap: 12px;
-  padding: calc(10px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); z-index: 1100; }
-.brand { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-.brand svg { width: 34px; height: 34px; flex: none; }
-.brand h1 { font: 800 21px/1 var(--display); margin: 0; letter-spacing: -.3px; white-space: nowrap; }
-.brand h1 span { color: var(--gold); }
-#btnUser { background: var(--gold); color: var(--royal); border: none; border-radius: 999px; padding: 8px 16px; font-weight: 700; white-space: nowrap; max-width: 55vw; overflow: hidden; text-overflow: ellipsis; }
+/* Kopf & Hero */
+.hero { position: relative; overflow: hidden; color: #fff;
+  background: radial-gradient(120% 90% at 85% 10%, var(--royal-2) 0%, var(--royal) 45%, var(--royal-3) 100%);
+  padding-top: env(safe-area-inset-top, 0px); }
+.crown-bg { position: absolute; right: -8%; top: 50%; width: min(760px, 95vw); transform: translateY(-46%) rotate(-8deg); opacity: .14; pointer-events: none; }
+nav { position: relative; display: flex; align-items: center; gap: 16px; padding-block: 18px; }
+.brand { display: flex; align-items: center; gap: 10px; flex: 1; text-decoration: none; }
+.brand svg { width: 34px; height: 34px; }
+.brand b { font: 800 21px/1 var(--display); letter-spacing: -.3px; }
+.brand b span { color: var(--gold); }
+nav .navlink { color: rgba(255,255,255,.8); text-decoration: none; font-weight: 600; font-size: 15px; }
+nav .navlink:hover { color: #fff; }
+.hero-body { position: relative; padding-block: clamp(48px, 9vw, 110px) clamp(56px, 9vw, 120px); display: grid; gap: 22px; max-width: 640px; }
+.hero h1 { font-size: clamp(40px, 7vw, 72px); line-height: 1.02; letter-spacing: -1.5px; font-weight: 800; }
+.hero h1 em { font-style: normal; color: var(--gold); }
+.hero p { font-size: clamp(17px, 2vw, 20px); color: rgba(255,255,255,.82); margin: 0; max-width: 52ch; }
+.ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
 
-/* Karte */
-main { position: relative; flex: 1; min-height: 0; }
-#map { position: absolute; inset: 0; background: #ddd8e8; }
-.leaflet-container { font-family: var(--body); }
-
-/* Marker */
-.pin { width: 38px; height: 38px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); display: grid; place-items: center;
-  border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
-.pin b { transform: rotate(45deg); color: #fff; font: 800 13px/1 var(--display); }
-.pin.none b { font-size: 11px; font-weight: 700; }
-.pin.nearest { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(227,179,65,.45), 0 2px 8px rgba(0,0,0,.35); animation: pulse 1.4s ease-in-out infinite; }
-@keyframes pulse { 50% { box-shadow: 0 0 0 12px rgba(227,179,65,0), 0 2px 8px rgba(0,0,0,.35); } }
-.me { width: 18px; height: 18px; border-radius: 50%; background: #2f7bf5; border: 3px solid #fff; box-shadow: 0 0 0 6px rgba(47,123,245,.25); }
-
-/* Infokarte */
-#info { position: absolute; z-index: 900; top: 16px; right: max(16px, env(safe-area-inset-right, 0px)); width: 270px;
-  background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; display: grid; gap: 12px; }
-#info h2 { margin: 0; font: 700 13px/1 var(--body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.stats { display: grid; gap: 10px; }
-.stat { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 8px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
-.stat:last-child { border-bottom: none; padding-bottom: 0; }
+/* Zahlen */
+.stats { position: relative; margin-top: -44px; z-index: 2; }
+.stats-card { background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); display: grid; grid-template-columns: repeat(3, 1fr); }
+.stat { padding: 24px; text-align: center; border-right: 1px solid var(--line); }
+.stat:last-child { border-right: none; }
+.stat strong { display: block; font: 800 clamp(30px, 5vw, 44px)/1 var(--display); color: var(--royal); font-variant-numeric: tabular-nums; }
+@media (prefers-color-scheme: dark) { .stat strong { color: var(--gold); } }
 .stat span { color: var(--muted); font-size: 14px; }
-.stat strong { font: 800 22px/1 var(--display); font-variant-numeric: tabular-nums; }
-.stat small { grid-column: 1 / -1; color: var(--muted); font-size: 12px; margin-top: -4px; }
-#btnNearest { background: var(--royal); color: #fff; border: none; border-radius: 12px; padding: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; }
-#btnNearest:hover { background: var(--royal-2); }
-#btnNearest svg { width: 18px; height: 18px; }
 
-/* Runde Kartenknöpfe */
-.fabs { position: absolute; z-index: 900; left: max(16px, env(safe-area-inset-left, 0px)); bottom: 24px; display: grid; gap: 10px; }
-.fab { width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--surface); color: var(--royal); box-shadow: var(--shadow); display: grid; place-items: center; }
-.fab svg { width: 24px; height: 24px; }
-.fab.gold { background: var(--gold); color: var(--royal); }
-@media (prefers-color-scheme: dark) { .fab { color: var(--gold); } .fab.gold { color: var(--royal); } #btnNearest, #btnNearest:hover { background: var(--gold); color: var(--royal); } }
-.fab.active { outline: 3px solid var(--gold); }
+section { padding-block: clamp(64px, 9vw, 104px); }
+.section-head { display: grid; gap: 12px; margin-bottom: 40px; }
 
-#status { position: absolute; z-index: 950; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: calc(100% - 160px);
-  background: var(--royal); color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 13px; box-shadow: var(--shadow); text-align: center; }
+/* Schritte */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: step; }
+.step { background: var(--surface); border-radius: 20px; padding: 28px; display: grid; gap: 10px; align-content: start; }
+.step .num { width: 44px; height: 44px; border-radius: 50%; background: var(--gold); color: var(--royal); display: grid; place-items: center; font: 800 20px/1 var(--display); }
+.step h3 { font-size: 22px; }
+.step p { margin: 0; color: var(--muted); font-size: 16px; }
 
-/* Werbefläche */
-#ad { background: var(--surface); border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; text-align: center;
-  padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
-
-/* Detail-Sheet */
-#sheet { position: fixed; z-index: 1200; left: max(16px, env(safe-area-inset-left, 0px)); bottom: 0; width: min(440px, calc(100% - 32px));
-  max-height: 78%; overflow-y: auto; background: var(--surface); border-radius: 20px 20px 0 0; box-shadow: var(--shadow);
-  padding: 8px 20px calc(20px + env(safe-area-inset-bottom, 0px)); }
-#sheet::before { content: ""; display: block; width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 12px; }
-#sheet h2 { margin: 0 0 4px; font: 800 22px/1.15 var(--display); text-wrap: balance; padding-right: 40px; }
-.close { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--bg); color: var(--fg); font-size: 18px; line-height: 1; }
-.muted { color: var(--muted); font-size: 13px; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
-.chip { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; background: var(--bg); color: var(--muted); }
-.chip.yes { background: rgba(31,157,99,.14); color: var(--good); }
-.chip.no { background: rgba(209,75,58,.12); color: var(--bad); }
-.score { display: flex; align-items: center; gap: 14px; margin: 8px 0 4px; }
-.score .big { font: 800 40px/1 var(--display); }
-.score .big small { font-size: 16px; color: var(--muted); font-weight: 600; }
-.bars { display: grid; gap: 6px; margin: 10px 0; }
-.bar { display: grid; grid-template-columns: 110px 1fr 28px; align-items: center; gap: 8px; font-size: 13px; }
-.bar i { display: block; height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+/* Community */
+.community { background: var(--surface); }
+.split { display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: center; }
+.split > * { min-width: 0; }
+.checks { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 14px; }
+.checks li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start; }
+.checks svg { width: 28px; height: 28px; }
+.checks b { display: block; }
+.checks span { color: var(--muted); font-size: 15px; }
+/* Beispiel-Bewertung */
+.sample { background: var(--bg); border-radius: 20px; padding: 24px; display: grid; gap: 14px; border: 1px solid var(--line); }
+.sample .tag { justify-self: start; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.sample h3 { font-size: 22px; }
+.sample .score { display: flex; align-items: baseline; gap: 10px; }
+.sample .score b { font: 800 44px/1 var(--display); color: var(--good); }
+.sample .score small { color: var(--muted); }
+.bar { display: grid; grid-template-columns: 112px 1fr 30px; gap: 10px; align-items: center; font-size: 14px; }
+.bar i { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
 .bar i::after { content: ""; display: block; height: 100%; width: var(--w); background: var(--gold); border-radius: 4px; }
 .bar b { text-align: right; font-variant-numeric: tabular-nums; }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; }
-.btn { border-radius: 12px; padding: 10px 16px; font-weight: 700; border: 1px solid var(--line); background: var(--surface); color: var(--fg); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
-.btn.primary { background: var(--royal); color: #fff; border-color: var(--royal); }
-.btn.gold { background: var(--gold); color: var(--royal); border-color: var(--gold); }
-@media (prefers-color-scheme: dark) { .btn.primary { background: var(--gold); color: var(--royal); border-color: var(--gold); } }
-.stars { display: flex; gap: 2px; }
-.stars button { border: none; background: none; padding: 0 2px; font-size: 30px; line-height: 1; color: var(--line); }
-.stars button.on { color: var(--gold); }
-label { display: block; margin-top: 12px; font-weight: 600; font-size: 14px; }
-input[type=text], input[type=email], input[type=password], textarea { width: 100%; font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); margin-top: 4px; }
-.check { font-weight: 500; display: flex; gap: 8px; align-items: center; margin-top: 8px; }
-.check input { width: 18px; height: 18px; accent-color: var(--royal); }
-.review { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px; }
-.review p { margin: 4px 0 0; }
-.error { color: var(--warn); font-size: 13px; min-height: 1em; }
-.adding #map { cursor: crosshair; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; background: rgba(31,157,99,.14); color: var(--good); }
+.quote { margin: 0; font-size: 15px; border-top: 1px solid var(--line); padding-top: 12px; }
+.quote cite { display: block; color: var(--muted); font-style: normal; font-size: 13px; margin-top: 4px; }
 
-/* Handy: Infokarte oben als kompakte Leiste */
-@media (max-width: 640px) {
-  .brand h1 { font-size: 18px; }
-  .brand svg { width: 28px; height: 28px; }
-  #info { left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); top: 12px; width: auto; padding: 12px; gap: 10px; }
-  #info h2 { display: none; }
-  .stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .stat { grid-template-columns: 1fr; border-bottom: none; padding-bottom: 0; border-right: 1px solid var(--line); text-align: center; gap: 2px; }
-  .stat:last-child { border-right: none; }
-  .stat span { font-size: 11px; order: 2; }
-  .stat strong { font-size: 19px; }
-  .stat small { display: none; }
-  #btnNearest { padding: 10px; }
-  #sheet { left: 0; width: 100%; }
-  #status { max-width: calc(100% - 100px); }
+/* Mitmachen */
+.join { background: radial-gradient(120% 120% at 0% 0%, var(--royal-2), var(--royal) 60%, var(--royal-3)); color: #fff; position: relative; overflow: hidden; }
+.join .crown-bg { right: auto; left: -12%; opacity: .1; transform: translateY(-50%) rotate(10deg); }
+.join .split { position: relative; }
+.join .lead { color: rgba(255,255,255,.8); }
+.form-card { background: var(--surface); color: var(--fg); border-radius: 20px; padding: 28px; box-shadow: var(--shadow); }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 18px; }
+.tabs button { border: none; background: none; padding: 10px; border-radius: 9px; font-weight: 700; color: var(--muted); }
+.tabs button[aria-selected="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+label { display: block; font-weight: 600; font-size: 14px; margin-top: 12px; }
+input { width: 100%; font: inherit; font-size: 16px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); margin-top: 4px; }
+.form-card .btn { width: 100%; margin-top: 18px; }
+.error { color: var(--warn); font-size: 14px; min-height: 1.2em; margin: 10px 0 0; }
+.hint { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
+#signedIn p { margin: 0 0 8px; }
+
+/* FAQ */
+.faq { display: grid; gap: 12px; max-width: 760px; }
+details { background: var(--surface); border-radius: 16px; padding: 18px 22px; }
+summary { font-weight: 700; cursor: pointer; }
+details p { margin: 10px 0 0; color: var(--muted); }
+
+footer { border-top: 1px solid var(--line); padding-block: 28px calc(28px + env(safe-area-inset-bottom, 0px)); color: var(--muted); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+footer nav { padding: 0; gap: 20px; }
+footer a { color: var(--muted); }
+
+@media (max-width: 820px) {
+  .steps { grid-template-columns: 1fr; }
+  .split { grid-template-columns: 1fr; gap: 36px; }
+  nav .navlink.hide-sm { display: none; }
 }
-@media (prefers-reduced-motion: reduce) { .pin.nearest { animation: none; } }
+@media (max-width: 520px) {
+  .stat { padding: 18px 8px; }
+  .stat span { font-size: 12px; }
+  .ctas .btn { flex: 1 1 100%; }
+}
 </style>
 </head>
 <body>
-<header>
-  <div class="brand">
-    <svg viewBox="0 0 40 40" aria-hidden="true">
-      <path d="M6 30 4 12l9 7 7-11 7 11 9-7-2 18z" fill="#e3b341"/>
-      <rect x="6" y="31" width="28" height="4" rx="1.5" fill="#e3b341"/>
-      <circle cx="4" cy="11" r="2.5" fill="#e3b341"/><circle cx="20" cy="7" r="2.5" fill="#e3b341"/><circle cx="36" cy="11" r="2.5" fill="#e3b341"/>
-    </svg>
-    <h1>Rate My <span>Throne</span></h1>
+
+<header class="hero">
+  <svg class="crown-bg" viewBox="0 0 40 40" aria-hidden="true">
+    <path d="M6 30 4 12l9 7 7-11 7 11 9-7-2 18z" fill="#e3b341"/>
+    <rect x="6" y="31" width="28" height="4" rx="1.5" fill="#e3b341"/>
+    <circle cx="4" cy="11" r="2.5" fill="#e3b341"/><circle cx="20" cy="7" r="2.5" fill="#e3b341"/><circle cx="36" cy="11" r="2.5" fill="#e3b341"/>
+  </svg>
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="./">
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M6 30 4 12l9 7 7-11 7 11 9-7-2 18z" fill="#e3b341"/>
+          <rect x="6" y="31" width="28" height="4" rx="1.5" fill="#e3b341"/>
+          <circle cx="4" cy="11" r="2.5" fill="#e3b341"/><circle cx="20" cy="7" r="2.5" fill="#e3b341"/><circle cx="36" cy="11" r="2.5" fill="#e3b341"/>
+        </svg>
+        <b>Rate My <span>Throne</span></b>
+      </a>
+      <a class="navlink hide-sm" href="#so-gehts">So geht's</a>
+      <a class="navlink" href="#mitmachen" id="navJoin">Anmelden</a>
+    </nav>
+    <div class="hero-body">
+      <span class="eyebrow">Öffentliche Toiletten · bewertet von der Community</span>
+      <h1>Fremde Stadt. <em>Dringendes</em> Bedürfnis.</h1>
+      <p>Rate My Throne zeigt dir in Sekunden die nächste öffentliche Toilette – und was andere über sie sagen. Sauber oder lieber weitergehen? Kostenlos oder Kleingeld bereithalten? Du weißt es, bevor du da bist.</p>
+      <div class="ctas">
+        <a class="btn gold" href="karte.html">Nächste Toilette finden</a>
+        <a class="btn ghost" href="#mitmachen">Kostenlos mitmachen</a>
+      </div>
+    </div>
   </div>
-  <button id="btnUser" type="button">Anmelden</button>
 </header>
 
-<main>
-  <div id="map"></div>
-
-  <aside id="info" aria-label="Übersicht für den Kartenausschnitt">
-    <h2>Hier in der Gegend</h2>
-    <div class="stats">
-      <div class="stat"><span>Toiletten</span><strong id="sCount">–</strong><small>im sichtbaren Kartenausschnitt</small></div>
-      <div class="stat"><span>Ø Bewertung</span><strong id="sAvg">–</strong><small id="sAvgNote">noch keine Bewertungen</small></div>
-      <div class="stat"><span>Nächste</span><strong id="sNear">–</strong><small id="sNearNote">ab Kartenmitte</small></div>
+<div class="stats">
+  <div class="wrap">
+    <div class="stats-card" aria-live="polite">
+      <div class="stat"><strong id="nReviews">–</strong><span>Bewertungen</span></div>
+      <div class="stat"><strong id="nMembers">–</strong><span>Community-Mitglieder</span></div>
+      <div class="stat"><strong id="nToilets">–</strong><span>neu eingetragene Toiletten</span></div>
     </div>
-    <button id="btnNearest" type="button">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
-      Nächste Toilette finden
-    </button>
-  </aside>
-
-  <div class="fabs">
-    <button id="btnAdd" class="fab gold" type="button" aria-label="Toilette hinzufügen" title="Toilette hinzufügen">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-    </button>
-    <button id="btnLocate" class="fab" type="button" aria-label="Zu meinem Standort" title="Zu meinem Standort">
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 3 3 10.5l7.5 3 3 7.5z"/></svg>
-    </button>
   </div>
+</div>
 
-  <div id="status" hidden></div>
+<main>
+  <section id="so-gehts">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">So geht's</span>
+        <h2>In drei Schritten zum besten Thron der Stadt</h2>
+      </div>
+      <div class="steps">
+        <article class="step">
+          <span class="num">1</span>
+          <h3>Finden</h3>
+          <p>Öffne die Karte und tippe auf „Nächste Toilette finden“. Du siehst sofort, wie weit es ist und wie die Toilette bewertet wurde – grün, gelb oder rot.</p>
+        </article>
+        <article class="step">
+          <span class="num">2</span>
+          <h3>Hingehen</h3>
+          <p>Ein Tipp startet die Route in Google Maps. Vorab siehst du, ob die Toilette kostenlos, barrierefrei oder mit Wickeltisch ausgestattet ist.</p>
+        </article>
+        <article class="step">
+          <span class="num">3</span>
+          <h3>Bewerten</h3>
+          <p>Vergib Sterne für Sauberkeit, Ausstattung und Erreichbarkeit. Ein kurzer Kommentar hilft der nächsten Person, die genau dort steht, wo du gerade warst.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="community">
+    <div class="wrap split">
+      <div>
+        <span class="eyebrow">Warum Community?</span>
+        <h2 style="margin-top:12px">Eine Karte weiß, wo. Nur Menschen wissen, wie.</h2>
+        <p class="lead">Wo öffentliche Toiletten stehen, ist bekannt – die Standorte kommen aus OpenStreetMap. Ob dort Papier hängt, ob es sauber ist oder ob die Tür seit Wochen klemmt, weiß nur, wer gerade dort war. Jede Bewertung macht die Karte für alle besser.</p>
+        <ul class="checks">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#e3b341"/><path d="m7 12.5 3.2 3L17 9" stroke="#2a1f4d" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div><b>Ehrliche Noten in drei Kategorien</b><span>Sauberkeit, Ausstattung und Erreichbarkeit – statt einer einzigen, nichtssagenden Zahl.</span></div></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#e3b341"/><path d="m7 12.5 3.2 3L17 9" stroke="#2a1f4d" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div><b>Das Wichtigste auf einen Blick</b><span>Kostenlos, barrierefrei, Wickeltisch: die Infos, die unterwegs wirklich zählen.</span></div></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#e3b341"/><path d="m7 12.5 3.2 3L17 9" stroke="#2a1f4d" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div><b>Fehlende Toiletten eintragen</b><span>Du kennst eine, die noch nicht auf der Karte ist? Mit einem Tipp ist sie für alle sichtbar.</span></div></li>
+        </ul>
+      </div>
+      <aside class="sample" aria-label="Beispiel einer Bewertung">
+        <span class="tag">Beispiel</span>
+        <h3>WC am Hauptbahnhof, Ebene −1</h3>
+        <div class="score"><b>4,3</b><small>/ 5 · 12 Bewertungen</small></div>
+        <div class="bar"><span>Sauberkeit</span><i style="--w:90%"></i><b>4,5</b></div>
+        <div class="bar"><span>Ausstattung</span><i style="--w:80%"></i><b>4,0</b></div>
+        <div class="bar"><span>Erreichbarkeit</span><i style="--w:88%"></i><b>4,4</b></div>
+        <div class="chips"><span class="chip">Barrierefrei</span><span class="chip">Wickeltisch</span></div>
+        <p class="quote">„Gut ausgeschildert, frisch geputzt, Seife war da. Kostet 1 €, lohnt sich.“<cite>Beispielkommentar</cite></p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="join" id="mitmachen">
+    <svg class="crown-bg" viewBox="0 0 40 40" aria-hidden="true">
+      <path d="M6 30 4 12l9 7 7-11 7 11 9-7-2 18z" fill="#e3b341"/>
+      <rect x="6" y="31" width="28" height="4" rx="1.5" fill="#e3b341"/>
+    </svg>
+    <div class="wrap split">
+      <div>
+        <span class="eyebrow">Mitmachen</span>
+        <h2 style="margin-top:12px">Werde Teil der Community</h2>
+        <p class="lead">Suchen und Ansehen geht ohne Konto. Zum Bewerten und Eintragen brauchst du nur E-Mail-Adresse, Benutzernamen und Passwort. Kostenlos, ohne Abo.</p>
+      </div>
+      <div class="form-card">
+        <div id="authBox">
+          <div class="tabs" role="tablist">
+            <button type="button" role="tab" id="tabRegister" aria-selected="true">Registrieren</button>
+            <button type="button" role="tab" id="tabLogin" aria-selected="false">Anmelden</button>
+          </div>
+          <form id="authForm">
+            <label for="aMail">E-Mail-Adresse</label>
+            <input type="email" id="aMail" required autocomplete="email">
+            <div id="userField">
+              <label for="aUser">Benutzername</label>
+              <input type="text" id="aUser" required minlength="3" maxlength="30" autocomplete="username">
+            </div>
+            <label for="aPw">Passwort</label>
+            <input type="password" id="aPw" required minlength="8" autocomplete="new-password">
+            <p class="error" id="authErr"></p>
+            <button type="submit" class="btn royal" id="authSubmit">Konto erstellen</button>
+            <p class="hint" id="authHint">Mindestens 8 Zeichen. Dein Benutzername ist bei deinen Bewertungen sichtbar, deine E-Mail-Adresse nicht.</p>
+          </form>
+        </div>
+        <div id="signedIn" hidden>
+          <p>Angemeldet als <strong id="whoami"></strong>.</p>
+          <a class="btn royal" href="karte.html">Zur Karte</a>
+          <p class="hint"><a href="#" id="logout">Abmelden</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Fragen & Antworten</span>
+        <h2>Gut zu wissen</h2>
+      </div>
+      <div class="faq">
+        <details><summary>Kostet Rate My Throne etwas?</summary><p>Nein. Suchen, Bewerten und Eintragen sind kostenlos.</p></details>
+        <details><summary>Woher kommen die Toiletten auf der Karte?</summary><p>Die Standorte stammen aus OpenStreetMap, einer freien Weltkarte, die von Freiwilligen gepflegt wird. Dazu kommen Toiletten, die unsere Community selbst einträgt.</p></details>
+        <details><summary>Brauche ich ein Konto?</summary><p>Zum Suchen nicht. Zum Bewerten und Eintragen schon, damit jede Person jede Toilette nur einmal bewerten kann und Bewertungen nachvollziehbar bleiben.</p></details>
+        <details><summary>In welchen Städten funktioniert das?</summary><p>Überall, wo OpenStreetMap öffentliche Toiletten kennt. Bewertungen gibt es dort, wo unsere Community schon unterwegs war – im Moment vor allem in Berlin.</p></details>
+        <details><summary>Muss ich meinen Standort freigeben?</summary><p>Nur, wenn du die nächste Toilette zu deinem Standort finden willst. Dein Standort wird dabei nur in deinem Browser verwendet und nicht gespeichert.</p></details>
+      </div>
+    </div>
+  </section>
 </main>
 
-<div id="ad">Anzeige · Werbefläche (Platzhalter)</div>
-<div id="sheet" hidden></div>
+<footer>
+  <div class="wrap">
+    <span>© 2026 Rate My Throne · Kartendaten © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-Mitwirkende</span>
+    <nav>
+      <a href="karte.html">Karte</a>
+      <span title="Folgt vor dem offiziellen Start">Impressum (folgt)</span>
+      <span title="Folgt vor dem offiziellen Start">Datenschutz (folgt)</span>
+    </nav>
+  </div>
+</footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
-// ===== Verbindung zur Datenbank (Supabase). URL und publishable key dürfen öffentlich sein. =====
-const SUPABASE_URL = "https://bzgeqaseogawdptaqzgq.supabase.co";
-const SUPABASE_KEY = "sb_publishable_Uoawl08FsfsJwdv3eLVV0A_Zh5tT6EE";
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Gleiche Datenbank wie die Karte; die Anmeldung gilt danach auch dort.
+const db = supabase.createClient("https://bzgeqaseogawdptaqzgq.supabase.co", "sb_publishable_Uoawl08FsfsJwdv3eLVV0A_Zh5tT6EE");
+const $ = id => document.getElementById(id);
+const fmt = n => new Intl.NumberFormat("de-DE").format(n);
 
-let user = null;                 // { id, username } wenn angemeldet
-let myPos = null;                // [lat, lon] des Nutzers, sobald bekannt
-let nearestId = null;            // hervorgehobene Toilette
-const toilets = new Map();       // id -> toilet (OSM und eigene)
-const reviews = new Map();       // toiletId -> [review]
-const loadedAreas = [];          // bereits geladene Kartenbereiche
-
-const CATS = [
-  { key: "clean", label: "Sauberkeit" },
-  { key: "equip", label: "Ausstattung" },
-  { key: "access", label: "Erreichbarkeit" }
-];
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-
-// ===== Karte =====
-const map = L.map("map", { zoomControl: false }).setView([52.52, 13.405], 15); // Start: Berlin Mitte
-L.control.zoom({ position: "bottomright" }).addTo(map);
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende'
-}).addTo(map);
-const layer = L.layerGroup().addTo(map);
-let meMarker = null, routeLine = null;
-
-function status(msg, ms) {
-  const el = document.getElementById("status");
-  el.textContent = msg; el.hidden = !msg;
-  if (ms) setTimeout(() => { if (el.textContent === msg) el.hidden = true; }, ms);
+async function loadStats() {
+  const counts = await Promise.all(["reviews", "profiles", "toilets"].map(async t => {
+    const { count, error } = await db.from(t).select("*", { count: "exact", head: true });
+    return error ? null : count;
+  }));
+  [["nReviews", 0], ["nMembers", 1], ["nToilets", 2]].forEach(([id, i]) => { if (counts[i] != null) $(id).textContent = fmt(counts[i]); });
 }
 
-function avg(id) {
-  const list = reviews.get(id) || [];
-  if (!list.length) return null;
-  return list.reduce((s, r) => s + CATS.reduce((a, c) => a + r[c.key], 0) / CATS.length, 0) / list.length;
+let mode = "register";
+function setMode(m) {
+  mode = m;
+  const reg = m === "register";
+  $("tabRegister").setAttribute("aria-selected", reg);
+  $("tabLogin").setAttribute("aria-selected", !reg);
+  $("userField").hidden = !reg;
+  $("aUser").required = reg;
+  $("aPw").autocomplete = reg ? "new-password" : "current-password";
+  $("authSubmit").textContent = reg ? "Konto erstellen" : "Anmelden";
+  $("authHint").hidden = !reg;
+  $("authErr").textContent = "";
 }
-const scoreColor = a => a == null ? "var(--none)" : a >= 4 ? "var(--good)" : a >= 2.5 ? "var(--mid)" : "var(--bad)";
+$("tabRegister").onclick = () => setMode("register");
+$("tabLogin").onclick = () => setMode("login");
+$("navJoin").onclick = () => setMode("login");
 
-function markerIcon(t) {
-  const a = avg(t.id);
-  const cls = "pin" + (a == null ? " none" : "") + (t.id === nearestId ? " nearest" : "");
-  return L.divIcon({ className: "", iconSize: [38, 38], iconAnchor: [19, 40],
-    html: `<div class="${cls}" style="background:${scoreColor(a)}"><b>${a == null ? "WC" : a.toFixed(1).replace(".", ",")}</b></div>` });
-}
-
-function render() {
-  layer.clearLayers();
-  for (const t of toilets.values()) {
-    L.marker([t.lat, t.lon], { icon: markerIcon(t), zIndexOffset: t.id === nearestId ? 1000 : 0 })
-      .on("click", () => showToilet(t)).addTo(layer);
-  }
-  updateInfo();
-}
-
-// ===== Entfernungen & Infokarte =====
-function distance(a, b) { // Meter, Haversine
-  const R = 6371000, rad = Math.PI / 180;
-  const dLat = (b[0] - a[0]) * rad, dLon = (b[1] - a[1]) * rad;
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * rad) * Math.cos(b[0] * rad) * Math.sin(dLon / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h));
-}
-const fmtDist = m => m < 1000 ? Math.round(m / 10) * 10 + " m" : (m / 1000).toFixed(1).replace(".", ",") + " km";
-const walkMin = m => Math.max(1, Math.round(m / 80)); // ca. 4,8 km/h
-
-function nearestFrom(pos) {
-  let best = null, bestD = Infinity;
-  for (const t of toilets.values()) {
-    const d = distance(pos, [t.lat, t.lon]);
-    if (d < bestD) { best = t; bestD = d; }
-  }
-  return best && { toilet: best, dist: bestD };
-}
-
-function updateInfo() {
-  const b = map.getBounds();
-  const visible = [...toilets.values()].filter(t => b.contains([t.lat, t.lon]));
-  document.getElementById("sCount").textContent = visible.length;
-  const rated = visible.map(t => avg(t.id)).filter(a => a != null);
-  const sAvg = document.getElementById("sAvg");
-  if (rated.length) {
-    const m = rated.reduce((s, a) => s + a, 0) / rated.length;
-    sAvg.textContent = m.toFixed(1).replace(".", ",");
-    sAvg.style.color = scoreColor(m);
-    document.getElementById("sAvgNote").textContent = rated.length + " von " + visible.length + " bewertet";
-  } else {
-    sAvg.textContent = "–"; sAvg.style.color = "";
-    document.getElementById("sAvgNote").textContent = "noch keine Bewertungen";
-  }
-  const from = myPos || [map.getCenter().lat, map.getCenter().lng];
-  const n = nearestFrom(from);
-  document.getElementById("sNear").textContent = n ? fmtDist(n.dist) : "–";
-  document.getElementById("sNearNote").textContent = n ? (myPos ? "von deinem Standort, ca. " + walkMin(n.dist) + " Min. zu Fuß" : "ab Kartenmitte") : "keine geladen";
-}
-
-// ===== Daten laden =====
-async function loadOsm(box) {
-  const q = `[out:json][timeout:25];(node["amenity"="toilets"](${box.join(",")});way["amenity"="toilets"](${box.join(",")}););out center tags;`;
-  const res = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: "data=" + encodeURIComponent(q) });
-  if (!res.ok) throw new Error("Toilettendaten: HTTP " + res.status);
-  const data = await res.json();
-  for (const e of data.elements) {
-    const lat = e.lat ?? e.center?.lat, lon = e.lon ?? e.center?.lon;
-    if (lat == null) continue;
-    const tg = e.tags || {};
-    const id = "osm-" + e.type + e.id;
-    toilets.set(id, { id, lat, lon, source: "OpenStreetMap",
-      name: tg.name || tg.operator || "Öffentliche Toilette",
-      fee: tg.fee, wheelchair: tg.wheelchair, changing: tg.changing_table, hours: tg.opening_hours });
-  }
-}
-
-const yn = v => v == null ? undefined : v ? "yes" : "no";
-async function loadOwn(box) {
-  const { data, error } = await db.from("toilets").select("*, profiles(username)")
-    .gte("lat", box[0]).lte("lat", box[2]).gte("lon", box[1]).lte("lon", box[3]);
-  if (error) throw new Error("Eigene Toiletten: " + error.message);
-  for (const t of data) {
-    toilets.set(t.id, { id: t.id, lat: t.lat, lon: t.lon, name: t.name,
-      source: "Rate My Throne (von " + (t.profiles?.username ?? "?") + ")",
-      fee: yn(t.fee), wheelchair: yn(t.wheelchair), changing: yn(t.changing_table) });
-  }
-}
-
-async function loadReviews(ids) {
-  for (let i = 0; i < ids.length; i += 100) {
-    const chunk = ids.slice(i, i + 100);
-    const { data, error } = await db.from("reviews").select("*, profiles(username)").in("toilet_ref", chunk);
-    if (error) throw new Error("Bewertungen: " + error.message);
-    for (const id of chunk) reviews.set(id, []);
-    for (const r of data) reviews.get(r.toilet_ref).push(r);
-  }
-}
-
-// Lädt den sichtbaren Bereich (mit etwas Rand), außer er wurde schon geladen
-async function loadToilets(force) {
-  if (map.getZoom() < 13) { status("Zum Laden der Toiletten näher heranzoomen", 2500); updateInfo(); return; }
-  const b = map.getBounds();
-  if (!force && loadedAreas.some(a => a.contains(b))) { updateInfo(); return; }
-  const big = b.pad(0.5);
-  const box = [big.getSouth(), big.getWest(), big.getNorth(), big.getEast()];
-  status("Lade Toiletten …");
-  const before = new Set(toilets.keys());
-  const results = await Promise.allSettled([loadOsm(box), loadOwn(box)]);
-  const failed = results.filter(r => r.status === "rejected").map(r => r.reason.message);
-  try { await loadReviews([...toilets.keys()].filter(id => !before.has(id))); } catch (err) { failed.push(err.message); }
-  if (!failed.length) loadedAreas.push(big);
-  render();
-  if (failed.length) status("Laden teilweise fehlgeschlagen: " + failed.join("; "), 6000); else status("");
-}
-let moveTimer;
-map.on("moveend", () => { updateInfo(); clearTimeout(moveTimer); moveTimer = setTimeout(() => loadToilets(), 700); });
-
-// ===== Standort & nächste Toilette =====
-function locate() {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) return reject(new Error("Dein Browser unterstützt keine Standortabfrage."));
-    navigator.geolocation.getCurrentPosition(p => {
-      myPos = [p.coords.latitude, p.coords.longitude];
-      if (meMarker) meMarker.setLatLng(myPos);
-      else meMarker = L.marker(myPos, { icon: L.divIcon({ className: "", iconSize: [18, 18], html: '<div class="me"></div>' }), interactive: false }).addTo(map);
-      resolve(myPos);
-    }, () => reject(new Error("Standort nicht verfügbar. Bitte Standortfreigabe im Browser erlauben.")), { enableHighAccuracy: true, timeout: 10000 });
-  });
-}
-
-document.getElementById("btnLocate").onclick = async () => {
-  status("Suche Standort …");
-  try { const pos = await locate(); map.setView(pos, 16); status(""); }
-  catch (err) { status(err.message, 4000); }
-};
-
-document.getElementById("btnNearest").onclick = async () => {
-  status("Suche nächste Toilette …");
-  let from;
-  try { from = await locate(); }
-  catch { from = [map.getCenter().lat, map.getCenter().lng]; status("Kein Standort – ich suche ab Kartenmitte", 2500); }
-  map.setView(from, Math.max(map.getZoom(), 15), { animate: false });
-  await loadToilets();
-  const n = nearestFrom(from);
-  if (!n) { status("In der Nähe wurde keine Toilette gefunden. Zoom etwas heraus und versuch es erneut.", 4000); return; }
-  nearestId = n.toilet.id;
-  if (routeLine) routeLine.remove();
-  routeLine = L.polyline([from, [n.toilet.lat, n.toilet.lon]], { color: "#e3b341", weight: 4, dashArray: "6 8" }).addTo(map);
-  render();
-  map.fitBounds(L.latLngBounds([from, [n.toilet.lat, n.toilet.lon]]).pad(0.4), { maxZoom: 17 });
-  status("");
-  showToilet(n.toilet, n.dist);
-};
-
-const mapsLink = t => `https://www.google.com/maps/dir/?api=1&destination=${t.lat},${t.lon}&travelmode=walking`;
-
-// ===== Detailansicht & Bewertung =====
-const sheet = document.getElementById("sheet");
-function closeSheet() { sheet.hidden = true; sheet.innerHTML = ""; }
-const chip = (label, v) => `<span class="chip ${v === "yes" ? "yes" : v === "no" ? "no" : ""}">${label}: ${v === "yes" ? "ja" : v === "no" ? "nein" : v ? esc(v) : "?"}</span>`;
-
-function showToilet(t, dist) {
-  const list = reviews.get(t.id) || [];
-  const a = avg(t.id);
-  const d = dist ?? (myPos ? distance(myPos, [t.lat, t.lon]) : null);
-  sheet.innerHTML = `
-    <button class="close" type="button" onclick="closeSheet()" aria-label="Schließen">✕</button>
-    <h2>${esc(t.name)}</h2>
-    <div class="muted">${d != null ? fmtDist(d) + " entfernt · ca. " + walkMin(d) + " Min. zu Fuß · " : ""}Quelle: ${esc(t.source)}${t.hours ? " · Öffnungszeiten: " + esc(t.hours) : ""}</div>
-    <div class="chips">${chip("Kostenpflichtig", t.fee)}${chip("Rollstuhlgerecht", t.wheelchair)}${chip("Wickeltisch", t.changing)}</div>
-    ${a == null ? `<p class="muted">Noch keine Bewertung. Sei die erste Person, die diesen Thron bewertet.</p>` : `
-      <div class="score"><div class="big" style="color:${scoreColor(a)}">${a.toFixed(1).replace(".", ",")}<small> / 5</small></div>
-      <div class="muted">${list.length} Bewertung${list.length > 1 ? "en" : ""}</div></div>
-      <div class="bars">${CATS.map(c => {
-        const m = list.reduce((s, r) => s + r[c.key], 0) / list.length;
-        return `<div class="bar"><span>${c.label}</span><i style="--w:${m / 5 * 100}%"></i><b>${m.toFixed(1).replace(".", ",")}</b></div>`;
-      }).join("")}</div>`}
-    <div class="actions">
-      <a class="btn gold" href="${mapsLink(t)}" target="_blank" rel="noopener">Route in Google Maps</a>
-      <span id="formArea"></span>
-    </div>
-    <div>${list.slice().sort((x, y) => y.created_at.localeCompare(x.created_at)).map(r => `
-      <div class="review"><strong>${esc(r.profiles?.username ?? "?")}</strong> <span class="muted">${new Date(r.created_at).toLocaleDateString("de-DE")}</span>
-        <div class="muted">${CATS.map(c => c.label + " " + r[c.key]).join(" · ")}${r.free ? " · kostenlos" : ""}${r.barrierfree ? " · barrierefrei" : ""}${r.changing ? " · Wickeltisch" : ""}</div>
-        ${r.comment ? `<p>${esc(r.comment)}</p>` : ""}</div>`).join("")}</div>`;
-  sheet.hidden = false;
-  const area = document.getElementById("formArea");
-  if (!user) {
-    area.innerHTML = `<button type="button" class="btn primary" id="loginToRate">Zum Bewerten anmelden</button>`;
-    document.getElementById("loginToRate").onclick = () => showAuth(() => showToilet(t, dist));
-  } else if (list.some(r => r.user_id === user.id)) {
-    area.innerHTML = `<span class="muted">Du hast diesen Thron schon bewertet.</span>`;
-  } else {
-    area.innerHTML = `<button type="button" class="btn primary" id="rateBtn">Bewerten</button>`;
-    document.getElementById("rateBtn").onclick = () => showRatingForm(t);
-  }
-}
-
-function showRatingForm(t) {
-  const vals = {};
-  sheet.innerHTML = `
-    <button class="close" type="button" onclick="closeSheet()" aria-label="Schließen">✕</button>
-    <h2>${esc(t.name)} bewerten</h2>
-    <form id="rateForm">
-    ${CATS.map(c => `<label>${c.label}</label><div class="stars" data-key="${c.key}">${[1,2,3,4,5].map(n => `<button type="button" data-n="${n}" aria-label="${c.label}: ${n} von 5">★</button>`).join("")}</div>`).join("")}
-    <label class="check"><input type="checkbox" id="fFree"> kostenlos</label>
-    <label class="check"><input type="checkbox" id="fBarrier"> barrierefrei</label>
-    <label class="check"><input type="checkbox" id="fChanging"> Wickeltisch vorhanden</label>
-    <label for="fText">Kommentar (optional)</label>
-    <textarea id="fText" rows="3" maxlength="500" placeholder="Wie war's?"></textarea>
-    <p class="error" id="rateErr"></p>
-    <div class="actions"><button type="submit" class="btn primary">Bewertung speichern</button>
-    <button type="button" class="btn" id="rateCancel">Abbrechen</button></div>
-  </form>`;
-  sheet.hidden = false;
-  document.getElementById("rateCancel").onclick = () => showToilet(t);
-  sheet.querySelectorAll(".stars").forEach(group => {
-    group.querySelectorAll("button").forEach(btn => btn.onclick = () => {
-      const n = +btn.dataset.n; vals[group.dataset.key] = n;
-      group.querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.n <= n));
-    });
-  });
-  document.getElementById("rateForm").onsubmit = async e => {
-    e.preventDefault();
-    const err = document.getElementById("rateErr");
-    if (CATS.some(c => !vals[c.key])) { err.textContent = "Bitte alle drei Kategorien mit Sternen bewerten."; return; }
-    const { data, error } = await db.from("reviews").insert({ toilet_ref: t.id, ...vals,
-      free: fFree.checked, barrierfree: fBarrier.checked, changing: fChanging.checked,
-      comment: fText.value.trim() || null }).select("*, profiles(username)").single();
-    if (error) { err.textContent = error.code === "23505" ? "Du hast diesen Thron schon bewertet." : "Speichern fehlgeschlagen: " + error.message; return; }
-    reviews.set(t.id, [...(reviews.get(t.id) || []), data]);
-    render(); showToilet(t);
-  };
-}
-
-// ===== Registrierung / Anmeldung =====
-function showAuth(after, mode = "login") {
-  const reg = mode === "register";
-  sheet.innerHTML = `
-    <button class="close" type="button" onclick="closeSheet()" aria-label="Schließen">✕</button>
-    <h2>${reg ? "Konto erstellen" : "Anmelden"}</h2>
-    <form id="authForm">
-      <label for="aMail">E-Mail-Adresse</label><input type="email" id="aMail" required autocomplete="email">
-      ${reg ? `<label for="aUser">Benutzername</label><input type="text" id="aUser" required minlength="3" maxlength="30" autocomplete="username">` : ""}
-      <label for="aPw">Passwort</label><input type="password" id="aPw" required minlength="8" autocomplete="${reg ? "new-password" : "current-password"}">
-      <p class="error" id="authErr"></p>
-      <div class="actions"><button type="submit" class="btn primary">${reg ? "Konto erstellen" : "Anmelden"}</button>
-      <button type="button" class="btn" id="switchMode">${reg ? "Ich habe schon ein Konto" : "Neues Konto erstellen"}</button></div>
-    </form>`;
-  sheet.hidden = false;
-  document.getElementById("switchMode").onclick = () => showAuth(after, reg ? "login" : "register");
-  document.getElementById("authForm").onsubmit = async e => {
-    e.preventDefault();
-    const err = document.getElementById("authErr");
-    const email = aMail.value.trim(), password = aPw.value;
-    err.textContent = "";
-    if (reg) {
-      const username = aUser.value.trim();
+$("authForm").onsubmit = async e => {
+  e.preventDefault();
+  const err = $("authErr"), email = $("aMail").value.trim(), password = $("aPw").value;
+  err.textContent = "";
+  $("authSubmit").disabled = true;
+  try {
+    if (mode === "register") {
+      const username = $("aUser").value.trim();
       const { data: taken } = await db.from("profiles").select("id").ilike("username", username.replace(/[\\%_]/g, "\\$&")).limit(1);
       if (taken?.length) { err.textContent = "Dieser Benutzername ist schon vergeben."; return; }
       const { data, error } = await db.auth.signUp({ email, password, options: { data: { username } } });
       if (error) { err.textContent = "Registrierung fehlgeschlagen: " + error.message; return; }
-      if (!data.session) {
-        sheet.innerHTML = `<button class="close" type="button" onclick="closeSheet()" aria-label="Schließen">✕</button>
-          <h2>Fast geschafft</h2><p>Wir haben dir eine E-Mail an <strong>${esc(email)}</strong> geschickt. Bestätige deine Adresse über den Link darin und melde dich danach hier an.</p>`;
-        return;
-      }
+      if (!data.session) { err.textContent = ""; $("authHint").hidden = false; $("authHint").textContent = "Fast geschafft: Bestätige deine E-Mail-Adresse über den Link, den wir dir geschickt haben."; return; }
     } else {
       const { error } = await db.auth.signInWithPassword({ email, password });
       if (error) { err.textContent = error.message === "Email not confirmed" ? "Bitte bestätige zuerst deine E-Mail-Adresse." : "E-Mail oder Passwort ist falsch."; return; }
     }
-    await refreshUser();
-    after ? after() : closeSheet();
-  };
-}
+    location.href = "karte.html";
+  } finally { $("authSubmit").disabled = false; }
+};
 
-async function refreshUser() {
+async function showSession() {
   const { data: { session } } = await db.auth.getSession();
-  if (session) {
-    const { data } = await db.from("profiles").select("username").eq("id", session.user.id).single();
-    user = { id: session.user.id, username: data?.username ?? session.user.email };
-  } else user = null;
-  document.getElementById("btnUser").textContent = user ? "👑 " + user.username : "Anmelden";
+  if (!session) return;
+  const { data } = await db.from("profiles").select("username").eq("id", session.user.id).single();
+  $("whoami").textContent = data?.username ?? session.user.email;
+  $("authBox").hidden = true; $("signedIn").hidden = false;
+  $("navJoin").textContent = "Zur Karte"; $("navJoin").href = "karte.html";
 }
-document.getElementById("btnUser").onclick = () => {
-  if (!user) return showAuth();
-  sheet.innerHTML = `<button class="close" type="button" onclick="closeSheet()" aria-label="Schließen">✕</button>
-    <h2>Hallo ${esc(user.username)}</h2>
-    <div class="actions"><button type="button" class="btn" id="logout">Abmelden</button></div>`;
-  sheet.hidden = false;
-  document.getElementById("logout").onclick = async () => { await db.auth.signOut(); await refreshUser(); closeSheet(); };
-};
+$("logout").onclick = async e => { e.preventDefault(); await db.auth.signOut(); location.reload(); };
 
-// ===== Toilette hinzufügen =====
-let adding = false;
-const btnAdd = document.getElementById("btnAdd");
-function setAdding(on) {
-  adding = on; document.body.classList.toggle("adding", on); btnAdd.classList.toggle("active", on);
-  status(on ? "Tippe auf die Karte, wo die Toilette ist" : "");
-}
-btnAdd.onclick = () => {
-  if (!user) { showAuth(() => setAdding(true)); return; }
-  closeSheet(); setAdding(!adding);
-};
-map.on("click", e => {
-  if (!adding) return;
-  setAdding(false);
-  sheet.innerHTML = `
-    <button class="close" type="button" onclick="closeSheet()" aria-label="Abbrechen">✕</button>
-    <h2>Neuer Thron</h2>
-    <form id="addForm">
-      <label for="nName">Name oder Beschreibung</label>
-      <input type="text" id="nName" required maxlength="80" placeholder="z. B. WC im Bahnhof, Untergeschoss">
-      <label class="check"><input type="checkbox" id="nFee"> kostenpflichtig</label>
-      <label class="check"><input type="checkbox" id="nWheel"> rollstuhlgerecht</label>
-      <label class="check"><input type="checkbox" id="nChange"> Wickeltisch</label>
-      <p class="error" id="addErr"></p>
-      <div class="actions"><button type="submit" class="btn primary">Toilette speichern</button></div>
-    </form>`;
-  sheet.hidden = false;
-  document.getElementById("addForm").onsubmit = async ev => {
-    ev.preventDefault();
-    const { data, error } = await db.from("toilets").insert({ name: nName.value.trim(), lat: e.latlng.lat, lon: e.latlng.lng,
-      fee: nFee.checked, wheelchair: nWheel.checked, changing_table: nChange.checked }).select().single();
-    if (error) { document.getElementById("addErr").textContent = "Speichern fehlgeschlagen: " + error.message; return; }
-    const t = { id: data.id, lat: data.lat, lon: data.lon, name: data.name, source: "Rate My Throne (von " + user.username + ")",
-      fee: yn(data.fee), wheelchair: yn(data.wheelchair), changing: yn(data.changing_table) };
-    toilets.set(t.id, t); reviews.set(t.id, []); render(); showToilet(t);
-  };
-});
-
-refreshUser(); loadToilets();
+loadStats(); showSession();
 </script>
 </body>
 </html>
