@@ -285,69 +285,33 @@ function updateInfo() {
 }
 
 // ===== Daten laden =====
-// Die Welt ist in Kacheln von 0,05° (ca. 4–5 km) geteilt. Jede Kachel wird nur einmal geladen
-// und 24 Stunden im Browser zwischengespeichert, damit Wiederbesuche sofort angezeigt werden.
-const TILE = 0.05, CACHE_KEY = "rmt-osm-v1", CACHE_MS = 24 * 3600 * 1000, CACHE_MAX = 300;
-const OVERPASS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter"];
+// Alle Toiletten kommen aus unserer Datenbank: osm_toilets (Kopie aus OpenStreetMap) und toilets (Community).
+// Abgefragt wird in Kacheln von 0,05° (ca. 4–5 km); jede Kachel nur einmal pro Besuch.
+// Kennt die Datenbank eine Gegend noch nicht (1°-Kachel), stößt die App einmalig den Import an.
+const TILE = 0.05;
 const loadedTiles = new Set();
-let osmCache = {};
-try { osmCache = JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch {}
-function saveCache() {
-  const keys = Object.keys(osmCache).sort((a, b) => osmCache[b].at - osmCache[a].at);
-  for (const k of keys.slice(CACHE_MAX)) delete osmCache[k];
-  try { localStorage.setItem(CACHE_KEY, JSON.stringify(osmCache)); } catch {}
-}
+const importAsked = new Set();
 
-function tilesFor(bounds) {
+function tilesFor(bounds, size) {
   const out = [];
-  for (let y = Math.floor(bounds.getSouth() / TILE); y <= Math.floor(bounds.getNorth() / TILE); y++)
-    for (let x = Math.floor(bounds.getWest() / TILE); x <= Math.floor(bounds.getEast() / TILE); x++) out.push(x + "_" + y);
+  for (let y = Math.floor(bounds.getSouth() / size); y <= Math.floor(bounds.getNorth() / size); y++)
+    for (let x = Math.floor(bounds.getWest() / size); x <= Math.floor(bounds.getEast() / size); x++) out.push(x + "_" + y);
   return out;
 }
-const tileBox = k => { const [x, y] = k.split("_").map(Number); return [y * TILE, x * TILE, (y + 1) * TILE, (x + 1) * TILE]; };
-
-function addOsm(list) {
-  for (const e of list) {
-    const tg = e.tags || {};
-    toilets.set(e.id, { id: e.id, lat: e.lat, lon: e.lon, source: "OpenStreetMap",
-      name: tg.name || tg.operator || t("m.toilet.default"),
-      fee: tg.fee, wheelchair: tg.wheelchair, changing: tg.changing_table, hours: tg.opening_hours });
-  }
+function unionBox(keys, size) {
+  const xs = keys.map(k => +k.split("_")[0]), ys = keys.map(k => +k.split("_")[1]);
+  return [Math.min(...ys) * size, Math.min(...xs) * size, (Math.max(...ys) + 1) * size, (Math.max(...xs) + 1) * size];
 }
 
-// Fragt Overpass; fällt bei Zeitüberschreitung oder Fehler auf den zweiten Server zurück
-async function overpass(query) {
-  let lastErr;
-  for (const url of OVERPASS) {
-    try {
-      const res = await fetch(url, { method: "POST", body: "data=" + encodeURIComponent(query), signal: AbortSignal.timeout(12000) });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      return await res.json();
-    } catch (err) { lastErr = err; }
+async function loadOsm(box) {
+  const { data, error } = await db.from("osm_toilets").select("id,lat,lon,name,operator,fee,wheelchair,changing_table,opening_hours")
+    .gte("lat", box[0]).lte("lat", box[2]).gte("lon", box[1]).lte("lon", box[3]).limit(5000);
+  if (error) throw new Error(t("m.err.osm") + ": " + error.message);
+  for (const r of data) {
+    toilets.set(r.id, { id: r.id, lat: r.lat, lon: r.lon, source: "OpenStreetMap",
+      name: r.name || r.operator || t("m.toilet.default"),
+      fee: r.fee, wheelchair: r.wheelchair, changing: r.changing_table, hours: r.opening_hours });
   }
-  throw new Error(t("m.err.osm") + ": " + lastErr.message);
-}
-
-async function loadOsmTiles(keys) {
-  const fresh = [], missing = [];
-  for (const k of keys) (osmCache[k] && Date.now() - osmCache[k].at < CACHE_MS ? fresh : missing).push(k);
-  for (const k of fresh) addOsm(osmCache[k].items);
-  if (!missing.length) return;
-  // Eine Abfrage über das Rechteck aller fehlenden Kacheln, danach auf die Kacheln verteilen
-  const boxes = missing.map(tileBox);
-  const box = [Math.min(...boxes.map(b => b[0])), Math.min(...boxes.map(b => b[1])), Math.max(...boxes.map(b => b[2])), Math.max(...boxes.map(b => b[3]))];
-  const data = await overpass(`[out:json][timeout:20];nwr["amenity"="toilets"](${box.join(",")});out center tags qt;`);
-  const byTile = Object.fromEntries(missing.map(k => [k, []]));
-  for (const e of data.elements) {
-    const lat = e.lat ?? e.center?.lat, lon = e.lon ?? e.center?.lon;
-    if (lat == null) continue;
-    const k = Math.floor(lon / TILE) + "_" + Math.floor(lat / TILE);
-    const tg = e.tags || {};
-    byTile[k]?.push({ id: "osm-" + e.type + e.id, lat, lon,
-      tags: { name: tg.name, operator: tg.operator, fee: tg.fee, wheelchair: tg.wheelchair, changing_table: tg.changing_table, opening_hours: tg.opening_hours } });
-  }
-  for (const k of missing) { osmCache[k] = { at: Date.now(), items: byTile[k] }; addOsm(byTile[k]); }
-  saveCache();
 }
 
 const yn = v => v == null ? undefined : v ? "yes" : "no";
@@ -371,28 +335,58 @@ async function loadReviews(ids) {
     for (const r of data) reviews.get(r.toilet_ref).push(r);
   }
 }
-async function loadMissingReviews() {
-  await loadReviews([...toilets.keys()].filter(id => !reviews.has(id)));
+
+// Lädt die noch fehlenden 0,05°-Kacheln im sichtbaren Bereich aus der Datenbank
+async function loadArea(bounds) {
+  const keys = tilesFor(bounds, TILE).filter(k => !loadedTiles.has(k));
+  if (!keys.length) return [];
+  keys.forEach(k => loadedTiles.add(k));
+  const box = unionBox(keys, TILE);
+  const failed = [];
+  await Promise.all([loadOsm(box), loadOwn(box)].map(p => p.catch(err => { failed.push(err.message); keys.forEach(k => loadedTiles.delete(k)); })));
+  try { await loadReviews([...toilets.keys()].filter(id => !reviews.has(id))); } catch (err) { failed.push(err.message); }
+  render();
+  return failed;
 }
 
-// Lädt alle Kacheln im sichtbaren Bereich, die noch fehlen. Was schon da ist, erscheint sofort.
+// Stößt den Import für Gegenden an, die die Datenbank noch nicht kennt.
+// Ergebnis: fresh = neue Daten da, busy = Import läuft noch woanders oder schlug fehl
+let retryTimer;
+async function ensureImported(bounds) {
+  const keys = tilesFor(bounds, 1).filter(k => !importAsked.has(k)).slice(0, 2);
+  if (!keys.length) return {};
+  keys.forEach(k => importAsked.add(k));
+  const { data: rows, error } = await db.from("osm_tiles").select("key,status").in("key", keys);
+  if (error) return {};
+  const ok = new Set(rows.filter(r => r.status === "ok").map(r => r.key));
+  const missing = keys.filter(k => !ok.has(k));
+  if (!missing.length) return {};
+  status(t("m.status.importing"));
+  const { data } = await db.functions.invoke("osm-sync", { body: { tiles: missing } });
+  const done = new Set((data?.done ?? []).filter(d => !d.error).map(d => d.key));
+  const notDone = missing.filter(k => !done.has(k));
+  if (notDone.length) {
+    // Läuft gerade woanders oder ist fehlgeschlagen: später nochmal versuchen
+    notDone.forEach(k => importAsked.delete(k));
+    clearTimeout(retryTimer); retryTimer = setTimeout(loadToilets, 30000);
+  }
+  return { fresh: done.size > 0, busy: notDone.length > 0 && !done.size };
+}
+
 async function loadToilets() {
   if (map.getZoom() < 13) { status(t("m.status.zoom"), 2500); updateInfo(); return; }
-  const keys = tilesFor(map.getBounds()).filter(k => !loadedTiles.has(k));
-  if (!keys.length) { updateInfo(); return; }
-  keys.forEach(k => loadedTiles.add(k));
-  const boxes = keys.map(tileBox);
-  const box = [Math.min(...boxes.map(b => b[0])), Math.min(...boxes.map(b => b[1])), Math.max(...boxes.map(b => b[2])), Math.max(...boxes.map(b => b[3]))];
-  status(t("m.status.loading"));
-  const failed = [];
-  // Eigene Toiletten und Bewertungen (schnell) und OSM-Daten (langsamer) laufen parallel;
-  // jedes Ergebnis wird angezeigt, sobald es da ist.
-  const own = loadOwn(box).then(loadMissingReviews).then(render).catch(err => failed.push(err.message));
-  const osm = loadOsmTiles(keys).then(() => { render(); return loadMissingReviews(); }).then(render)
-    .catch(err => { failed.push(err.message); keys.forEach(k => loadedTiles.delete(k)); });
-  await Promise.all([own, osm]);
-  render();
-  if (failed.length) status(t("m.status.partial", { e: failed.join("; ") }), 6000); else status("");
+  const b = map.getBounds();
+  if (tilesFor(b, TILE).some(k => !loadedTiles.has(k))) status(t("m.status.loading"));
+  const failed = await loadArea(b);
+  const imp = await ensureImported(b);
+  if (imp.fresh) {
+    tilesFor(b, TILE).forEach(k => loadedTiles.delete(k));
+    failed.push(...await loadArea(b));
+  }
+  if (failed.length) status(t("m.status.partial", { e: failed.join("; ") }), 6000);
+  else if (imp.busy) status(t("m.status.importBusy"), 5000);
+  else status("");
+  updateInfo();
 }
 let moveTimer;
 map.on("moveend", () => { updateInfo(); clearTimeout(moveTimer); moveTimer = setTimeout(loadToilets, 400); });

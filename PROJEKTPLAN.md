@@ -21,3 +21,9 @@ Stand: 29.10.2026 · Version 0.4
 3. Konto löschen, Passwort vergessen
 4. Eigener E-Mail-Versand (für Bestätigungsmails, Passwort vergessen)
 5. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten
+
+## Toiletten-Daten (seit 29.10.2026)
+- OSM-Toiletten liegen in unserer Datenbank (Tabelle osm_toilets), die App fragt Overpass nicht mehr direkt
+- Import: Edge Function `osm-sync` (Code in supabase/functions/osm-sync), Zeitplan alle 2 Min., Kacheln von 1°
+- Deutschland ist vorgemerkt; neue Gegenden weltweit werden beim ersten Besuch automatisch nachgeladen
+- Aktualisierung jeder Kachel nach 7 Tagen
