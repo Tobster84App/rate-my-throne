@@ -1,0 +1,225 @@
+// Texte für Startseite und Karte in Deutsch und Englisch.
+// Sprache: ?lang=de|en in der Adresse > gespeicherte Wahl > Browsersprache (Deutsch, sonst Englisch).
+const I18N = {
+  de: {
+    // Gemeinsam
+    "lang.other": "EN", "lang.switch": "Switch to English",
+    "brand.home": "Zur Startseite",
+    "close": "Schließen", "cancel": "Abbrechen", "yes": "ja", "no": "nein",
+    "cat.clean": "Sauberkeit", "cat.equip": "Ausstattung", "cat.access": "Erreichbarkeit",
+    "auth.register": "Konto erstellen", "auth.login": "Anmelden", "auth.email": "E-Mail-Adresse",
+    "auth.username": "Benutzername", "auth.password": "Passwort",
+    "auth.haveAccount": "Ich habe schon ein Konto", "auth.newAccount": "Neues Konto erstellen",
+    "auth.taken": "Dieser Benutzername ist schon vergeben.",
+    "auth.regFailed": "Registrierung fehlgeschlagen: {e}",
+    "auth.almostTitle": "Fast geschafft",
+    "auth.almostText": "Wir haben dir eine E-Mail an <strong>{email}</strong> geschickt. Bestätige deine Adresse über den Link darin und melde dich danach hier an.",
+    "auth.confirmFirst": "Bitte bestätige zuerst deine E-Mail-Adresse.",
+    "auth.wrong": "E-Mail oder Passwort ist falsch.",
+    "auth.logout": "Abmelden",
+
+    // Startseite
+    "h.title": "Rate My Throne – Du musst. Wir wissen, wo.",
+    "h.description": "Öffentliche Toiletten in jeder Stadt finden und bewerten – mit der Community von Rate My Throne.",
+    "h.nav.how": "So geht's", "h.nav.join": "Anmelden", "h.nav.map": "Zur Karte",
+    "h.eyebrow": "Öffentliche Toiletten · ehrlich bewertet",
+    "h.h1": "Du musst.<br><em>Wir wissen, wo.</em>",
+    "h.lead": "Fremde Stadt, volle Blase, null Plan? Rate My Throne zeigt dir die nächste öffentliche Toilette – und ob dich dort ein Thron erwartet oder ein Tatort. Bewertet von Leuten, die vor dir dort saßen.",
+    "h.cta.find": "Nächsten Thron finden", "h.cta.join": "Kostenlos mitmachen",
+    "h.stat.reviews": "Bewertungen", "h.stat.members": "Mitglieder im Hofstaat", "h.stat.toilets": "von der Community entdeckte Throne",
+    "h.how.eyebrow": "So geht's", "h.how.title": "Drei Schritte. Keine Panik.",
+    "h.step1.title": "Finden",
+    "h.step1.text": "Karte auf, „Nächsten Thron finden“ drücken. Du siehst sofort, wie weit es ist – und ob grün (Paradies), gelb (geht so) oder rot (lieber noch durchhalten).",
+    "h.step2.title": "Hingehen",
+    "h.step2.text": "Ein Tipp, und Google Maps lotst dich hin. Kostenlos, barrierefrei, Wickeltisch? Weißt du, bevor du die Klinke anfasst.",
+    "h.step3.title": "Bewerten",
+    "h.step3.text": "Sterne für Sauberkeit, Ausstattung und Erreichbarkeit. Ein Satz dazu – und die nächste Person in Not wird dich dafür lieben.",
+    "h.comm.eyebrow": "Warum Community?",
+    "h.comm.title": "Die Karte weiß, wo. Du weißt, was hinter der Tür wartet.",
+    "h.comm.lead": "Wo Toiletten stehen, verrät uns OpenStreetMap. Ob Papier da ist, ob's sauber ist oder ob die Tür seit Wochen klemmt, weiß nur, wer gerade dort war. Jede Bewertung rettet jemandem den Tag.",
+    "h.comm.c1.title": "Ehrliche Noten in drei Kategorien",
+    "h.comm.c1.text": "Sauberkeit, Ausstattung, Erreichbarkeit – statt einer Zahl, die nichts verrät.",
+    "h.comm.c2.title": "Das Wichtigste auf einen Blick",
+    "h.comm.c2.text": "Kostenlos, barrierefrei, Wickeltisch: die Infos, die unterwegs wirklich zählen.",
+    "h.comm.c3.title": "Fehlende Throne eintragen",
+    "h.comm.c3.text": "Du kennst ein Geheimversteck, das noch fehlt? Ein Tipp, und alle profitieren.",
+    "h.sample.tag": "Beispiel", "h.sample.name": "WC am Hauptbahnhof, Ebene −1",
+    "h.sample.count": "/ 5 · 12 Bewertungen",
+    "h.sample.chip1": "Barrierefrei", "h.sample.chip2": "Wickeltisch",
+    "h.sample.quote": "„Gut ausgeschildert, frisch geputzt, Seife da. Kostet 1 €, jeder Cent wert.“",
+    "h.sample.cite": "Beispielkommentar", "h.sample.aria": "Beispiel einer Bewertung",
+    "h.join.eyebrow": "Mitmachen", "h.join.title": "Werde Teil des Hofstaats",
+    "h.join.lead": "Suchen geht ohne Konto. Zum Bewerten und Eintragen brauchst du nur E-Mail, Benutzernamen und Passwort. Kostenlos. Kein Abo. Keine Krone nötig.",
+    "h.join.hint": "Mindestens 8 Zeichen. Dein Benutzername ist bei deinen Bewertungen sichtbar, deine E-Mail-Adresse nicht.",
+    "h.join.confirm": "Fast geschafft: Bestätige deine E-Mail-Adresse über den Link, den wir dir geschickt haben.",
+    "h.join.signedIn": "Angemeldet als <strong>{u}</strong>.",
+    "h.faq.eyebrow": "Fragen & Antworten", "h.faq.title": "Was du wissen willst",
+    "h.faq.q1": "Kostet das was?", "h.faq.a1": "Nein. Pinkeln kostet manchmal Geld – wir nicht.",
+    "h.faq.q2": "Woher kommen die Toiletten auf der Karte?", "h.faq.a2": "Die Standorte stammen aus OpenStreetMap, einer freien Weltkarte, die von Freiwilligen gepflegt wird. Dazu kommen Throne, die unsere Community selbst einträgt.",
+    "h.faq.q3": "Brauche ich ein Konto?", "h.faq.a3": "Zum Suchen nicht. Zum Bewerten und Eintragen schon – damit jede Person jeden Thron nur einmal bewerten kann und niemand die Wertung manipuliert.",
+    "h.faq.q4": "In welchen Städten funktioniert das?", "h.faq.a4": "Überall, wo OpenStreetMap öffentliche Toiletten kennt – also in sehr vielen Städten weltweit. Bewertungen gibt es dort, wo unsere Community schon war. Gerade vor allem in Berlin. Hilf uns, das zu ändern.",
+    "h.faq.q5": "Muss ich meinen Standort freigeben?", "h.faq.a5": "Nur, wenn du den nächsten Thron zu deinem Standort finden willst. Dein Standort wird dabei nur in deinem Browser verwendet und nicht gespeichert.",
+    "h.footer.osm": "Kartendaten © <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap</a>-Mitwirkende",
+    "h.footer.map": "Karte", "h.footer.imprint": "Impressum (folgt)", "h.footer.privacy": "Datenschutz (folgt)", "h.footer.soon": "Folgt vor dem offiziellen Start",
+
+    // Karte
+    "m.title": "Karte · Rate My Throne",
+    "m.info.aria": "Übersicht für den Kartenausschnitt", "m.info.heading": "Hier in der Gegend",
+    "m.info.toilets": "Toiletten", "m.info.toiletsNote": "im sichtbaren Kartenausschnitt",
+    "m.info.avg": "Ø Bewertung", "m.info.noReviews": "noch keine Bewertungen", "m.info.ratedOf": "{n} von {m} bewertet",
+    "m.info.nearest": "Nächste", "m.info.fromCenter": "ab Kartenmitte", "m.info.fromYou": "von deinem Standort, ca. {min} Min. zu Fuß", "m.info.noneLoaded": "keine geladen",
+    "m.btn.nearest": "Nächsten Thron finden", "m.fab.add": "Toilette hinzufügen", "m.fab.locate": "Zu meinem Standort",
+    "m.ad": "Anzeige · Werbefläche (Platzhalter)",
+    "m.status.zoom": "Zum Laden der Toiletten näher heranzoomen", "m.status.loading": "Lade Throne …",
+    "m.status.partial": "Laden teilweise fehlgeschlagen: {e}", "m.status.locating": "Suche Standort …",
+    "m.status.searching": "Suche nächsten Thron …", "m.status.fallback": "Kein Standort – ich suche ab Kartenmitte",
+    "m.status.none": "Weit und breit kein Thron. Zoom etwas heraus und versuch es nochmal.",
+    "m.status.tapMap": "Tippe auf die Karte, wo die Toilette ist",
+    "m.err.noGeo": "Dein Browser unterstützt keine Standortabfrage.",
+    "m.err.geo": "Standort nicht verfügbar. Bitte Standortfreigabe im Browser erlauben.",
+    "m.err.osm": "Toilettendaten", "m.err.own": "Community-Toiletten", "m.err.reviews": "Bewertungen",
+    "m.toilet.default": "Öffentliche Toilette", "m.toilet.by": "Rate My Throne (von {u})",
+    "m.detail.away": "{d} entfernt · ca. {min} Min. zu Fuß · ", "m.detail.source": "Quelle: {s}", "m.detail.hours": " · Öffnungszeiten: {h}",
+    "m.chip.fee": "Kostenpflichtig", "m.chip.wheelchair": "Rollstuhlgerecht", "m.chip.changing": "Wickeltisch",
+    "m.detail.noReviews": "Noch keine Bewertung. Sei die erste Person, die diesen Thron bewertet.",
+    "m.detail.count1": "1 Bewertung", "m.detail.countN": "{n} Bewertungen",
+    "m.detail.route": "Route in Google Maps", "m.detail.loginToRate": "Zum Bewerten anmelden",
+    "m.detail.already": "Du hast diesen Thron schon bewertet.", "m.detail.rate": "Bewerten",
+    "m.review.free": "kostenlos", "m.review.barrierfree": "barrierefrei", "m.review.changing": "Wickeltisch",
+    "m.rate.title": "{name} bewerten", "m.rate.star": "{cat}: {n} von 5",
+    "m.rate.free": "kostenlos", "m.rate.barrierfree": "barrierefrei", "m.rate.changing": "Wickeltisch vorhanden",
+    "m.rate.comment": "Kommentar (optional)", "m.rate.placeholder": "Thron oder Tatort?",
+    "m.rate.save": "Bewertung speichern", "m.rate.missing": "Bitte alle drei Kategorien mit Sternen bewerten.",
+    "m.rate.failed": "Speichern fehlgeschlagen: {e}",
+    "m.user.hello": "Hallo {u}",
+    "m.add.title": "Neuer Thron", "m.add.name": "Name oder Beschreibung", "m.add.placeholder": "z. B. WC im Bahnhof, Untergeschoss",
+    "m.add.fee": "kostenpflichtig", "m.add.wheel": "rollstuhlgerecht", "m.add.changing": "Wickeltisch", "m.add.save": "Toilette speichern"
+  },
+
+  en: {
+    "lang.other": "DE", "lang.switch": "Auf Deutsch wechseln",
+    "brand.home": "Back to home",
+    "close": "Close", "cancel": "Cancel", "yes": "yes", "no": "no",
+    "cat.clean": "Cleanliness", "cat.equip": "Supplies", "cat.access": "Accessibility",
+    "auth.register": "Create account", "auth.login": "Sign in", "auth.email": "Email address",
+    "auth.username": "Username", "auth.password": "Password",
+    "auth.haveAccount": "I already have an account", "auth.newAccount": "Create a new account",
+    "auth.taken": "That username is already taken.",
+    "auth.regFailed": "Sign-up failed: {e}",
+    "auth.almostTitle": "Almost there",
+    "auth.almostText": "We've sent an email to <strong>{email}</strong>. Confirm your address via the link in it, then sign in here.",
+    "auth.confirmFirst": "Please confirm your email address first.",
+    "auth.wrong": "Wrong email or password.",
+    "auth.logout": "Sign out",
+
+    "h.title": "Rate My Throne – You gotta go. We know where.",
+    "h.description": "Find and rate public toilets in any city – with the Rate My Throne community.",
+    "h.nav.how": "How it works", "h.nav.join": "Sign in", "h.nav.map": "Open map",
+    "h.eyebrow": "Public toilets · honestly rated",
+    "h.h1": "You gotta go.<br><em>We know where.</em>",
+    "h.lead": "New city, full bladder, zero clue? Rate My Throne shows you the nearest public toilet – and whether a throne awaits you or a crime scene. Rated by people who sat there before you.",
+    "h.cta.find": "Find the nearest throne", "h.cta.join": "Join for free",
+    "h.stat.reviews": "reviews", "h.stat.members": "members of the royal court", "h.stat.toilets": "thrones discovered by the community",
+    "h.how.eyebrow": "How it works", "h.how.title": "Three steps. No panic.",
+    "h.step1.title": "Find",
+    "h.step1.text": "Open the map, hit “Find the nearest throne”. You instantly see how far it is – and whether it's green (paradise), yellow (meh) or red (better hold it).",
+    "h.step2.title": "Go",
+    "h.step2.text": "One tap and Google Maps guides you there. Free, accessible, baby changing? You'll know before you touch the handle.",
+    "h.step3.title": "Rate",
+    "h.step3.text": "Stars for cleanliness, supplies and accessibility. Add one sentence – and the next person in need will love you for it.",
+    "h.comm.eyebrow": "Why community?",
+    "h.comm.title": "The map knows where. You know what's behind the door.",
+    "h.comm.lead": "OpenStreetMap tells us where toilets are. Whether there's paper, whether it's clean, or whether the door has been jammed for weeks – only the person who was just there knows. Every review saves someone's day.",
+    "h.comm.c1.title": "Honest scores in three categories",
+    "h.comm.c1.text": "Cleanliness, supplies, accessibility – not one number that tells you nothing.",
+    "h.comm.c2.title": "The essentials at a glance",
+    "h.comm.c2.text": "Free, accessible, baby changing: the info that actually matters on the go.",
+    "h.comm.c3.title": "Add missing thrones",
+    "h.comm.c3.text": "Know a hidden gem that's not on the map yet? One tap and everyone benefits.",
+    "h.sample.tag": "Example", "h.sample.name": "Central Station WC, Level −1",
+    "h.sample.count": "/ 5 · 12 reviews",
+    "h.sample.chip1": "Accessible", "h.sample.chip2": "Baby changing",
+    "h.sample.quote": "“Well signposted, freshly cleaned, soap available. Costs €1, worth every cent.”",
+    "h.sample.cite": "Example review", "h.sample.aria": "Example of a review",
+    "h.join.eyebrow": "Join in", "h.join.title": "Join the royal court",
+    "h.join.lead": "Searching works without an account. To rate and add thrones you only need an email, a username and a password. Free. No subscription. No crown required.",
+    "h.join.hint": "At least 8 characters. Your username is shown on your reviews, your email address is not.",
+    "h.join.confirm": "Almost there: confirm your email address via the link we just sent you.",
+    "h.join.signedIn": "Signed in as <strong>{u}</strong>.",
+    "h.faq.eyebrow": "FAQ", "h.faq.title": "What you want to know",
+    "h.faq.q1": "Does it cost anything?", "h.faq.a1": "No. Peeing sometimes costs money – we don't.",
+    "h.faq.q2": "Where do the toilets on the map come from?", "h.faq.a2": "Locations come from OpenStreetMap, a free world map maintained by volunteers. On top of that come thrones our community adds itself.",
+    "h.faq.q3": "Do I need an account?", "h.faq.a3": "Not for searching. For rating and adding, yes – so everyone can rate each throne only once and nobody games the scores.",
+    "h.faq.q4": "Which cities does it work in?", "h.faq.a4": "Anywhere OpenStreetMap knows public toilets – that's a lot of cities worldwide. Reviews exist wherever our community has already been. Right now that's mostly Berlin. Help us change that.",
+    "h.faq.q5": "Do I have to share my location?", "h.faq.a5": "Only if you want to find the nearest throne to where you are. Your location is used in your browser only and never stored.",
+    "h.footer.osm": "Map data © <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap</a> contributors",
+    "h.footer.map": "Map", "h.footer.imprint": "Legal notice (coming soon)", "h.footer.privacy": "Privacy policy (coming soon)", "h.footer.soon": "Coming before the official launch",
+
+    "m.title": "Map · Rate My Throne",
+    "m.info.aria": "Overview of the visible map area", "m.info.heading": "Around here",
+    "m.info.toilets": "Toilets", "m.info.toiletsNote": "in the visible map area",
+    "m.info.avg": "Avg. rating", "m.info.noReviews": "no reviews yet", "m.info.ratedOf": "{n} of {m} rated",
+    "m.info.nearest": "Nearest", "m.info.fromCenter": "from the map centre", "m.info.fromYou": "from your location, approx. {min} min walk", "m.info.noneLoaded": "none loaded",
+    "m.btn.nearest": "Find the nearest throne", "m.fab.add": "Add a toilet", "m.fab.locate": "Go to my location",
+    "m.ad": "Advertisement · ad space (placeholder)",
+    "m.status.zoom": "Zoom in to load toilets", "m.status.loading": "Loading thrones …",
+    "m.status.partial": "Some data failed to load: {e}", "m.status.locating": "Finding your location …",
+    "m.status.searching": "Looking for the nearest throne …", "m.status.fallback": "No location – searching from the map centre",
+    "m.status.none": "No throne anywhere near. Zoom out a bit and try again.",
+    "m.status.tapMap": "Tap the map where the toilet is",
+    "m.err.noGeo": "Your browser doesn't support location.",
+    "m.err.geo": "Location unavailable. Please allow location access in your browser.",
+    "m.err.osm": "Toilet data", "m.err.own": "Community toilets", "m.err.reviews": "Reviews",
+    "m.toilet.default": "Public toilet", "m.toilet.by": "Rate My Throne (by {u})",
+    "m.detail.away": "{d} away · approx. {min} min walk · ", "m.detail.source": "Source: {s}", "m.detail.hours": " · Opening hours: {h}",
+    "m.chip.fee": "Paid", "m.chip.wheelchair": "Wheelchair accessible", "m.chip.changing": "Baby changing",
+    "m.detail.noReviews": "No reviews yet. Be the first to rate this throne.",
+    "m.detail.count1": "1 review", "m.detail.countN": "{n} reviews",
+    "m.detail.route": "Route in Google Maps", "m.detail.loginToRate": "Sign in to rate",
+    "m.detail.already": "You've already rated this throne.", "m.detail.rate": "Rate",
+    "m.review.free": "free", "m.review.barrierfree": "accessible", "m.review.changing": "baby changing",
+    "m.rate.title": "Rate {name}", "m.rate.star": "{cat}: {n} of 5",
+    "m.rate.free": "free", "m.rate.barrierfree": "accessible", "m.rate.changing": "baby changing available",
+    "m.rate.comment": "Comment (optional)", "m.rate.placeholder": "Throne or crime scene?",
+    "m.rate.save": "Save review", "m.rate.missing": "Please rate all three categories.",
+    "m.rate.failed": "Couldn't save: {e}",
+    "m.user.hello": "Hi {u}",
+    "m.add.title": "New throne", "m.add.name": "Name or description", "m.add.placeholder": "e.g. station toilets, lower level",
+    "m.add.fee": "paid", "m.add.wheel": "wheelchair accessible", "m.add.changing": "baby changing", "m.add.save": "Save toilet"
+  }
+};
+
+const LANG = (() => {
+  try {
+    const q = new URLSearchParams(location.search).get("lang");
+    if (q && I18N[q]) { localStorage.setItem("rmt-lang", q); return q; }
+    const saved = localStorage.getItem("rmt-lang");
+    if (saved && I18N[saved]) return saved;
+  } catch {}
+  return (navigator.language || "").toLowerCase().startsWith("de") ? "de" : "en";
+})();
+const LOCALE = LANG === "de" ? "de-DE" : "en-GB";
+
+// Text holen; {name}-Platzhalter werden ersetzt
+function t(key, vars = {}) {
+  const s = I18N[LANG][key] ?? I18N.de[key] ?? key;
+  return s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
+}
+const fmtNum = (n, digits = 0) => new Intl.NumberFormat(LOCALE, { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
+
+// Füllt data-i18n (Inhalt), data-i18n-aria, data-i18n-title, data-i18n-placeholder
+function applyI18n(root = document) {
+  document.documentElement.lang = LANG;
+  root.querySelectorAll("[data-i18n]").forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+  for (const attr of ["aria-label", "title", "placeholder", "content"]) {
+    const key = "i18n" + attr.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+    root.querySelectorAll(`[data-${"i18n-" + attr}]`).forEach(el => el.setAttribute(attr, t(el.dataset[key])));
+  }
+  root.querySelectorAll("[data-lang-switch]").forEach(a => {
+    const other = LANG === "de" ? "en" : "de";
+    a.href = "?lang=" + other + location.hash;
+    a.textContent = t("lang.other");
+    a.setAttribute("aria-label", t("lang.switch"));
+    a.lang = other;
+  });
+}

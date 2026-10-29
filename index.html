@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2a1f4d">
 <title>Rate My Throne</title>
-<meta name="description" content="Öffentliche Toiletten in jeder Stadt finden und bewerten – mit der Community von Rate My Throne.">
+<meta name="description" content="Öffentliche Toiletten in jeder Stadt finden und bewerten – mit der Community von Rate My Throne." data-i18n-content="h.description">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
@@ -53,6 +53,8 @@ nav { position: relative; display: flex; align-items: center; gap: 16px; padding
 .brand b span { color: var(--gold); }
 nav .navlink { color: rgba(255,255,255,.8); text-decoration: none; font-weight: 600; font-size: 15px; }
 nav .navlink:hover { color: #fff; }
+nav .lang { color: rgba(255,255,255,.85); text-decoration: none; font-weight: 700; font-size: 13px; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: 5px 10px; }
+nav .lang:hover { color: #fff; border-color: #fff; }
 .hero-body { position: relative; padding-block: clamp(48px, 9vw, 110px) clamp(56px, 9vw, 120px); display: grid; gap: 22px; max-width: 640px; }
 .hero h1 { font-size: clamp(40px, 7vw, 72px); line-height: 1.02; letter-spacing: -1.5px; font-weight: 800; }
 .hero h1 em { font-style: normal; color: var(--gold); }
@@ -160,16 +162,17 @@ footer a { color: var(--muted); }
         </svg>
         <b>Rate My <span>Throne</span></b>
       </a>
-      <a class="navlink hide-sm" href="#so-gehts">So geht's</a>
-      <a class="navlink" href="#mitmachen" id="navJoin">Anmelden</a>
+      <a class="navlink hide-sm" href="#so-gehts" data-i18n="h.nav.how">So geht's</a>
+      <a class="navlink" href="#mitmachen" id="navJoin" data-i18n="h.nav.join">Anmelden</a>
+      <a class="lang" data-lang-switch href="?lang=en">EN</a>
     </nav>
     <div class="hero-body">
-      <span class="eyebrow">Öffentliche Toiletten · bewertet von der Community</span>
-      <h1>Fremde Stadt. <em>Dringendes</em> Bedürfnis.</h1>
-      <p>Rate My Throne zeigt dir in Sekunden die nächste öffentliche Toilette – und was andere über sie sagen. Sauber oder lieber weitergehen? Kostenlos oder Kleingeld bereithalten? Du weißt es, bevor du da bist.</p>
+      <span class="eyebrow" data-i18n="h.eyebrow">Öffentliche Toiletten · ehrlich bewertet</span>
+      <h1 data-i18n="h.h1">Du musst.<br><em>Wir wissen, wo.</em></h1>
+      <p data-i18n="h.lead"></p>
       <div class="ctas">
-        <a class="btn gold" href="karte.html">Nächste Toilette finden</a>
-        <a class="btn ghost" href="#mitmachen">Kostenlos mitmachen</a>
+        <a class="btn gold" href="karte.html" data-i18n="h.cta.find">Nächsten Thron finden</a>
+        <a class="btn ghost" href="#mitmachen" data-i18n="h.cta.join">Kostenlos mitmachen</a>
       </div>
     </div>
   </div>
@@ -178,9 +181,9 @@ footer a { color: var(--muted); }
 <div class="stats">
   <div class="wrap">
     <div class="stats-card" aria-live="polite">
-      <div class="stat"><strong id="nReviews">–</strong><span>Bewertungen</span></div>
-      <div class="stat"><strong id="nMembers">–</strong><span>Community-Mitglieder</span></div>
-      <div class="stat"><strong id="nToilets">–</strong><span>neu eingetragene Toiletten</span></div>
+      <div class="stat"><strong id="nReviews">–</strong><span data-i18n="h.stat.reviews">Bewertungen</span></div>
+      <div class="stat"><strong id="nMembers">–</strong><span data-i18n="h.stat.members">Mitglieder im Hofstaat</span></div>
+      <div class="stat"><strong id="nToilets">–</strong><span data-i18n="h.stat.toilets">von der Community entdeckte Throne</span></div>
     </div>
   </div>
 </div>
@@ -189,24 +192,24 @@ footer a { color: var(--muted); }
   <section id="so-gehts">
     <div class="wrap">
       <div class="section-head">
-        <span class="eyebrow">So geht's</span>
-        <h2>In drei Schritten zum besten Thron der Stadt</h2>
+        <span class="eyebrow" data-i18n="h.how.eyebrow">So geht's</span>
+        <h2 data-i18n="h.how.title">Drei Schritte. Keine Panik.</h2>
       </div>
       <div class="steps">
         <article class="step">
           <span class="num">1</span>
-          <h3>Finden</h3>
-          <p>Öffne die Karte und tippe auf „Nächste Toilette finden“. Du siehst sofort, wie weit es ist und wie die Toilette bewertet wurde – grün, gelb oder rot.</p>
+          <h3 data-i18n="h.step1.title">Finden</h3>
+          <p data-i18n="h.step1.text"></p>
         </article>
         <article class="step">
           <span class="num">2</span>
-          <h3>Hingehen</h3>
-          <p>Ein Tipp startet die Route in Google Maps. Vorab siehst du, ob die Toilette kostenlos, barrierefrei oder mit Wickeltisch ausgestattet ist.</p>
+          <h3 data-i18n="h.step2.title">Hingehen</h3>
+          <p data-i18n="h.step2.text"></p>
         </article>
         <article class="step">
           <span class="num">3</span>
-          <h3>Bewerten</h3>
-          <p>Vergib Sterne für Sauberkeit, Ausstattung und Erreichbarkeit. Ein kurzer Kommentar hilft der nächsten Person, die genau dort steht, wo du gerade warst.</p>
+          <h3 data-i18n="h.step3.title">Bewerten</h3>
+          <p data-i18n="h.step3.text"></p>
         </article>
       </div>
     </div>
@@ -215,27 +218,27 @@ footer a { color: var(--muted); }
   <section class="community">
     <div class="wrap split">
       <div>
-        <span class="eyebrow">Warum Community?</span>
-        <h2 style="margin-top:12px">Eine Karte weiß, wo. Nur Menschen wissen, wie.</h2>
-        <p class="lead">Wo öffentliche Toiletten stehen, ist bekannt – die Standorte kommen aus OpenStreetMap. Ob dort Papier hängt, ob es sauber ist oder ob die Tür seit Wochen klemmt, weiß nur, wer gerade dort war. Jede Bewertung macht die Karte für alle besser.</p>
+        <span class="eyebrow" data-i18n="h.comm.eyebrow">Warum Community?</span>
+        <h2 style="margin-top:12px" data-i18n="h.comm.title"></h2>
+        <p class="lead" data-i18n="h.comm.lead"></p>
         <ul class="checks">
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#e3b341"/><path d="m7 12.5 3.2 3L17 9" stroke="#2a1f4d" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <div><b>Ehrliche Noten in drei Kategorien</b><span>Sauberkeit, Ausstattung und Erreichbarkeit – statt einer einzigen, nichtssagenden Zahl.</span></div></li>
+            <div><b data-i18n="h.comm.c1.title"></b><span data-i18n="h.comm.c1.text"></span></div></li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#e3b341"/><path d="m7 12.5 3.2 3L17 9" stroke="#2a1f4d" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <div><b>Das Wichtigste auf einen Blick</b><span>Kostenlos, barrierefrei, Wickeltisch: die Infos, die unterwegs wirklich zählen.</span></div></li>
+            <div><b data-i18n="h.comm.c2.title"></b><span data-i18n="h.comm.c2.text"></span></div></li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#e3b341"/><path d="m7 12.5 3.2 3L17 9" stroke="#2a1f4d" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <div><b>Fehlende Toiletten eintragen</b><span>Du kennst eine, die noch nicht auf der Karte ist? Mit einem Tipp ist sie für alle sichtbar.</span></div></li>
+            <div><b data-i18n="h.comm.c3.title"></b><span data-i18n="h.comm.c3.text"></span></div></li>
         </ul>
       </div>
-      <aside class="sample" aria-label="Beispiel einer Bewertung">
-        <span class="tag">Beispiel</span>
-        <h3>WC am Hauptbahnhof, Ebene −1</h3>
-        <div class="score"><b>4,3</b><small>/ 5 · 12 Bewertungen</small></div>
-        <div class="bar"><span>Sauberkeit</span><i style="--w:90%"></i><b>4,5</b></div>
-        <div class="bar"><span>Ausstattung</span><i style="--w:80%"></i><b>4,0</b></div>
-        <div class="bar"><span>Erreichbarkeit</span><i style="--w:88%"></i><b>4,4</b></div>
-        <div class="chips"><span class="chip">Barrierefrei</span><span class="chip">Wickeltisch</span></div>
-        <p class="quote">„Gut ausgeschildert, frisch geputzt, Seife war da. Kostet 1 €, lohnt sich.“<cite>Beispielkommentar</cite></p>
+      <aside class="sample" data-i18n-aria-label="h.sample.aria">
+        <span class="tag" data-i18n="h.sample.tag">Beispiel</span>
+        <h3 data-i18n="h.sample.name"></h3>
+        <div class="score"><b id="sampleScore">4,3</b><small data-i18n="h.sample.count"></small></div>
+        <div class="bar"><span data-i18n="cat.clean"></span><i style="--w:90%"></i><b class="num1" data-v="4.5">4,5</b></div>
+        <div class="bar"><span data-i18n="cat.equip"></span><i style="--w:80%"></i><b class="num1" data-v="4.0">4,0</b></div>
+        <div class="bar"><span data-i18n="cat.access"></span><i style="--w:88%"></i><b class="num1" data-v="4.4">4,4</b></div>
+        <div class="chips"><span class="chip" data-i18n="h.sample.chip1"></span><span class="chip" data-i18n="h.sample.chip2"></span></div>
+        <p class="quote"><span data-i18n="h.sample.quote"></span><cite data-i18n="h.sample.cite"></cite></p>
       </aside>
     </div>
   </section>
@@ -247,34 +250,34 @@ footer a { color: var(--muted); }
     </svg>
     <div class="wrap split">
       <div>
-        <span class="eyebrow">Mitmachen</span>
-        <h2 style="margin-top:12px">Werde Teil der Community</h2>
-        <p class="lead">Suchen und Ansehen geht ohne Konto. Zum Bewerten und Eintragen brauchst du nur E-Mail-Adresse, Benutzernamen und Passwort. Kostenlos, ohne Abo.</p>
+        <span class="eyebrow" data-i18n="h.join.eyebrow">Mitmachen</span>
+        <h2 style="margin-top:12px" data-i18n="h.join.title"></h2>
+        <p class="lead" data-i18n="h.join.lead"></p>
       </div>
       <div class="form-card">
         <div id="authBox">
           <div class="tabs" role="tablist">
-            <button type="button" role="tab" id="tabRegister" aria-selected="true">Registrieren</button>
-            <button type="button" role="tab" id="tabLogin" aria-selected="false">Anmelden</button>
+            <button type="button" role="tab" id="tabRegister" aria-selected="true" data-i18n="auth.register"></button>
+            <button type="button" role="tab" id="tabLogin" aria-selected="false" data-i18n="auth.login"></button>
           </div>
           <form id="authForm">
-            <label for="aMail">E-Mail-Adresse</label>
+            <label for="aMail" data-i18n="auth.email"></label>
             <input type="email" id="aMail" required autocomplete="email">
             <div id="userField">
-              <label for="aUser">Benutzername</label>
+              <label for="aUser" data-i18n="auth.username"></label>
               <input type="text" id="aUser" required minlength="3" maxlength="30" autocomplete="username">
             </div>
-            <label for="aPw">Passwort</label>
+            <label for="aPw" data-i18n="auth.password"></label>
             <input type="password" id="aPw" required minlength="8" autocomplete="new-password">
             <p class="error" id="authErr"></p>
-            <button type="submit" class="btn royal" id="authSubmit">Konto erstellen</button>
-            <p class="hint" id="authHint">Mindestens 8 Zeichen. Dein Benutzername ist bei deinen Bewertungen sichtbar, deine E-Mail-Adresse nicht.</p>
+            <button type="submit" class="btn royal" id="authSubmit" data-i18n="auth.register"></button>
+            <p class="hint" id="authHint" data-i18n="h.join.hint"></p>
           </form>
         </div>
         <div id="signedIn" hidden>
-          <p>Angemeldet als <strong id="whoami"></strong>.</p>
-          <a class="btn royal" href="karte.html">Zur Karte</a>
-          <p class="hint"><a href="#" id="logout">Abmelden</a></p>
+          <p id="whoami"></p>
+          <a class="btn royal" href="karte.html" data-i18n="h.nav.map"></a>
+          <p class="hint"><a href="#" id="logout" data-i18n="auth.logout"></a></p>
         </div>
       </div>
     </div>
@@ -283,15 +286,15 @@ footer a { color: var(--muted); }
   <section>
     <div class="wrap">
       <div class="section-head">
-        <span class="eyebrow">Fragen & Antworten</span>
-        <h2>Gut zu wissen</h2>
+        <span class="eyebrow" data-i18n="h.faq.eyebrow"></span>
+        <h2 data-i18n="h.faq.title"></h2>
       </div>
       <div class="faq">
-        <details><summary>Kostet Rate My Throne etwas?</summary><p>Nein. Suchen, Bewerten und Eintragen sind kostenlos.</p></details>
-        <details><summary>Woher kommen die Toiletten auf der Karte?</summary><p>Die Standorte stammen aus OpenStreetMap, einer freien Weltkarte, die von Freiwilligen gepflegt wird. Dazu kommen Toiletten, die unsere Community selbst einträgt.</p></details>
-        <details><summary>Brauche ich ein Konto?</summary><p>Zum Suchen nicht. Zum Bewerten und Eintragen schon, damit jede Person jede Toilette nur einmal bewerten kann und Bewertungen nachvollziehbar bleiben.</p></details>
-        <details><summary>In welchen Städten funktioniert das?</summary><p>Überall, wo OpenStreetMap öffentliche Toiletten kennt. Bewertungen gibt es dort, wo unsere Community schon unterwegs war – im Moment vor allem in Berlin.</p></details>
-        <details><summary>Muss ich meinen Standort freigeben?</summary><p>Nur, wenn du die nächste Toilette zu deinem Standort finden willst. Dein Standort wird dabei nur in deinem Browser verwendet und nicht gespeichert.</p></details>
+        <details><summary data-i18n="h.faq.q1"></summary><p data-i18n="h.faq.a1"></p></details>
+        <details><summary data-i18n="h.faq.q2"></summary><p data-i18n="h.faq.a2"></p></details>
+        <details><summary data-i18n="h.faq.q3"></summary><p data-i18n="h.faq.a3"></p></details>
+        <details><summary data-i18n="h.faq.q4"></summary><p data-i18n="h.faq.a4"></p></details>
+        <details><summary data-i18n="h.faq.q5"></summary><p data-i18n="h.faq.a5"></p></details>
       </div>
     </div>
   </section>
@@ -299,28 +302,34 @@ footer a { color: var(--muted); }
 
 <footer>
   <div class="wrap">
-    <span>© 2026 Rate My Throne · Kartendaten © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-Mitwirkende</span>
+    <span>© 2026 Rate My Throne · <span data-i18n="h.footer.osm"></span></span>
     <nav>
-      <a href="karte.html">Karte</a>
-      <span title="Folgt vor dem offiziellen Start">Impressum (folgt)</span>
-      <span title="Folgt vor dem offiziellen Start">Datenschutz (folgt)</span>
+      <a href="karte.html" data-i18n="h.footer.map">Karte</a>
+      <span data-i18n="h.footer.imprint" data-i18n-title="h.footer.soon"></span>
+      <span data-i18n="h.footer.privacy" data-i18n-title="h.footer.soon"></span>
     </nav>
   </div>
 </footer>
 
+<script src="i18n.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
+applyI18n();
+document.title = t("h.title");
+document.getElementById("sampleScore").textContent = fmtNum(4.3, 1);
+document.querySelectorAll(".num1").forEach(el => { el.textContent = fmtNum(+el.dataset.v, 1); });
+
 // Gleiche Datenbank wie die Karte; die Anmeldung gilt danach auch dort.
 const db = supabase.createClient("https://bzgeqaseogawdptaqzgq.supabase.co", "sb_publishable_Uoawl08FsfsJwdv3eLVV0A_Zh5tT6EE");
 const $ = id => document.getElementById(id);
-const fmt = n => new Intl.NumberFormat("de-DE").format(n);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 async function loadStats() {
-  const counts = await Promise.all(["reviews", "profiles", "toilets"].map(async t => {
-    const { count, error } = await db.from(t).select("*", { count: "exact", head: true });
+  const counts = await Promise.all(["reviews", "profiles", "toilets"].map(async tbl => {
+    const { count, error } = await db.from(tbl).select("*", { count: "exact", head: true });
     return error ? null : count;
   }));
-  [["nReviews", 0], ["nMembers", 1], ["nToilets", 2]].forEach(([id, i]) => { if (counts[i] != null) $(id).textContent = fmt(counts[i]); });
+  [["nReviews", 0], ["nMembers", 1], ["nToilets", 2]].forEach(([id, i]) => { if (counts[i] != null) $(id).textContent = fmtNum(counts[i]); });
 }
 
 let mode = "register";
@@ -332,13 +341,14 @@ function setMode(m) {
   $("userField").hidden = !reg;
   $("aUser").required = reg;
   $("aPw").autocomplete = reg ? "new-password" : "current-password";
-  $("authSubmit").textContent = reg ? "Konto erstellen" : "Anmelden";
+  $("authSubmit").textContent = reg ? t("auth.register") : t("auth.login");
   $("authHint").hidden = !reg;
+  $("authHint").textContent = t("h.join.hint");
   $("authErr").textContent = "";
 }
 $("tabRegister").onclick = () => setMode("register");
 $("tabLogin").onclick = () => setMode("login");
-$("navJoin").onclick = () => setMode("login");
+$("navJoin").onclick = () => { if (!$("authBox").hidden) setMode("login"); };
 
 $("authForm").onsubmit = async e => {
   e.preventDefault();
@@ -349,13 +359,13 @@ $("authForm").onsubmit = async e => {
     if (mode === "register") {
       const username = $("aUser").value.trim();
       const { data: taken } = await db.from("profiles").select("id").ilike("username", username.replace(/[\\%_]/g, "\\$&")).limit(1);
-      if (taken?.length) { err.textContent = "Dieser Benutzername ist schon vergeben."; return; }
+      if (taken?.length) { err.textContent = t("auth.taken"); return; }
       const { data, error } = await db.auth.signUp({ email, password, options: { data: { username } } });
-      if (error) { err.textContent = "Registrierung fehlgeschlagen: " + error.message; return; }
-      if (!data.session) { err.textContent = ""; $("authHint").hidden = false; $("authHint").textContent = "Fast geschafft: Bestätige deine E-Mail-Adresse über den Link, den wir dir geschickt haben."; return; }
+      if (error) { err.textContent = t("auth.regFailed", { e: error.message }); return; }
+      if (!data.session) { $("authHint").hidden = false; $("authHint").textContent = t("h.join.confirm"); return; }
     } else {
       const { error } = await db.auth.signInWithPassword({ email, password });
-      if (error) { err.textContent = error.message === "Email not confirmed" ? "Bitte bestätige zuerst deine E-Mail-Adresse." : "E-Mail oder Passwort ist falsch."; return; }
+      if (error) { err.textContent = error.message === "Email not confirmed" ? t("auth.confirmFirst") : t("auth.wrong"); return; }
     }
     location.href = "karte.html";
   } finally { $("authSubmit").disabled = false; }
@@ -365,9 +375,9 @@ async function showSession() {
   const { data: { session } } = await db.auth.getSession();
   if (!session) return;
   const { data } = await db.from("profiles").select("username").eq("id", session.user.id).single();
-  $("whoami").textContent = data?.username ?? session.user.email;
+  $("whoami").innerHTML = t("h.join.signedIn", { u: esc(data?.username ?? session.user.email) });
   $("authBox").hidden = true; $("signedIn").hidden = false;
-  $("navJoin").textContent = "Zur Karte"; $("navJoin").href = "karte.html";
+  $("navJoin").textContent = t("h.nav.map"); $("navJoin").href = "karte.html";
 }
 $("logout").onclick = async e => { e.preventDefault(); await db.auth.signOut(); location.reload(); };
 

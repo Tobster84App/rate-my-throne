@@ -37,6 +37,8 @@ header { background: var(--royal); color: #fff; display: flex; align-items: cent
 .brand svg { width: 34px; height: 34px; flex: none; }
 .brand h1 { font: 800 21px/1 var(--display); margin: 0; letter-spacing: -.3px; white-space: nowrap; }
 .brand h1 span { color: var(--gold); }
+.lang { color: rgba(255,255,255,.85); text-decoration: none; font-weight: 700; font-size: 13px; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: 6px 10px; }
+.lang:hover { color: #fff; border-color: #fff; }
 #btnUser { background: var(--gold); color: var(--royal); border: none; border-radius: 999px; padding: 8px 16px; font-weight: 700; white-space: nowrap; max-width: 55vw; overflow: hidden; text-overflow: ellipsis; }
 
 /* Karte */
@@ -140,7 +142,7 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
 </head>
 <body>
 <header>
-  <a class="brand" href="./" title="Zur Startseite">
+  <a class="brand" href="./" data-i18n-title="brand.home">
     <svg viewBox="0 0 40 40" aria-hidden="true">
       <path d="M6 30 4 12l9 7 7-11 7 11 9-7-2 18z" fill="#e3b341"/>
       <rect x="6" y="31" width="28" height="4" rx="1.5" fill="#e3b341"/>
@@ -148,30 +150,31 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
     </svg>
     <h1>Rate My <span>Throne</span></h1>
   </a>
-  <button id="btnUser" type="button">Anmelden</button>
+  <a class="lang" data-lang-switch href="?lang=en">EN</a>
+  <button id="btnUser" type="button" data-i18n="auth.login">Anmelden</button>
 </header>
 
 <main>
   <div id="map"></div>
 
-  <aside id="info" aria-label="Übersicht für den Kartenausschnitt">
-    <h2>Hier in der Gegend</h2>
+  <aside id="info" data-i18n-aria-label="m.info.aria">
+    <h2 data-i18n="m.info.heading">Hier in der Gegend</h2>
     <div class="stats">
-      <div class="stat"><span>Toiletten</span><strong id="sCount">–</strong><small>im sichtbaren Kartenausschnitt</small></div>
-      <div class="stat"><span>Ø Bewertung</span><strong id="sAvg">–</strong><small id="sAvgNote">noch keine Bewertungen</small></div>
-      <div class="stat"><span>Nächste</span><strong id="sNear">–</strong><small id="sNearNote">ab Kartenmitte</small></div>
+      <div class="stat"><span data-i18n="m.info.toilets">Toiletten</span><strong id="sCount">–</strong><small data-i18n="m.info.toiletsNote">im sichtbaren Kartenausschnitt</small></div>
+      <div class="stat"><span data-i18n="m.info.avg">Ø Bewertung</span><strong id="sAvg">–</strong><small id="sAvgNote" data-i18n="m.info.noReviews">noch keine Bewertungen</small></div>
+      <div class="stat"><span data-i18n="m.info.nearest">Nächste</span><strong id="sNear">–</strong><small id="sNearNote" data-i18n="m.info.fromCenter">ab Kartenmitte</small></div>
     </div>
     <button id="btnNearest" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
-      Nächste Toilette finden
+      <span data-i18n="m.btn.nearest">Nächsten Thron finden</span>
     </button>
   </aside>
 
   <div class="fabs">
-    <button id="btnAdd" class="fab gold" type="button" aria-label="Toilette hinzufügen" title="Toilette hinzufügen">
+    <button id="btnAdd" class="fab gold" type="button" data-i18n-aria-label="m.fab.add" data-i18n-title="m.fab.add">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
     </button>
-    <button id="btnLocate" class="fab" type="button" aria-label="Zu meinem Standort" title="Zu meinem Standort">
+    <button id="btnLocate" class="fab" type="button" data-i18n-aria-label="m.fab.locate" data-i18n-title="m.fab.locate">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 3 3 10.5l7.5 3 3 7.5z"/></svg>
     </button>
   </div>
@@ -179,12 +182,16 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
   <div id="status" hidden></div>
 </main>
 
-<div id="ad">Anzeige · Werbefläche (Platzhalter)</div>
+<div id="ad" data-i18n="m.ad">Anzeige · Werbefläche (Platzhalter)</div>
 <div id="sheet" hidden></div>
 
+<script src="i18n.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
+applyI18n();
+document.title = t("m.title");
+
 // ===== Verbindung zur Datenbank (Supabase). URL und publishable key dürfen öffentlich sein. =====
 const SUPABASE_URL = "https://bzgeqaseogawdptaqzgq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Uoawl08FsfsJwdv3eLVV0A_Zh5tT6EE";
@@ -195,20 +202,15 @@ let myPos = null;                // [lat, lon] des Nutzers, sobald bekannt
 let nearestId = null;            // hervorgehobene Toilette
 const toilets = new Map();       // id -> toilet (OSM und eigene)
 const reviews = new Map();       // toiletId -> [review]
-const loadedAreas = [];          // bereits geladene Kartenbereiche
 
-const CATS = [
-  { key: "clean", label: "Sauberkeit" },
-  { key: "equip", label: "Ausstattung" },
-  { key: "access", label: "Erreichbarkeit" }
-];
+const CATS = ["clean", "equip", "access"].map(key => ({ key, label: t("cat." + key) }));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 // ===== Karte =====
 const map = L.map("map", { zoomControl: false }).setView([52.52, 13.405], 15); // Start: Berlin Mitte
 L.control.zoom({ position: "bottomright" }).addTo(map);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende'
+  maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 const layer = L.layerGroup().addTo(map);
 let meMarker = null, routeLine = null;
@@ -226,18 +228,18 @@ function avg(id) {
 }
 const scoreColor = a => a == null ? "var(--none)" : a >= 4 ? "var(--good)" : a >= 2.5 ? "var(--mid)" : "var(--bad)";
 
-function markerIcon(t) {
-  const a = avg(t.id);
-  const cls = "pin" + (a == null ? " none" : "") + (t.id === nearestId ? " nearest" : "");
+function markerIcon(tl) {
+  const a = avg(tl.id);
+  const cls = "pin" + (a == null ? " none" : "") + (tl.id === nearestId ? " nearest" : "");
   return L.divIcon({ className: "", iconSize: [38, 38], iconAnchor: [19, 40],
-    html: `<div class="${cls}" style="background:${scoreColor(a)}"><b>${a == null ? "WC" : a.toFixed(1).replace(".", ",")}</b></div>` });
+    html: `<div class="${cls}" style="background:${scoreColor(a)}"><b>${a == null ? "WC" : fmtNum(a, 1)}</b></div>` });
 }
 
 function render() {
   layer.clearLayers();
-  for (const t of toilets.values()) {
-    L.marker([t.lat, t.lon], { icon: markerIcon(t), zIndexOffset: t.id === nearestId ? 1000 : 0 })
-      .on("click", () => showToilet(t)).addTo(layer);
+  for (const tl of toilets.values()) {
+    L.marker([tl.lat, tl.lon], { icon: markerIcon(tl), zIndexOffset: tl.id === nearestId ? 1000 : 0 })
+      .on("click", () => showToilet(tl)).addTo(layer);
   }
   updateInfo();
 }
@@ -249,65 +251,114 @@ function distance(a, b) { // Meter, Haversine
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * rad) * Math.cos(b[0] * rad) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
-const fmtDist = m => m < 1000 ? Math.round(m / 10) * 10 + " m" : (m / 1000).toFixed(1).replace(".", ",") + " km";
+const fmtDist = m => m < 1000 ? Math.round(m / 10) * 10 + " m" : fmtNum(m / 1000, 1) + " km";
 const walkMin = m => Math.max(1, Math.round(m / 80)); // ca. 4,8 km/h
 
 function nearestFrom(pos) {
   let best = null, bestD = Infinity;
-  for (const t of toilets.values()) {
-    const d = distance(pos, [t.lat, t.lon]);
-    if (d < bestD) { best = t; bestD = d; }
+  for (const tl of toilets.values()) {
+    const d = distance(pos, [tl.lat, tl.lon]);
+    if (d < bestD) { best = tl; bestD = d; }
   }
   return best && { toilet: best, dist: bestD };
 }
 
 function updateInfo() {
   const b = map.getBounds();
-  const visible = [...toilets.values()].filter(t => b.contains([t.lat, t.lon]));
+  const visible = [...toilets.values()].filter(tl => b.contains([tl.lat, tl.lon]));
   document.getElementById("sCount").textContent = visible.length;
-  const rated = visible.map(t => avg(t.id)).filter(a => a != null);
+  const rated = visible.map(tl => avg(tl.id)).filter(a => a != null);
   const sAvg = document.getElementById("sAvg");
   if (rated.length) {
     const m = rated.reduce((s, a) => s + a, 0) / rated.length;
-    sAvg.textContent = m.toFixed(1).replace(".", ",");
+    sAvg.textContent = fmtNum(m, 1);
     sAvg.style.color = scoreColor(m);
-    document.getElementById("sAvgNote").textContent = rated.length + " von " + visible.length + " bewertet";
+    document.getElementById("sAvgNote").textContent = t("m.info.ratedOf", { n: rated.length, m: visible.length });
   } else {
     sAvg.textContent = "–"; sAvg.style.color = "";
-    document.getElementById("sAvgNote").textContent = "noch keine Bewertungen";
+    document.getElementById("sAvgNote").textContent = t("m.info.noReviews");
   }
   const from = myPos || [map.getCenter().lat, map.getCenter().lng];
   const n = nearestFrom(from);
   document.getElementById("sNear").textContent = n ? fmtDist(n.dist) : "–";
-  document.getElementById("sNearNote").textContent = n ? (myPos ? "von deinem Standort, ca. " + walkMin(n.dist) + " Min. zu Fuß" : "ab Kartenmitte") : "keine geladen";
+  document.getElementById("sNearNote").textContent = n ? (myPos ? t("m.info.fromYou", { min: walkMin(n.dist) }) : t("m.info.fromCenter")) : t("m.info.noneLoaded");
 }
 
 // ===== Daten laden =====
-async function loadOsm(box) {
-  const q = `[out:json][timeout:25];(node["amenity"="toilets"](${box.join(",")});way["amenity"="toilets"](${box.join(",")}););out center tags;`;
-  const res = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: "data=" + encodeURIComponent(q) });
-  if (!res.ok) throw new Error("Toilettendaten: HTTP " + res.status);
-  const data = await res.json();
+// Die Welt ist in Kacheln von 0,05° (ca. 4–5 km) geteilt. Jede Kachel wird nur einmal geladen
+// und 24 Stunden im Browser zwischengespeichert, damit Wiederbesuche sofort angezeigt werden.
+const TILE = 0.05, CACHE_KEY = "rmt-osm-v1", CACHE_MS = 24 * 3600 * 1000, CACHE_MAX = 300;
+const OVERPASS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter"];
+const loadedTiles = new Set();
+let osmCache = {};
+try { osmCache = JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; } catch {}
+function saveCache() {
+  const keys = Object.keys(osmCache).sort((a, b) => osmCache[b].at - osmCache[a].at);
+  for (const k of keys.slice(CACHE_MAX)) delete osmCache[k];
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(osmCache)); } catch {}
+}
+
+function tilesFor(bounds) {
+  const out = [];
+  for (let y = Math.floor(bounds.getSouth() / TILE); y <= Math.floor(bounds.getNorth() / TILE); y++)
+    for (let x = Math.floor(bounds.getWest() / TILE); x <= Math.floor(bounds.getEast() / TILE); x++) out.push(x + "_" + y);
+  return out;
+}
+const tileBox = k => { const [x, y] = k.split("_").map(Number); return [y * TILE, x * TILE, (y + 1) * TILE, (x + 1) * TILE]; };
+
+function addOsm(list) {
+  for (const e of list) {
+    const tg = e.tags || {};
+    toilets.set(e.id, { id: e.id, lat: e.lat, lon: e.lon, source: "OpenStreetMap",
+      name: tg.name || tg.operator || t("m.toilet.default"),
+      fee: tg.fee, wheelchair: tg.wheelchair, changing: tg.changing_table, hours: tg.opening_hours });
+  }
+}
+
+// Fragt Overpass; fällt bei Zeitüberschreitung oder Fehler auf den zweiten Server zurück
+async function overpass(query) {
+  let lastErr;
+  for (const url of OVERPASS) {
+    try {
+      const res = await fetch(url, { method: "POST", body: "data=" + encodeURIComponent(query), signal: AbortSignal.timeout(12000) });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return await res.json();
+    } catch (err) { lastErr = err; }
+  }
+  throw new Error(t("m.err.osm") + ": " + lastErr.message);
+}
+
+async function loadOsmTiles(keys) {
+  const fresh = [], missing = [];
+  for (const k of keys) (osmCache[k] && Date.now() - osmCache[k].at < CACHE_MS ? fresh : missing).push(k);
+  for (const k of fresh) addOsm(osmCache[k].items);
+  if (!missing.length) return;
+  // Eine Abfrage über das Rechteck aller fehlenden Kacheln, danach auf die Kacheln verteilen
+  const boxes = missing.map(tileBox);
+  const box = [Math.min(...boxes.map(b => b[0])), Math.min(...boxes.map(b => b[1])), Math.max(...boxes.map(b => b[2])), Math.max(...boxes.map(b => b[3]))];
+  const data = await overpass(`[out:json][timeout:20];nwr["amenity"="toilets"](${box.join(",")});out center tags qt;`);
+  const byTile = Object.fromEntries(missing.map(k => [k, []]));
   for (const e of data.elements) {
     const lat = e.lat ?? e.center?.lat, lon = e.lon ?? e.center?.lon;
     if (lat == null) continue;
+    const k = Math.floor(lon / TILE) + "_" + Math.floor(lat / TILE);
     const tg = e.tags || {};
-    const id = "osm-" + e.type + e.id;
-    toilets.set(id, { id, lat, lon, source: "OpenStreetMap",
-      name: tg.name || tg.operator || "Öffentliche Toilette",
-      fee: tg.fee, wheelchair: tg.wheelchair, changing: tg.changing_table, hours: tg.opening_hours });
+    byTile[k]?.push({ id: "osm-" + e.type + e.id, lat, lon,
+      tags: { name: tg.name, operator: tg.operator, fee: tg.fee, wheelchair: tg.wheelchair, changing_table: tg.changing_table, opening_hours: tg.opening_hours } });
   }
+  for (const k of missing) { osmCache[k] = { at: Date.now(), items: byTile[k] }; addOsm(byTile[k]); }
+  saveCache();
 }
 
 const yn = v => v == null ? undefined : v ? "yes" : "no";
 async function loadOwn(box) {
   const { data, error } = await db.from("toilets").select("*, profiles(username)")
     .gte("lat", box[0]).lte("lat", box[2]).gte("lon", box[1]).lte("lon", box[3]);
-  if (error) throw new Error("Eigene Toiletten: " + error.message);
-  for (const t of data) {
-    toilets.set(t.id, { id: t.id, lat: t.lat, lon: t.lon, name: t.name,
-      source: "Rate My Throne (von " + (t.profiles?.username ?? "?") + ")",
-      fee: yn(t.fee), wheelchair: yn(t.wheelchair), changing: yn(t.changing_table) });
+  if (error) throw new Error(t("m.err.own") + ": " + error.message);
+  for (const tl of data) {
+    toilets.set(tl.id, { id: tl.id, lat: tl.lat, lon: tl.lon, name: tl.name,
+      source: t("m.toilet.by", { u: tl.profiles?.username ?? "?" }),
+      fee: yn(tl.fee), wheelchair: yn(tl.wheelchair), changing: yn(tl.changing_table) });
   }
 }
 
@@ -315,59 +366,66 @@ async function loadReviews(ids) {
   for (let i = 0; i < ids.length; i += 100) {
     const chunk = ids.slice(i, i + 100);
     const { data, error } = await db.from("reviews").select("*, profiles(username)").in("toilet_ref", chunk);
-    if (error) throw new Error("Bewertungen: " + error.message);
+    if (error) throw new Error(t("m.err.reviews") + ": " + error.message);
     for (const id of chunk) reviews.set(id, []);
     for (const r of data) reviews.get(r.toilet_ref).push(r);
   }
 }
+async function loadMissingReviews() {
+  await loadReviews([...toilets.keys()].filter(id => !reviews.has(id)));
+}
 
-// Lädt den sichtbaren Bereich (mit etwas Rand), außer er wurde schon geladen
-async function loadToilets(force) {
-  if (map.getZoom() < 13) { status("Zum Laden der Toiletten näher heranzoomen", 2500); updateInfo(); return; }
-  const b = map.getBounds();
-  if (!force && loadedAreas.some(a => a.contains(b))) { updateInfo(); return; }
-  const big = b.pad(0.5);
-  const box = [big.getSouth(), big.getWest(), big.getNorth(), big.getEast()];
-  status("Lade Toiletten …");
-  const before = new Set(toilets.keys());
-  const results = await Promise.allSettled([loadOsm(box), loadOwn(box)]);
-  const failed = results.filter(r => r.status === "rejected").map(r => r.reason.message);
-  try { await loadReviews([...toilets.keys()].filter(id => !before.has(id))); } catch (err) { failed.push(err.message); }
-  if (!failed.length) loadedAreas.push(big);
+// Lädt alle Kacheln im sichtbaren Bereich, die noch fehlen. Was schon da ist, erscheint sofort.
+async function loadToilets() {
+  if (map.getZoom() < 13) { status(t("m.status.zoom"), 2500); updateInfo(); return; }
+  const keys = tilesFor(map.getBounds()).filter(k => !loadedTiles.has(k));
+  if (!keys.length) { updateInfo(); return; }
+  keys.forEach(k => loadedTiles.add(k));
+  const boxes = keys.map(tileBox);
+  const box = [Math.min(...boxes.map(b => b[0])), Math.min(...boxes.map(b => b[1])), Math.max(...boxes.map(b => b[2])), Math.max(...boxes.map(b => b[3]))];
+  status(t("m.status.loading"));
+  const failed = [];
+  // Eigene Toiletten und Bewertungen (schnell) und OSM-Daten (langsamer) laufen parallel;
+  // jedes Ergebnis wird angezeigt, sobald es da ist.
+  const own = loadOwn(box).then(loadMissingReviews).then(render).catch(err => failed.push(err.message));
+  const osm = loadOsmTiles(keys).then(() => { render(); return loadMissingReviews(); }).then(render)
+    .catch(err => { failed.push(err.message); keys.forEach(k => loadedTiles.delete(k)); });
+  await Promise.all([own, osm]);
   render();
-  if (failed.length) status("Laden teilweise fehlgeschlagen: " + failed.join("; "), 6000); else status("");
+  if (failed.length) status(t("m.status.partial", { e: failed.join("; ") }), 6000); else status("");
 }
 let moveTimer;
-map.on("moveend", () => { updateInfo(); clearTimeout(moveTimer); moveTimer = setTimeout(() => loadToilets(), 700); });
+map.on("moveend", () => { updateInfo(); clearTimeout(moveTimer); moveTimer = setTimeout(loadToilets, 400); });
 
-// ===== Standort & nächste Toilette =====
+// ===== Standort & nächster Thron =====
 function locate() {
   return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) return reject(new Error("Dein Browser unterstützt keine Standortabfrage."));
+    if (!navigator.geolocation) return reject(new Error(t("m.err.noGeo")));
     navigator.geolocation.getCurrentPosition(p => {
       myPos = [p.coords.latitude, p.coords.longitude];
       if (meMarker) meMarker.setLatLng(myPos);
       else meMarker = L.marker(myPos, { icon: L.divIcon({ className: "", iconSize: [18, 18], html: '<div class="me"></div>' }), interactive: false }).addTo(map);
       resolve(myPos);
-    }, () => reject(new Error("Standort nicht verfügbar. Bitte Standortfreigabe im Browser erlauben.")), { enableHighAccuracy: true, timeout: 10000 });
+    }, () => reject(new Error(t("m.err.geo"))), { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
   });
 }
 
 document.getElementById("btnLocate").onclick = async () => {
-  status("Suche Standort …");
+  status(t("m.status.locating"));
   try { const pos = await locate(); map.setView(pos, 16); status(""); }
   catch (err) { status(err.message, 4000); }
 };
 
 document.getElementById("btnNearest").onclick = async () => {
-  status("Suche nächste Toilette …");
+  status(t("m.status.searching"));
   let from;
   try { from = await locate(); }
-  catch { from = [map.getCenter().lat, map.getCenter().lng]; status("Kein Standort – ich suche ab Kartenmitte", 2500); }
+  catch { from = [map.getCenter().lat, map.getCenter().lng]; status(t("m.status.fallback"), 2500); }
   map.setView(from, Math.max(map.getZoom(), 15), { animate: false });
+  clearTimeout(moveTimer);
   await loadToilets();
   const n = nearestFrom(from);
-  if (!n) { status("In der Nähe wurde keine Toilette gefunden. Zoom etwas heraus und versuch es erneut.", 4000); return; }
+  if (!n) { status(t("m.status.none"), 4000); return; }
   nearestId = n.toilet.id;
   if (routeLine) routeLine.remove();
   routeLine = L.polyline([from, [n.toilet.lat, n.toilet.lon]], { color: "#e3b341", weight: 4, dashArray: "6 8" }).addTo(map);
@@ -377,68 +435,69 @@ document.getElementById("btnNearest").onclick = async () => {
   showToilet(n.toilet, n.dist);
 };
 
-const mapsLink = t => `https://www.google.com/maps/dir/?api=1&destination=${t.lat},${t.lon}&travelmode=walking`;
+const mapsLink = tl => `https://www.google.com/maps/dir/?api=1&destination=${tl.lat},${tl.lon}&travelmode=walking`;
 
 // ===== Detailansicht & Bewertung =====
 const sheet = document.getElementById("sheet");
 function closeSheet() { sheet.hidden = true; sheet.innerHTML = ""; }
-const chip = (label, v) => `<span class="chip ${v === "yes" ? "yes" : v === "no" ? "no" : ""}">${label}: ${v === "yes" ? "ja" : v === "no" ? "nein" : v ? esc(v) : "?"}</span>`;
+const closeBtn = () => `<button class="close" type="button" onclick="closeSheet()" aria-label="${t("close")}">✕</button>`;
+const chip = (label, v) => `<span class="chip ${v === "yes" ? "yes" : v === "no" ? "no" : ""}">${label}: ${v === "yes" ? t("yes") : v === "no" ? t("no") : v ? esc(v) : "?"}</span>`;
 
-function showToilet(t, dist) {
-  const list = reviews.get(t.id) || [];
-  const a = avg(t.id);
-  const d = dist ?? (myPos ? distance(myPos, [t.lat, t.lon]) : null);
+function showToilet(tl, dist) {
+  const list = reviews.get(tl.id) || [];
+  const a = avg(tl.id);
+  const d = dist ?? (myPos ? distance(myPos, [tl.lat, tl.lon]) : null);
   sheet.innerHTML = `
-    <button class="close" type="button" onclick="closeSheet()" aria-label="Schließen">✕</button>
-    <h2>${esc(t.name)}</h2>
-    <div class="muted">${d != null ? fmtDist(d) + " entfernt · ca. " + walkMin(d) + " Min. zu Fuß · " : ""}Quelle: ${esc(t.source)}${t.hours ? " · Öffnungszeiten: " + esc(t.hours) : ""}</div>
-    <div class="chips">${chip("Kostenpflichtig", t.fee)}${chip("Rollstuhlgerecht", t.wheelchair)}${chip("Wickeltisch", t.changing)}</div>
-    ${a == null ? `<p class="muted">Noch keine Bewertung. Sei die erste Person, die diesen Thron bewertet.</p>` : `
-      <div class="score"><div class="big" style="color:${scoreColor(a)}">${a.toFixed(1).replace(".", ",")}<small> / 5</small></div>
-      <div class="muted">${list.length} Bewertung${list.length > 1 ? "en" : ""}</div></div>
+    ${closeBtn()}
+    <h2>${esc(tl.name)}</h2>
+    <div class="muted">${d != null ? t("m.detail.away", { d: fmtDist(d), min: walkMin(d) }) : ""}${t("m.detail.source", { s: esc(tl.source) })}${tl.hours ? t("m.detail.hours", { h: esc(tl.hours) }) : ""}</div>
+    <div class="chips">${chip(t("m.chip.fee"), tl.fee)}${chip(t("m.chip.wheelchair"), tl.wheelchair)}${chip(t("m.chip.changing"), tl.changing)}</div>
+    ${a == null ? `<p class="muted">${t("m.detail.noReviews")}</p>` : `
+      <div class="score"><div class="big" style="color:${scoreColor(a)}">${fmtNum(a, 1)}<small> / 5</small></div>
+      <div class="muted">${list.length === 1 ? t("m.detail.count1") : t("m.detail.countN", { n: list.length })}</div></div>
       <div class="bars">${CATS.map(c => {
         const m = list.reduce((s, r) => s + r[c.key], 0) / list.length;
-        return `<div class="bar"><span>${c.label}</span><i style="--w:${m / 5 * 100}%"></i><b>${m.toFixed(1).replace(".", ",")}</b></div>`;
+        return `<div class="bar"><span>${c.label}</span><i style="--w:${m / 5 * 100}%"></i><b>${fmtNum(m, 1)}</b></div>`;
       }).join("")}</div>`}
     <div class="actions">
-      <a class="btn gold" href="${mapsLink(t)}" target="_blank" rel="noopener">Route in Google Maps</a>
+      <a class="btn gold" href="${mapsLink(tl)}" target="_blank" rel="noopener">${t("m.detail.route")}</a>
       <span id="formArea"></span>
     </div>
     <div>${list.slice().sort((x, y) => y.created_at.localeCompare(x.created_at)).map(r => `
-      <div class="review"><strong>${esc(r.profiles?.username ?? "?")}</strong> <span class="muted">${new Date(r.created_at).toLocaleDateString("de-DE")}</span>
-        <div class="muted">${CATS.map(c => c.label + " " + r[c.key]).join(" · ")}${r.free ? " · kostenlos" : ""}${r.barrierfree ? " · barrierefrei" : ""}${r.changing ? " · Wickeltisch" : ""}</div>
+      <div class="review"><strong>${esc(r.profiles?.username ?? "?")}</strong> <span class="muted">${new Date(r.created_at).toLocaleDateString(LOCALE)}</span>
+        <div class="muted">${CATS.map(c => c.label + " " + r[c.key]).join(" · ")}${r.free ? " · " + t("m.review.free") : ""}${r.barrierfree ? " · " + t("m.review.barrierfree") : ""}${r.changing ? " · " + t("m.review.changing") : ""}</div>
         ${r.comment ? `<p>${esc(r.comment)}</p>` : ""}</div>`).join("")}</div>`;
   sheet.hidden = false;
   const area = document.getElementById("formArea");
   if (!user) {
-    area.innerHTML = `<button type="button" class="btn primary" id="loginToRate">Zum Bewerten anmelden</button>`;
-    document.getElementById("loginToRate").onclick = () => showAuth(() => showToilet(t, dist));
+    area.innerHTML = `<button type="button" class="btn primary" id="loginToRate">${t("m.detail.loginToRate")}</button>`;
+    document.getElementById("loginToRate").onclick = () => showAuth(() => showToilet(tl, dist));
   } else if (list.some(r => r.user_id === user.id)) {
-    area.innerHTML = `<span class="muted">Du hast diesen Thron schon bewertet.</span>`;
+    area.innerHTML = `<span class="muted">${t("m.detail.already")}</span>`;
   } else {
-    area.innerHTML = `<button type="button" class="btn primary" id="rateBtn">Bewerten</button>`;
-    document.getElementById("rateBtn").onclick = () => showRatingForm(t);
+    area.innerHTML = `<button type="button" class="btn primary" id="rateBtn">${t("m.detail.rate")}</button>`;
+    document.getElementById("rateBtn").onclick = () => showRatingForm(tl);
   }
 }
 
-function showRatingForm(t) {
+function showRatingForm(tl) {
   const vals = {};
   sheet.innerHTML = `
-    <button class="close" type="button" onclick="closeSheet()" aria-label="Schließen">✕</button>
-    <h2>${esc(t.name)} bewerten</h2>
+    ${closeBtn()}
+    <h2>${t("m.rate.title", { name: esc(tl.name) })}</h2>
     <form id="rateForm">
-    ${CATS.map(c => `<label>${c.label}</label><div class="stars" data-key="${c.key}">${[1,2,3,4,5].map(n => `<button type="button" data-n="${n}" aria-label="${c.label}: ${n} von 5">★</button>`).join("")}</div>`).join("")}
-    <label class="check"><input type="checkbox" id="fFree"> kostenlos</label>
-    <label class="check"><input type="checkbox" id="fBarrier"> barrierefrei</label>
-    <label class="check"><input type="checkbox" id="fChanging"> Wickeltisch vorhanden</label>
-    <label for="fText">Kommentar (optional)</label>
-    <textarea id="fText" rows="3" maxlength="500" placeholder="Wie war's?"></textarea>
+    ${CATS.map(c => `<label>${c.label}</label><div class="stars" data-key="${c.key}">${[1,2,3,4,5].map(n => `<button type="button" data-n="${n}" aria-label="${t("m.rate.star", { cat: c.label, n })}">★</button>`).join("")}</div>`).join("")}
+    <label class="check"><input type="checkbox" id="fFree"> ${t("m.rate.free")}</label>
+    <label class="check"><input type="checkbox" id="fBarrier"> ${t("m.rate.barrierfree")}</label>
+    <label class="check"><input type="checkbox" id="fChanging"> ${t("m.rate.changing")}</label>
+    <label for="fText">${t("m.rate.comment")}</label>
+    <textarea id="fText" rows="3" maxlength="500" placeholder="${t("m.rate.placeholder")}"></textarea>
     <p class="error" id="rateErr"></p>
-    <div class="actions"><button type="submit" class="btn primary">Bewertung speichern</button>
-    <button type="button" class="btn" id="rateCancel">Abbrechen</button></div>
+    <div class="actions"><button type="submit" class="btn primary">${t("m.rate.save")}</button>
+    <button type="button" class="btn" id="rateCancel">${t("cancel")}</button></div>
   </form>`;
   sheet.hidden = false;
-  document.getElementById("rateCancel").onclick = () => showToilet(t);
+  document.getElementById("rateCancel").onclick = () => showToilet(tl);
   sheet.querySelectorAll(".stars").forEach(group => {
     group.querySelectorAll("button").forEach(btn => btn.onclick = () => {
       const n = +btn.dataset.n; vals[group.dataset.key] = n;
@@ -448,13 +507,13 @@ function showRatingForm(t) {
   document.getElementById("rateForm").onsubmit = async e => {
     e.preventDefault();
     const err = document.getElementById("rateErr");
-    if (CATS.some(c => !vals[c.key])) { err.textContent = "Bitte alle drei Kategorien mit Sternen bewerten."; return; }
-    const { data, error } = await db.from("reviews").insert({ toilet_ref: t.id, ...vals,
+    if (CATS.some(c => !vals[c.key])) { err.textContent = t("m.rate.missing"); return; }
+    const { data, error } = await db.from("reviews").insert({ toilet_ref: tl.id, ...vals,
       free: fFree.checked, barrierfree: fBarrier.checked, changing: fChanging.checked,
       comment: fText.value.trim() || null }).select("*, profiles(username)").single();
-    if (error) { err.textContent = error.code === "23505" ? "Du hast diesen Thron schon bewertet." : "Speichern fehlgeschlagen: " + error.message; return; }
-    reviews.set(t.id, [...(reviews.get(t.id) || []), data]);
-    render(); showToilet(t);
+    if (error) { err.textContent = error.code === "23505" ? t("m.detail.already") : t("m.rate.failed", { e: error.message }); return; }
+    reviews.set(tl.id, [...(reviews.get(tl.id) || []), data]);
+    render(); showToilet(tl);
   };
 }
 
@@ -462,15 +521,15 @@ function showRatingForm(t) {
 function showAuth(after, mode = "login") {
   const reg = mode === "register";
   sheet.innerHTML = `
-    <button class="close" type="button" onclick="closeSheet()" aria-label="Schließen">✕</button>
-    <h2>${reg ? "Konto erstellen" : "Anmelden"}</h2>
+    ${closeBtn()}
+    <h2>${reg ? t("auth.register") : t("auth.login")}</h2>
     <form id="authForm">
-      <label for="aMail">E-Mail-Adresse</label><input type="email" id="aMail" required autocomplete="email">
-      ${reg ? `<label for="aUser">Benutzername</label><input type="text" id="aUser" required minlength="3" maxlength="30" autocomplete="username">` : ""}
-      <label for="aPw">Passwort</label><input type="password" id="aPw" required minlength="8" autocomplete="${reg ? "new-password" : "current-password"}">
+      <label for="aMail">${t("auth.email")}</label><input type="email" id="aMail" required autocomplete="email">
+      ${reg ? `<label for="aUser">${t("auth.username")}</label><input type="text" id="aUser" required minlength="3" maxlength="30" autocomplete="username">` : ""}
+      <label for="aPw">${t("auth.password")}</label><input type="password" id="aPw" required minlength="8" autocomplete="${reg ? "new-password" : "current-password"}">
       <p class="error" id="authErr"></p>
-      <div class="actions"><button type="submit" class="btn primary">${reg ? "Konto erstellen" : "Anmelden"}</button>
-      <button type="button" class="btn" id="switchMode">${reg ? "Ich habe schon ein Konto" : "Neues Konto erstellen"}</button></div>
+      <div class="actions"><button type="submit" class="btn primary">${reg ? t("auth.register") : t("auth.login")}</button>
+      <button type="button" class="btn" id="switchMode">${reg ? t("auth.haveAccount") : t("auth.newAccount")}</button></div>
     </form>`;
   sheet.hidden = false;
   document.getElementById("switchMode").onclick = () => showAuth(after, reg ? "login" : "register");
@@ -482,17 +541,16 @@ function showAuth(after, mode = "login") {
     if (reg) {
       const username = aUser.value.trim();
       const { data: taken } = await db.from("profiles").select("id").ilike("username", username.replace(/[\\%_]/g, "\\$&")).limit(1);
-      if (taken?.length) { err.textContent = "Dieser Benutzername ist schon vergeben."; return; }
+      if (taken?.length) { err.textContent = t("auth.taken"); return; }
       const { data, error } = await db.auth.signUp({ email, password, options: { data: { username } } });
-      if (error) { err.textContent = "Registrierung fehlgeschlagen: " + error.message; return; }
+      if (error) { err.textContent = t("auth.regFailed", { e: error.message }); return; }
       if (!data.session) {
-        sheet.innerHTML = `<button class="close" type="button" onclick="closeSheet()" aria-label="Schließen">✕</button>
-          <h2>Fast geschafft</h2><p>Wir haben dir eine E-Mail an <strong>${esc(email)}</strong> geschickt. Bestätige deine Adresse über den Link darin und melde dich danach hier an.</p>`;
+        sheet.innerHTML = `${closeBtn()}<h2>${t("auth.almostTitle")}</h2><p>${t("auth.almostText", { email: esc(email) })}</p>`;
         return;
       }
     } else {
       const { error } = await db.auth.signInWithPassword({ email, password });
-      if (error) { err.textContent = error.message === "Email not confirmed" ? "Bitte bestätige zuerst deine E-Mail-Adresse." : "E-Mail oder Passwort ist falsch."; return; }
+      if (error) { err.textContent = error.message === "Email not confirmed" ? t("auth.confirmFirst") : t("auth.wrong"); return; }
     }
     await refreshUser();
     after ? after() : closeSheet();
@@ -505,13 +563,13 @@ async function refreshUser() {
     const { data } = await db.from("profiles").select("username").eq("id", session.user.id).single();
     user = { id: session.user.id, username: data?.username ?? session.user.email };
   } else user = null;
-  document.getElementById("btnUser").textContent = user ? "👑 " + user.username : "Anmelden";
+  document.getElementById("btnUser").textContent = user ? "👑 " + user.username : t("auth.login");
 }
 document.getElementById("btnUser").onclick = () => {
   if (!user) return showAuth();
-  sheet.innerHTML = `<button class="close" type="button" onclick="closeSheet()" aria-label="Schließen">✕</button>
-    <h2>Hallo ${esc(user.username)}</h2>
-    <div class="actions"><button type="button" class="btn" id="logout">Abmelden</button></div>`;
+  sheet.innerHTML = `${closeBtn()}
+    <h2>${t("m.user.hello", { u: esc(user.username) })}</h2>
+    <div class="actions"><button type="button" class="btn" id="logout">${t("auth.logout")}</button></div>`;
   sheet.hidden = false;
   document.getElementById("logout").onclick = async () => { await db.auth.signOut(); await refreshUser(); closeSheet(); };
 };
@@ -521,7 +579,7 @@ let adding = false;
 const btnAdd = document.getElementById("btnAdd");
 function setAdding(on) {
   adding = on; document.body.classList.toggle("adding", on); btnAdd.classList.toggle("active", on);
-  status(on ? "Tippe auf die Karte, wo die Toilette ist" : "");
+  status(on ? t("m.status.tapMap") : "");
 }
 btnAdd.onclick = () => {
   if (!user) { showAuth(() => setAdding(true)); return; }
@@ -531,26 +589,26 @@ map.on("click", e => {
   if (!adding) return;
   setAdding(false);
   sheet.innerHTML = `
-    <button class="close" type="button" onclick="closeSheet()" aria-label="Abbrechen">✕</button>
-    <h2>Neuer Thron</h2>
+    ${closeBtn()}
+    <h2>${t("m.add.title")}</h2>
     <form id="addForm">
-      <label for="nName">Name oder Beschreibung</label>
-      <input type="text" id="nName" required maxlength="80" placeholder="z. B. WC im Bahnhof, Untergeschoss">
-      <label class="check"><input type="checkbox" id="nFee"> kostenpflichtig</label>
-      <label class="check"><input type="checkbox" id="nWheel"> rollstuhlgerecht</label>
-      <label class="check"><input type="checkbox" id="nChange"> Wickeltisch</label>
+      <label for="nName">${t("m.add.name")}</label>
+      <input type="text" id="nName" required maxlength="80" placeholder="${t("m.add.placeholder")}">
+      <label class="check"><input type="checkbox" id="nFee"> ${t("m.add.fee")}</label>
+      <label class="check"><input type="checkbox" id="nWheel"> ${t("m.add.wheel")}</label>
+      <label class="check"><input type="checkbox" id="nChange"> ${t("m.add.changing")}</label>
       <p class="error" id="addErr"></p>
-      <div class="actions"><button type="submit" class="btn primary">Toilette speichern</button></div>
+      <div class="actions"><button type="submit" class="btn primary">${t("m.add.save")}</button></div>
     </form>`;
   sheet.hidden = false;
   document.getElementById("addForm").onsubmit = async ev => {
     ev.preventDefault();
     const { data, error } = await db.from("toilets").insert({ name: nName.value.trim(), lat: e.latlng.lat, lon: e.latlng.lng,
       fee: nFee.checked, wheelchair: nWheel.checked, changing_table: nChange.checked }).select().single();
-    if (error) { document.getElementById("addErr").textContent = "Speichern fehlgeschlagen: " + error.message; return; }
-    const t = { id: data.id, lat: data.lat, lon: data.lon, name: data.name, source: "Rate My Throne (von " + user.username + ")",
+    if (error) { document.getElementById("addErr").textContent = t("m.rate.failed", { e: error.message }); return; }
+    const tl = { id: data.id, lat: data.lat, lon: data.lon, name: data.name, source: t("m.toilet.by", { u: user.username }),
       fee: yn(data.fee), wheelchair: yn(data.wheelchair), changing: yn(data.changing_table) };
-    toilets.set(t.id, t); reviews.set(t.id, []); render(); showToilet(t);
+    toilets.set(tl.id, tl); reviews.set(tl.id, []); render(); showToilet(tl);
   };
 });
 
