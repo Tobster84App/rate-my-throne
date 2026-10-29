@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rate My Throne</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+/* Layout: Vollbild-Karte, oben schmale Leiste, unten Werbebanner, Details als Bottom-Sheet */
+:root {
+  --bg: #f6f8f7; --surface: #ffffff; --fg: #1d2a27; --muted: #5d6e69;
+  --accent: #0f7a6c; --accent-fg: #ffffff; --line: #d9e2df; --star: #e0a100; --warn: #b3402f;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #121a18; --surface: #1b2522; --fg: #e6eeeb; --muted: #9db0aa;
+    --accent: #3cc2ae; --accent-fg: #0b1513; --line: #2e3b37; --star: #f2be3a; --warn: #f07b68; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--font); display: flex; flex-direction: column; }
+header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--surface); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+header h1 { font-size: 18px; margin: 0; flex: 1; letter-spacing: .2px; }
+button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); padding: 7px 12px; }
+button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#map { flex: 1; min-height: 0; }
+#status { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); z-index: 500; background: var(--surface); border: 1px solid var(--line); padding: 6px 12px; border-radius: 20px; font-size: 13px; }
+#ad { background: var(--surface); border-top: 1px dashed var(--line); text-align: center; padding: 10px; color: var(--muted); font-size: 12px; }
+#sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; background: var(--surface); border-top: 1px solid var(--line);
+  border-radius: 14px 14px 0 0; max-height: 75%; overflow-y: auto; padding: 16px; box-shadow: 0 -6px 20px rgba(0,0,0,.15); }
+#sheet h2 { margin: 0 0 4px; font-size: 18px; }
+.close { float: right; }
+.muted { color: var(--muted); font-size: 13px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.stars button { border: none; background: none; padding: 0 2px; font-size: 24px; color: var(--line); }
+.stars button.on { color: var(--star); }
+.stars.readonly { color: var(--star); font-size: 15px; }
+label { display: block; margin-top: 10px; font-weight: 600; font-size: 14px; }
+input[type=text], input[type=email], input[type=password], textarea { width: 100%; font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); }
+.check { font-weight: normal; display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+.review { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 8px; }
+.chips span { font-size: 12px; border: 1px solid var(--line); border-radius: 12px; padding: 2px 8px; }
+.error { color: var(--warn); font-size: 13px; }
+.adding #map { cursor: crosshair; }
+</style>
+</head>
+<body>
+<header>
+  <h1>👑 Rate My Throne</h1>
+  <button id="btnLocate" type="button">Mein Standort</button>
+  <button id="btnLoad" type="button">Toiletten hier laden</button>
+  <button id="btnAdd" type="button">+ Toilette</button>
+  <button id="btnUser" type="button" class="primary">Anmelden</button>
+</header>
+<div id="status" hidden></div>
+<div id="map"></div>
+<div id="ad">Werbefläche (Platzhalter)</div>
+<div id="sheet" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+// ===== Verbindung zur Datenbank (Supabase). URL und publishable key dürfen öffentlich sein. =====
+const SUPABASE_URL = "https://bzgeqaseogawdptaqzgq.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Uoawl08FsfsJwdv3eLVV0A_Zh5tT6EE";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let user = null;                 // { id, username } wenn angemeldet
+const toilets = new Map();       // id -> toilet (OSM und eigene)
+const reviews = new Map();       // toiletId -> [review]
+
+const CATS = [
+  { key: "clean", label: "Sauberkeit" },
+  { key: "equip", label: "Ausstattung (Papier, Seife, Trockner)" },
+  { key: "access", label: "Erreichbarkeit / Auffindbarkeit" }
+];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// ===== Karte =====
+const map = L.map("map").setView([52.52, 13.405], 15); // Start: Berlin Mitte
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende'
+}).addTo(map);
+const layer = L.layerGroup().addTo(map);
+
+function status(msg, ms) {
+  const el = document.getElementById("status");
+  el.textContent = msg; el.hidden = !msg;
+  if (ms) setTimeout(() => { if (el.textContent === msg) el.hidden = true; }, ms);
+}
+
+function avg(id) {
+  const list = reviews.get(id) || [];
+  if (!list.length) return null;
+  const sum = list.reduce((s, r) => s + CATS.reduce((a, c) => a + r[c.key], 0) / CATS.length, 0);
+  return sum / list.length;
+}
+
+function markerIcon(id) {
+  const a = avg(id);
+  const color = a == null ? "#7b8a86" : a >= 4 ? "#1e9e5a" : a >= 2.5 ? "#e0a100" : "#c9452f";
+  const text = a == null ? "WC" : a.toFixed(1);
+  return L.divIcon({ className: "", iconSize: [34, 34], iconAnchor: [17, 17],
+    html: `<div style="width:34px;height:34px;border-radius:50%;background:${color};color:#fff;font:600 12px system-ui;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">${text}</div>` });
+}
+
+function render() {
+  layer.clearLayers();
+  for (const t of toilets.values()) {
+    L.marker([t.lat, t.lon], { icon: markerIcon(t.id) }).on("click", () => showToilet(t)).addTo(layer);
+  }
+}
+
+// ===== Daten laden =====
+async function loadOsm(b) {
+  const box = `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`;
+  const q = `[out:json][timeout:25];(node["amenity"="toilets"](${box});way["amenity"="toilets"](${box}););out center tags;`;
+  const res = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: "data=" + encodeURIComponent(q) });
+  if (!res.ok) throw new Error("Toilettendaten: HTTP " + res.status);
+  const data = await res.json();
+  for (const e of data.elements) {
+    const lat = e.lat ?? e.center?.lat, lon = e.lon ?? e.center?.lon;
+    if (lat == null) continue;
+    const tg = e.tags || {};
+    const id = "osm-" + e.type + e.id;
+    toilets.set(id, { id, lat, lon, source: "OpenStreetMap",
+      name: tg.name || tg.operator || "Öffentliche Toilette",
+      fee: tg.fee, wheelchair: tg.wheelchair, changing: tg.changing_table, hours: tg.opening_hours });
+  }
+}
+
+const yn = v => v == null ? undefined : v ? "yes" : "no";
+async function loadOwn(b) {
+  const { data, error } = await db.from("toilets").select("*, profiles(username)")
+    .gte("lat", b.getSouth()).lte("lat", b.getNorth()).gte("lon", b.getWest()).lte("lon", b.getEast());
+  if (error) throw new Error("Eigene Toiletten: " + error.message);
+  for (const t of data) {
+    toilets.set(t.id, { id: t.id, lat: t.lat, lon: t.lon, name: t.name,
+      source: "Rate My Throne (von " + (t.profiles?.username ?? "?") + ")",
+      fee: yn(t.fee), wheelchair: yn(t.wheelchair), changing: yn(t.changing_table) });
+  }
+}
+
+async function loadReviews(ids) {
+  for (let i = 0; i < ids.length; i += 100) {
+    const chunk = ids.slice(i, i + 100);
+    const { data, error } = await db.from("reviews").select("*, profiles(username)").in("toilet_ref", chunk);
+    if (error) throw new Error("Bewertungen: " + error.message);
+    for (const id of chunk) reviews.set(id, []);
+    for (const r of data) reviews.get(r.toilet_ref).push(r);
+  }
+}
+
+async function loadToilets() {
+  if (map.getZoom() < 13) { status("Bitte näher heranzoomen", 2500); return; }
+  const b = map.getBounds();
+  status("Lade Toiletten …");
+  const results = await Promise.allSettled([loadOsm(b), loadOwn(b)]);
+  const failed = results.filter(r => r.status === "rejected").map(r => r.reason.message);
+  try { await loadReviews([...toilets.keys()]); } catch (err) { failed.push(err.message); }
+  render();
+  status(failed.length ? "Laden teilweise fehlgeschlagen: " + failed.join("; ") : toilets.size + " Toiletten", failed.length ? 6000 : 2500);
+}
+
+// ===== Detailansicht & Bewertung =====
+const sheet = document.getElementById("sheet");
+function closeSheet() { sheet.hidden = true; sheet.innerHTML = ""; }
+const yesNo = v => v === "yes" ? "ja" : v === "no" ? "nein" : v ? v : "unbekannt";
+const starsText = n => "★".repeat(Math.round(n)) + "☆".repeat(5 - Math.round(n));
+
+function showToilet(t) {
+  const list = reviews.get(t.id) || [];
+  const a = avg(t.id);
+  sheet.innerHTML = `
+    <button class="close" type="button" onclick="closeSheet()">Schließen</button>
+    <h2>${esc(t.name)}</h2>
+    <div class="muted">Quelle: ${esc(t.source)}${t.hours ? " · Öffnungszeiten: " + esc(t.hours) : ""}</div>
+    <div class="row chips" style="margin-top:8px">
+      <span>Kostenpflichtig: ${esc(yesNo(t.fee))}</span>
+      <span>Rollstuhlgerecht: ${esc(yesNo(t.wheelchair))}</span>
+      <span>Wickeltisch: ${esc(yesNo(t.changing))}</span>
+    </div>
+    <p><strong>${a == null ? "Noch keine Bewertung" : "Gesamt " + a.toFixed(1) + " / 5 (" + list.length + " Bewertung" + (list.length > 1 ? "en" : "") + ")"}</strong></p>
+    ${a == null ? "" : CATS.map(c => {
+      const m = list.reduce((s, r) => s + r[c.key], 0) / list.length;
+      return `<div class="row"><span class="stars readonly">${starsText(m)}</span><span class="muted">${c.label}</span></div>`;
+    }).join("")}
+    <div id="formArea" style="margin-top:12px"></div>
+    <div>${list.slice().sort((x, y) => y.created_at.localeCompare(x.created_at)).map(r => `
+      <div class="review"><strong>${esc(r.profiles?.username ?? "?")}</strong> <span class="muted">${new Date(r.created_at).toLocaleDateString("de-DE")}</span>
+        <div class="muted">${CATS.map(c => c.label.split(" ")[0] + " " + r[c.key]).join(" · ")}${r.free ? " · kostenlos" : ""}${r.barrierfree ? " · barrierefrei" : ""}${r.changing ? " · Wickeltisch" : ""}</div>
+        ${r.comment ? `<div>${esc(r.comment)}</div>` : ""}</div>`).join("")}</div>`;
+  sheet.hidden = false;
+  const area = document.getElementById("formArea");
+  if (!user) {
+    area.innerHTML = `<button type="button" class="primary" id="loginToRate">Zum Bewerten anmelden</button>`;
+    document.getElementById("loginToRate").onclick = () => showAuth(() => showToilet(t));
+  } else if (list.some(r => r.user_id === user.id)) {
+    area.innerHTML = `<p class="muted">Du hast diese Toilette bereits bewertet.</p>`;
+  } else {
+    area.innerHTML = `<button type="button" class="primary" id="rateBtn">Bewerten</button>`;
+    document.getElementById("rateBtn").onclick = () => showRatingForm(t);
+  }
+}
+
+function showRatingForm(t) {
+  const vals = {};
+  const area = document.getElementById("formArea");
+  area.innerHTML = `<form id="rateForm">
+    ${CATS.map(c => `<label>${c.label}</label><div class="stars" data-key="${c.key}">${[1,2,3,4,5].map(n => `<button type="button" data-n="${n}" aria-label="${n} Sterne">★</button>`).join("")}</div>`).join("")}
+    <label class="check"><input type="checkbox" id="fFree"> kostenlos</label>
+    <label class="check"><input type="checkbox" id="fBarrier"> barrierefrei</label>
+    <label class="check"><input type="checkbox" id="fChanging"> Wickeltisch vorhanden</label>
+    <label for="fText">Kommentar (optional)</label>
+    <textarea id="fText" rows="3" maxlength="500"></textarea>
+    <p class="error" id="rateErr"></p>
+    <button type="submit" class="primary">Bewertung speichern</button>
+  </form>`;
+  area.querySelectorAll(".stars").forEach(group => {
+    group.querySelectorAll("button").forEach(btn => btn.onclick = () => {
+      const n = +btn.dataset.n; vals[group.dataset.key] = n;
+      group.querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.n <= n));
+    });
+  });
+  document.getElementById("rateForm").onsubmit = async e => {
+    e.preventDefault();
+    const err = document.getElementById("rateErr");
+    if (CATS.some(c => !vals[c.key])) { err.textContent = "Bitte alle drei Kategorien mit Sternen bewerten."; return; }
+    const { data, error } = await db.from("reviews").insert({ toilet_ref: t.id, ...vals,
+      free: fFree.checked, barrierfree: fBarrier.checked, changing: fChanging.checked,
+      comment: fText.value.trim() || null }).select("*, profiles(username)").single();
+    if (error) { err.textContent = error.code === "23505" ? "Du hast diese Toilette bereits bewertet." : "Speichern fehlgeschlagen: " + error.message; return; }
+    reviews.set(t.id, [...(reviews.get(t.id) || []), data]);
+    render(); showToilet(t);
+  };
+}
+
+// ===== Registrierung / Anmeldung =====
+function showAuth(after, mode = "login") {
+  const reg = mode === "register";
+  sheet.innerHTML = `
+    <button class="close" type="button" onclick="closeSheet()">Schließen</button>
+    <h2>${reg ? "Registrieren" : "Anmelden"}</h2>
+    <form id="authForm">
+      <label for="aMail">E-Mail-Adresse</label><input type="email" id="aMail" required autocomplete="email">
+      ${reg ? `<label for="aUser">Benutzername</label><input type="text" id="aUser" required minlength="3" maxlength="30" autocomplete="username">` : ""}
+      <label for="aPw">Passwort</label><input type="password" id="aPw" required minlength="8" autocomplete="${reg ? "new-password" : "current-password"}">
+      <p class="error" id="authErr"></p>
+      <div class="row"><button type="submit" class="primary">${reg ? "Konto erstellen" : "Anmelden"}</button>
+      <button type="button" id="switchMode">${reg ? "Ich habe schon ein Konto" : "Neues Konto erstellen"}</button></div>
+    </form>`;
+  sheet.hidden = false;
+  document.getElementById("switchMode").onclick = () => showAuth(after, reg ? "login" : "register");
+  document.getElementById("authForm").onsubmit = async e => {
+    e.preventDefault();
+    const err = document.getElementById("authErr");
+    const email = aMail.value.trim(), password = aPw.value;
+    err.textContent = "";
+    if (reg) {
+      const username = aUser.value.trim();
+      const { data: taken } = await db.from("profiles").select("id").ilike("username", username.replace(/[\\%_]/g, "\\$&")).limit(1);
+      if (taken?.length) { err.textContent = "Dieser Benutzername ist schon vergeben."; return; }
+      const { data, error } = await db.auth.signUp({ email, password, options: { data: { username } } });
+      if (error) { err.textContent = "Registrierung fehlgeschlagen: " + error.message; return; }
+      if (!data.session) {
+        sheet.innerHTML = `<button class="close" type="button" onclick="closeSheet()">Schließen</button>
+          <h2>Fast geschafft</h2><p>Wir haben dir eine E-Mail an <strong>${esc(email)}</strong> geschickt. Bestätige deine Adresse über den Link darin und melde dich danach hier an.</p>`;
+        return;
+      }
+    } else {
+      const { error } = await db.auth.signInWithPassword({ email, password });
+      if (error) { err.textContent = error.message === "Email not confirmed" ? "Bitte bestätige zuerst deine E-Mail-Adresse." : "E-Mail oder Passwort ist falsch."; return; }
+    }
+    await refreshUser();
+    after ? after() : closeSheet();
+  };
+}
+
+async function refreshUser() {
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    const { data } = await db.from("profiles").select("username").eq("id", session.user.id).single();
+    user = { id: session.user.id, username: data?.username ?? session.user.email };
+  } else user = null;
+  document.getElementById("btnUser").textContent = user ? "Abmelden (" + user.username + ")" : "Anmelden";
+}
+document.getElementById("btnUser").onclick = async () => {
+  if (user) { await db.auth.signOut(); await refreshUser(); closeSheet(); }
+  else showAuth();
+};
+
+// ===== Toilette hinzufügen =====
+let adding = false;
+document.getElementById("btnAdd").onclick = () => {
+  if (!user) { showAuth(() => document.getElementById("btnAdd").click()); return; }
+  adding = !adding; document.body.classList.toggle("adding", adding);
+  status(adding ? "Tippe auf die Karte, wo die Toilette ist" : "", adding ? 0 : 1);
+};
+map.on("click", e => {
+  if (!adding) return;
+  adding = false; document.body.classList.remove("adding"); status("");
+  sheet.innerHTML = `
+    <button class="close" type="button" onclick="closeSheet()">Abbrechen</button>
+    <h2>Neue Toilette</h2>
+    <form id="addForm">
+      <label for="nName">Name oder Beschreibung</label>
+      <input type="text" id="nName" required maxlength="80" placeholder="z. B. WC im Bahnhof, Untergeschoss">
+      <label class="check"><input type="checkbox" id="nFee"> kostenpflichtig</label>
+      <label class="check"><input type="checkbox" id="nWheel"> rollstuhlgerecht</label>
+      <label class="check"><input type="checkbox" id="nChange"> Wickeltisch</label>
+      <p class="error" id="addErr"></p><button type="submit" class="primary">Toilette speichern</button>
+    </form>`;
+  sheet.hidden = false;
+  document.getElementById("addForm").onsubmit = async ev => {
+    ev.preventDefault();
+    const { data, error } = await db.from("toilets").insert({ name: nName.value.trim(), lat: e.latlng.lat, lon: e.latlng.lng,
+      fee: nFee.checked, wheelchair: nWheel.checked, changing_table: nChange.checked }).select().single();
+    if (error) { document.getElementById("addErr").textContent = "Speichern fehlgeschlagen: " + error.message; return; }
+    const t = { id: data.id, lat: data.lat, lon: data.lon, name: data.name, source: "Rate My Throne (von " + user.username + ")",
+      fee: yn(data.fee), wheelchair: yn(data.wheelchair), changing: yn(data.changing_table) };
+    toilets.set(t.id, t); reviews.set(t.id, []); render(); showToilet(t);
+  };
+});
+
+// ===== Standort =====
+document.getElementById("btnLocate").onclick = () => {
+  if (!navigator.geolocation) { status("Standort wird von diesem Browser nicht unterstützt", 3000); return; }
+  status("Suche Standort …");
+  navigator.geolocation.getCurrentPosition(
+    p => { map.setView([p.coords.latitude, p.coords.longitude], 16); status(""); loadToilets(); },
+    () => status("Standort nicht verfügbar. Du kannst die Karte auch selbst verschieben.", 4000),
+    { enableHighAccuracy: true, timeout: 10000 });
+};
+document.getElementById("btnLoad").onclick = loadToilets;
+
+refreshUser(); loadToilets();
+</script>
+</body>
+</html>
