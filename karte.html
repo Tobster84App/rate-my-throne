@@ -132,6 +132,12 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
 .btn.danger.solid { background: var(--bad); color: #fff; }
 .linkbtn { border: none; background: none; padding: 0; color: var(--muted); text-decoration: underline; font-size: 13px; margin-top: 10px; }
 .ok { color: var(--good); }
+.rev-actions { display: flex; gap: 14px; }
+.rev-actions .linkbtn { margin-top: 4px; }
+.report-form { margin-top: 8px; padding: 10px 12px; background: var(--bg); border-radius: 10px; }
+.report-form label.check { margin-top: 4px; }
+.badge { font-size: 11px; font-weight: 700; color: var(--royal); background: var(--gold); border-radius: 999px; padding: 2px 8px; vertical-align: middle; }
+.report-item { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px; }
 
 /* Handy: Infokarte oben als kompakte Leiste */
 @media (max-width: 640px) {
@@ -205,7 +211,8 @@ const SUPABASE_URL = "https://bzgeqaseogawdptaqzgq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Uoawl08FsfsJwdv3eLVV0A_Zh5tT6EE";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let user = null;                 // { id, username } wenn angemeldet
+let user = null;                 // { id, username, isAdmin } wenn angemeldet
+let myReports = new Set();       // Bewertungen, die ich schon gemeldet habe
 let myPos = null;                // [lat, lon] des Nutzers, sobald bekannt
 let nearestId = null;            // hervorgehobene Toilette
 const toilets = new Map();       // id -> toilet (OSM und eigene)
@@ -474,10 +481,12 @@ function showToilet(tl, dist) {
       <span id="formArea"></span>
     </div>
     <div>${list.slice().sort((x, y) => y.created_at.localeCompare(x.created_at)).map(r => `
-      <div class="review"><strong>${esc(r.profiles?.username ?? "?")}</strong> <span class="muted">${new Date(r.created_at).toLocaleDateString(LOCALE)}</span>
+      <div class="review" data-id="${r.id}"><strong>${esc(r.profiles?.username ?? "?")}</strong> <span class="muted">${new Date(r.created_at).toLocaleDateString(LOCALE)}</span>
         <div class="muted">${CATS.map(c => c.label + " " + r[c.key]).join(" · ")}${r.free ? " · " + t("m.review.free") : ""}${r.barrierfree ? " · " + t("m.review.barrierfree") : ""}${r.changing ? " · " + t("m.review.changing") : ""}</div>
-        ${r.comment ? `<p>${esc(r.comment)}</p>` : ""}</div>`).join("")}</div>`;
+        ${r.comment ? `<p>${esc(r.comment)}</p>` : ""}
+        ${reviewActions(r)}</div>`).join("")}</div>`;
   sheet.hidden = false;
+  bindReviewActions(tl);
   const area = document.getElementById("formArea");
   if (!user) {
     area.innerHTML = `<button type="button" class="btn primary" id="loginToRate">${t("m.detail.loginToRate")}</button>`;
@@ -488,6 +497,111 @@ function showToilet(tl, dist) {
     area.innerHTML = `<button type="button" class="btn primary" id="rateBtn">${t("m.detail.rate")}</button>`;
     document.getElementById("rateBtn").onclick = () => showRatingForm(tl);
   }
+}
+
+// ===== Moderation: eigene Bewertungen löschen, fremde melden; Admins dürfen alles löschen =====
+function reviewActions(r) {
+  if (!user) return "";
+  const own = r.user_id === user.id;
+  const parts = [];
+  if (own || user.isAdmin) parts.push(`<button type="button" class="linkbtn" data-del="${r.id}">${t("mod.delete")}</button>`);
+  if (!own) parts.push(myReports.has(r.id) ? `<span class="muted">${t("mod.reported")}</span>`
+                                            : `<button type="button" class="linkbtn" data-rep="${r.id}">${t("mod.report")}</button>`);
+  return `<div class="rev-actions">${parts.join("")}</div>`;
+}
+
+// Löscht eine Bewertung; gibt eine Fehlermeldung zurück oder null
+async function deleteReview(id) {
+  const { data, error } = await db.from("reviews").delete().eq("id", id).select("id");
+  if (error) return t("mod.deleteFailed", { e: error.message });
+  if (!data.length) return t("mod.notAllowed");   // von den Zugriffsregeln abgelehnt
+  for (const [key, list] of reviews) reviews.set(key, list.filter(r => r.id !== id));
+  render();
+  return null;
+}
+
+function bindReviewActions(tl) {
+  sheet.querySelectorAll("[data-del]").forEach(btn => btn.onclick = async () => {
+    // Erster Klick fragt nach, zweiter löscht
+    if (!btn.dataset.sure) { btn.dataset.sure = "1"; btn.textContent = t("mod.deleteSure"); btn.style.color = "var(--bad)"; return; }
+    const msg = await deleteReview(+btn.dataset.del);
+    if (msg) { btn.textContent = msg; return; }
+    showToilet(tl);
+  });
+  sheet.querySelectorAll("[data-rep]").forEach(btn => btn.onclick = () => {
+    const box = btn.closest(".review");
+    if (box.querySelector(".report-form")) return;
+    const id = +btn.dataset.rep;
+    const form = document.createElement("form");
+    form.className = "report-form";
+    form.innerHTML = `<strong>${t("mod.reportTitle")}</strong>
+      ${["offensive", "spam", "wrong", "other"].map((k, i) => `<label class="check"><input type="radio" name="reason" value="${k}" ${i ? "" : "checked"}> ${t("mod.reason." + k)}</label>`).join("")}
+      <label for="rNote${id}">${t("mod.note")}</label><input type="text" id="rNote${id}" maxlength="300">
+      <p class="error"></p>
+      <div class="actions"><button type="submit" class="btn primary">${t("mod.send")}</button>
+      <button type="button" class="btn" data-cancel>${t("cancel")}</button></div>`;
+    box.append(form);
+    form.querySelector("[data-cancel]").onclick = () => form.remove();
+    form.onsubmit = async e => {
+      e.preventDefault();
+      const { error } = await db.from("review_reports").insert({ review_id: id,
+        reason: form.reason.value, note: form.querySelector("input[type=text]").value.trim() || null });
+      if (error && error.code !== "23505") { form.querySelector(".error").textContent = t("mod.reportFailed", { e: error.message }); return; }
+      myReports.add(id);
+      showToilet(tl);
+    };
+  });
+}
+
+// Admin: offene Meldungen ansehen und bearbeiten
+async function showReports() {
+  const { data, error } = await db.from("review_reports")
+    .select("id, reason, note, review_id, reviews(id, toilet_ref, comment, user_id, profiles(username))")
+    .order("created_at", { ascending: false });
+  const groups = new Map();
+  for (const rep of data ?? []) {
+    if (!rep.reviews) continue;
+    const g = groups.get(rep.review_id) ?? { review: rep.reviews, reports: [] };
+    g.reports.push(rep); groups.set(rep.review_id, g);
+  }
+  sheet.innerHTML = `${closeBtn()}
+    <h2>${t("mod.reportsTitle")}</h2>
+    ${error ? `<p class="error">${esc(error.message)}</p>` : groups.size ? "" : `<p class="muted empty">${throneMark}<span>${t("mod.noReports")}</span></p>`}
+    ${[...groups.values()].map(({ review: r, reports }) => `
+      <div class="report-item" data-review="${r.id}">
+        <strong>${esc(r.profiles?.username ?? "?")}</strong> <span class="muted">· ${t("mod.reportCount", { n: reports.length })}</span>
+        <p>${r.comment ? esc(r.comment) : `<span class="muted">${t("mod.noComment")}</span>`}</p>
+        <div class="muted">${reports.map(x => t("mod.reason." + x.reason) + (x.note ? ": „" + esc(x.note) + "“" : "")).join(" · ")}</div>
+        <p class="error"></p>
+        <div class="actions"><button type="button" class="btn danger solid" data-act="delete">${t("mod.deleteReview")}</button>
+        <button type="button" class="btn" data-act="dismiss">${t("mod.dismiss")}</button>
+        <button type="button" class="btn" data-act="show" data-ref="${esc(r.toilet_ref)}">${t("mod.show")}</button></div>
+      </div>`).join("")}`;
+  sheet.hidden = false;
+  sheet.querySelectorAll(".report-item").forEach(item => {
+    const id = +item.dataset.review, err = item.querySelector(".error");
+    item.querySelector('[data-act="delete"]').onclick = async () => {
+      const msg = await deleteReview(id);   // Meldungen werden mitgelöscht
+      if (msg) err.textContent = msg; else { item.remove(); refreshUser(); }
+    };
+    item.querySelector('[data-act="dismiss"]').onclick = async () => {
+      const { error } = await db.from("review_reports").delete().eq("review_id", id);
+      if (error) err.textContent = error.message; else { item.remove(); refreshUser(); }
+    };
+    item.querySelector('[data-act="show"]').onclick = async e => {
+      const ref = e.target.dataset.ref;
+      const { data: row } = ref.startsWith("osm-")
+        ? await db.from("osm_toilets").select("id,lat,lon").eq("id", ref).maybeSingle()
+        : await db.from("toilets").select("id,lat,lon").eq("id", ref).maybeSingle();
+      if (!row) return;
+      closeSheet();
+      map.setView([row.lat, row.lon], 18, { animate: false });
+      clearTimeout(moveTimer);
+      await loadToilets();
+      const tl = toilets.get(ref);
+      if (tl) showToilet(tl);
+    };
+  });
 }
 
 function showRatingForm(tl) {
@@ -571,23 +685,33 @@ function showAuth(after, mode = "login") {
 
 async function refreshUser() {
   const { data: { session } } = await db.auth.getSession();
+  myReports = new Set();
   if (session) {
-    const { data } = await db.from("profiles").select("username").eq("id", session.user.id).single();
-    user = { id: session.user.id, username: data?.username ?? session.user.email };
+    const { data } = await db.from("profiles").select("username,is_admin").eq("id", session.user.id).single();
+    user = { id: session.user.id, username: data?.username ?? session.user.email, isAdmin: !!data?.is_admin, openReports: 0 };
+    const { data: mine } = await db.from("review_reports").select("review_id").eq("reporter", user.id);
+    (mine ?? []).forEach(r => myReports.add(r.review_id));
+    if (user.isAdmin) {
+      const { data: all } = await db.from("review_reports").select("review_id");
+      user.openReports = new Set((all ?? []).map(r => r.review_id)).size;
+    }
   } else user = null;
-  document.getElementById("btnUser").textContent = user ? "👑 " + user.username : t("auth.login");
+  const btn = document.getElementById("btnUser");
+  btn.textContent = user ? "👑 " + user.username + (user.openReports ? " (" + user.openReports + ")" : "") : t("auth.login");
 }
 document.getElementById("btnUser").onclick = () => {
   if (!user) return showAuth();
   sheet.innerHTML = `${closeBtn()}
-    <h2 class="hello">${throneMark}${t("m.user.hello", { u: esc(user.username) })}</h2>
-    <div class="actions"><button type="button" class="btn" id="logout">${t("auth.logout")}</button>
+    <h2 class="hello">${throneMark}${t("m.user.hello", { u: esc(user.username) })}${user.isAdmin ? ` <span class="badge">${t("mod.admin")}</span>` : ""}</h2>
+    <div class="actions">${user.isAdmin ? `<button type="button" class="btn primary" id="reports">${t("mod.reports", { n: user.openReports })}</button>` : ""}
+    <button type="button" class="btn" id="logout">${t("auth.logout")}</button>
     <button type="button" class="btn" id="changePw">${t("acc.changePw")}</button>
     <button type="button" class="btn danger" id="delAcc">${t("acc.delete")}</button></div>`;
   sheet.hidden = false;
   document.getElementById("logout").onclick = async () => { await db.auth.signOut(); await refreshUser(); closeSheet(); };
   document.getElementById("changePw").onclick = showNewPassword;
   document.getElementById("delAcc").onclick = showDeleteAccount;
+  if (user.isAdmin) document.getElementById("reports").onclick = showReports;
 };
 
 // ===== Passwort vergessen / neues Passwort / Konto löschen =====
