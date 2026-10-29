@@ -24,6 +24,7 @@ Stand: 29.10.2026 · Version 0.4
 
 ## Toiletten-Daten (seit 29.10.2026)
 - OSM-Toiletten liegen in unserer Datenbank (Tabelle osm_toilets), die App fragt Overpass nicht mehr direkt
-- Import: Edge Function `osm-sync` (Code in supabase/functions/osm-sync), Zeitplan alle 2 Min., Kacheln von 1°
-- Deutschland ist vorgemerkt; neue Gegenden weltweit werden beim ersten Besuch automatisch nachgeladen
-- Aktualisierung jeder Kachel nach 7 Tagen
+- Import läuft in der Datenbank selbst (pg_net + pg_cron, alle 20 Sekunden, Kacheln von 1°), Skript: supabase/migrations/20261029_osm_import_in_db.sql
+- Deutschland ist vorgemerkt; neue Gegenden weltweit fordert die App beim ersten Besuch an (Funktion request_osm_tiles)
+- Ist Overpass überlastet, wird die Kachel nach 10 Minuten erneut versucht; Aktualisierung jeder Kachel nach 7 Tagen
+- Die Edge Function osm-sync wird nicht mehr benutzt (Overpass lehnt ihre Anfragen mit HTTP 406 ab) und kann im Supabase-Dashboard gelöscht werden
