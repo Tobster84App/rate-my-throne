@@ -362,8 +362,15 @@ async function ensureImported(bounds) {
   const missing = keys.filter(k => !ok.has(k));
   if (!missing.length) return {};
   status(t("m.status.importing"));
-  const { data } = await db.functions.invoke("osm-sync", { body: { tiles: missing } });
-  const done = new Set((data?.done ?? []).filter(d => !d.error).map(d => d.key));
+  await db.rpc("request_osm_tiles", { keys: missing });
+  // Die Datenbank holt die Daten im Hintergrund; alle 5 s nachsehen, höchstens 90 s lang
+  const done = new Set();
+  for (let i = 0; i < 18 && done.size < missing.length; i++) {
+    await new Promise(res => setTimeout(res, 5000));
+    const { data } = await db.from("osm_tiles").select("key,status").in("key", missing);
+    (data ?? []).filter(r => r.status === "ok").forEach(r => done.add(r.key));
+    if ((data ?? []).length === missing.length && data.every(r => r.status === "ok" || r.status === "error")) break;
+  }
   const notDone = missing.filter(k => !done.has(k));
   if (notDone.length) {
     // Läuft gerade woanders oder ist fehlgeschlagen: später nochmal versuchen
