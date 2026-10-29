@@ -124,6 +124,8 @@ input { width: 100%; font: inherit; font-size: 16px; padding: 12px 14px; border-
 .error { color: var(--warn); font-size: 14px; min-height: 1.2em; margin: 10px 0 0; }
 .hint { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
 #signedIn p { margin: 0 0 8px; }
+.linkbtn { border: none; background: none; padding: 0; margin-top: 10px; color: var(--muted); text-decoration: underline; font-size: 13px; }
+.hint.ok { color: var(--good); }
 
 /* FAQ */
 .faq { display: grid; gap: 12px; max-width: 760px; }
@@ -260,11 +262,14 @@ footer a { color: var(--muted); }
               <label for="aUser" data-i18n="auth.username"></label>
               <input type="text" id="aUser" required minlength="3" maxlength="30" autocomplete="username">
             </div>
-            <label for="aPw" data-i18n="auth.password"></label>
-            <input type="password" id="aPw" required minlength="8" autocomplete="new-password">
+            <div id="pwField">
+              <label for="aPw" data-i18n="auth.password"></label>
+              <input type="password" id="aPw" required minlength="8" autocomplete="new-password">
+            </div>
             <p class="error" id="authErr"></p>
             <button type="submit" class="btn royal" id="authSubmit" data-i18n="auth.register"></button>
             <p class="hint" id="authHint" data-i18n="h.join.hint"></p>
+            <button type="button" class="linkbtn" id="forgotLink" data-i18n="auth.forgot" hidden></button>
           </form>
         </div>
         <div id="signedIn" hidden>
@@ -326,19 +331,26 @@ async function loadStats() {
 }
 
 let mode = "register";
+// Modi: register, login, forgot (Passwort-zurücksetzen-Link anfordern)
 function setMode(m) {
   mode = m;
-  const reg = m === "register";
+  const reg = m === "register", forgot = m === "forgot";
   $("tabRegister").setAttribute("aria-selected", reg);
   $("tabLogin").setAttribute("aria-selected", !reg);
   $("userField").hidden = !reg;
   $("aUser").required = reg;
+  $("pwField").hidden = forgot;
+  $("aPw").required = !forgot;
   $("aPw").autocomplete = reg ? "new-password" : "current-password";
-  $("authSubmit").textContent = reg ? t("auth.register") : t("auth.login");
-  $("authHint").hidden = !reg;
-  $("authHint").textContent = t("h.join.hint");
+  $("authSubmit").textContent = reg ? t("auth.register") : forgot ? t("auth.resetSend") : t("auth.login");
+  $("authHint").hidden = !(reg || forgot);
+  $("authHint").className = "hint";
+  $("authHint").textContent = forgot ? t("auth.resetText") : t("h.join.hint");
+  $("forgotLink").hidden = reg;
+  $("forgotLink").textContent = forgot ? t("auth.back") : t("auth.forgot");
   $("authErr").textContent = "";
 }
+$("forgotLink").onclick = () => setMode(mode === "forgot" ? "login" : "forgot");
 $("tabRegister").onclick = () => setMode("register");
 $("tabLogin").onclick = () => setMode("login");
 $("navJoin").onclick = () => { if (!$("authBox").hidden) setMode("login"); };
@@ -349,6 +361,14 @@ $("authForm").onsubmit = async e => {
   err.textContent = "";
   $("authSubmit").disabled = true;
   try {
+    if (mode === "forgot") {
+      // Der Link in der E-Mail führt auf die Karte; dort wird das neue Passwort abgefragt
+      const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: new URL("karte.html", location.href).href });
+      $("authHint").hidden = false;
+      $("authHint").className = error ? "hint" : "hint ok";
+      $("authHint").textContent = error ? t("auth.resetFailed", { e: error.message }) : t("auth.resetSent");
+      return;
+    }
     if (mode === "register") {
       const username = $("aUser").value.trim();
       const { data: taken } = await db.from("profiles").select("id").ilike("username", username.replace(/[\\%_]/g, "\\$&")).limit(1);

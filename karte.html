@@ -128,6 +128,10 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
 .empty svg { width: 32px; height: 32px; flex: none; }
 #sheet h2.hello { display: flex; gap: 10px; align-items: center; }
 .hello svg { width: 30px; height: 30px; flex: none; }
+.btn.danger { color: var(--bad); border-color: var(--bad); background: transparent; }
+.btn.danger.solid { background: var(--bad); color: #fff; }
+.linkbtn { border: none; background: none; padding: 0; color: var(--muted); text-decoration: underline; font-size: 13px; margin-top: 10px; }
+.ok { color: var(--good); }
 
 /* Handy: Infokarte oben als kompakte Leiste */
 @media (max-width: 640px) {
@@ -325,7 +329,7 @@ async function loadOwn(box) {
   if (error) throw new Error(t("m.err.own") + ": " + error.message);
   for (const tl of data) {
     toilets.set(tl.id, { id: tl.id, lat: tl.lat, lon: tl.lon, name: tl.name,
-      source: t("m.toilet.by", { u: tl.profiles?.username ?? "?" }),
+      source: tl.profiles?.username ? t("m.toilet.by", { u: tl.profiles.username }) : t("m.toilet.community"),
       fee: yn(tl.fee), wheelchair: yn(tl.wheelchair), changing: yn(tl.changing_table) });
   }
 }
@@ -536,9 +540,11 @@ function showAuth(after, mode = "login") {
       <p class="error" id="authErr"></p>
       <div class="actions"><button type="submit" class="btn primary">${reg ? t("auth.register") : t("auth.login")}</button>
       <button type="button" class="btn" id="switchMode">${reg ? t("auth.haveAccount") : t("auth.newAccount")}</button></div>
+      ${reg ? "" : `<button type="button" class="linkbtn" id="forgot">${t("auth.forgot")}</button>`}
     </form>`;
   sheet.hidden = false;
   document.getElementById("switchMode").onclick = () => showAuth(after, reg ? "login" : "register");
+  if (!reg) document.getElementById("forgot").onclick = () => showForgot(after);
   document.getElementById("authForm").onsubmit = async e => {
     e.preventDefault();
     const err = document.getElementById("authErr");
@@ -575,10 +581,84 @@ document.getElementById("btnUser").onclick = () => {
   if (!user) return showAuth();
   sheet.innerHTML = `${closeBtn()}
     <h2 class="hello">${throneMark}${t("m.user.hello", { u: esc(user.username) })}</h2>
-    <div class="actions"><button type="button" class="btn" id="logout">${t("auth.logout")}</button></div>`;
+    <div class="actions"><button type="button" class="btn" id="logout">${t("auth.logout")}</button>
+    <button type="button" class="btn" id="changePw">${t("acc.changePw")}</button>
+    <button type="button" class="btn danger" id="delAcc">${t("acc.delete")}</button></div>`;
   sheet.hidden = false;
   document.getElementById("logout").onclick = async () => { await db.auth.signOut(); await refreshUser(); closeSheet(); };
+  document.getElementById("changePw").onclick = showNewPassword;
+  document.getElementById("delAcc").onclick = showDeleteAccount;
 };
+
+// ===== Passwort vergessen / neues Passwort / Konto löschen =====
+function showForgot(after) {
+  sheet.innerHTML = `
+    ${closeBtn()}
+    <h2>${t("auth.resetTitle")}</h2>
+    <p class="muted">${t("auth.resetText")}</p>
+    <form id="forgotForm">
+      <label for="fMail">${t("auth.email")}</label><input type="email" id="fMail" required autocomplete="email">
+      <p class="error" id="forgotMsg"></p>
+      <div class="actions"><button type="submit" class="btn primary">${t("auth.resetSend")}</button>
+      <button type="button" class="btn" id="backLogin">${t("auth.back")}</button></div>
+    </form>`;
+  sheet.hidden = false;
+  document.getElementById("backLogin").onclick = () => showAuth(after);
+  document.getElementById("forgotForm").onsubmit = async e => {
+    e.preventDefault();
+    const msg = document.getElementById("forgotMsg");
+    // Der Link in der E-Mail führt zurück auf diese Seite; dort erscheint dann das Formular für das neue Passwort
+    const { error } = await db.auth.resetPasswordForEmail(fMail.value.trim(), { redirectTo: location.origin + location.pathname });
+    msg.className = error ? "error" : "ok";
+    msg.textContent = error ? t("auth.resetFailed", { e: error.message }) : t("auth.resetSent");
+  };
+}
+
+function showNewPassword() {
+  sheet.innerHTML = `
+    ${closeBtn()}
+    <h2>${t("auth.newPwTitle")}</h2>
+    <form id="newPwForm">
+      <label for="nPw">${t("auth.newPw")}</label><input type="password" id="nPw" required minlength="8" autocomplete="new-password">
+      <p class="error" id="newPwMsg"></p>
+      <div class="actions"><button type="submit" class="btn primary">${t("auth.newPwSave")}</button></div>
+    </form>`;
+  sheet.hidden = false;
+  document.getElementById("newPwForm").onsubmit = async e => {
+    e.preventDefault();
+    const msg = document.getElementById("newPwMsg");
+    const { error } = await db.auth.updateUser({ password: nPw.value });
+    msg.className = error ? "error" : "ok";
+    msg.textContent = error ? t("auth.newPwFailed", { e: error.message }) : t("auth.newPwDone");
+  };
+}
+
+function showDeleteAccount() {
+  sheet.innerHTML = `
+    ${closeBtn()}
+    <h2>${t("acc.deleteTitle")}</h2>
+    <p>${t("acc.deleteText")}</p>
+    <p class="error" id="delMsg"></p>
+    <div class="actions"><button type="button" class="btn danger solid" id="delYes">${t("acc.deleteConfirm")}</button>
+    <button type="button" class="btn" id="delNo">${t("cancel")}</button></div>`;
+  sheet.hidden = false;
+  document.getElementById("delNo").onclick = () => document.getElementById("btnUser").click();
+  document.getElementById("delYes").onclick = async () => {
+    const { error } = await db.rpc("delete_my_account");
+    if (error) { document.getElementById("delMsg").textContent = t("acc.deleteFailed", { e: error.message }); return; }
+    const gone = user.id;
+    await db.auth.signOut();
+    await refreshUser();
+    for (const [id, list] of reviews) reviews.set(id, list.filter(r => r.user_id !== gone));
+    render();
+    sheet.innerHTML = `${closeBtn()}<h2 class="hello">${throneMark}${t("acc.deleted")}</h2>`;
+  };
+}
+
+// Kommt jemand über den Link aus der „Passwort vergessen“-E-Mail, gleich das neue Passwort abfragen
+db.auth.onAuthStateChange(event => {
+  if (event === "PASSWORD_RECOVERY") setTimeout(async () => { await refreshUser(); showNewPassword(); }, 0);
+});
 
 // ===== Toilette hinzufügen =====
 let adding = false;
