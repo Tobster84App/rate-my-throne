@@ -37,11 +37,11 @@ header { background: var(--royal); color: #fff; display: flex; align-items: cent
   padding: calc(10px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); z-index: 1100; }
 .brand { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; color: inherit; text-decoration: none; }
 .brand svg { width: 34px; height: 34px; flex: none; }
-.brand h1 { font: 800 21px/1 var(--display); margin: 0; letter-spacing: -.3px; white-space: nowrap; }
+.brand h1 { font: 800 21px/1 var(--display); margin: 0; letter-spacing: -.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brand h1 span { color: var(--gold); }
-.lang { color: rgba(255,255,255,.85); text-decoration: none; font-weight: 700; font-size: 13px; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: 6px 10px; }
+.lang { flex: none; color: rgba(255,255,255,.85); text-decoration: none; font-weight: 700; font-size: 13px; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; padding: 6px 10px; }
 .lang:hover { color: #fff; border-color: #fff; }
-#btnUser { background: var(--gold); color: var(--royal); border: none; border-radius: 999px; padding: 8px 16px; font-weight: 700; white-space: nowrap; max-width: 55vw; overflow: hidden; text-overflow: ellipsis; }
+#btnUser { flex: none; background: var(--gold); color: var(--royal); border: none; border-radius: 999px; padding: 8px 16px; font-weight: 700; white-space: nowrap; max-width: 38vw; overflow: hidden; text-overflow: ellipsis; }
 
 /* Karte */
 main { position: relative; flex: 1; min-height: 0; }
@@ -125,7 +125,7 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
 .adding #map { cursor: crosshair; }
 .empty { display: flex; gap: 10px; align-items: center; }
 .empty svg { width: 32px; height: 32px; flex: none; }
-#sheet h2.hello { display: flex; gap: 10px; align-items: center; }
+#sheet h2.hello { display: flex; gap: 10px; align-items: center; overflow-wrap: anywhere; }
 .hello svg { width: 30px; height: 30px; flex: none; }
 .btn.danger { color: var(--bad); border-color: var(--bad); background: transparent; }
 .btn.danger.solid { background: var(--bad); color: #fff; }
@@ -139,7 +139,7 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
 .trend .up { color: var(--good); font-weight: 700; } .trend .down { color: var(--bad); font-weight: 700; }
 .report-form { margin-top: 8px; padding: 10px 12px; background: var(--bg); border-radius: 10px; }
 .report-form label.check { margin-top: 4px; }
-.badge { font-size: 11px; font-weight: 700; color: var(--royal); background: var(--gold); border-radius: 999px; padding: 2px 8px; vertical-align: middle; }
+.badge { display: inline-block; font-size: 12px; font-weight: 700; color: var(--royal); background: var(--gold); border-radius: 999px; padding: 3px 10px; margin: 2px 0 6px; }
 .report-item { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px; }
 
 /* Handy: Infokarte oben als kompakte Leiste */
@@ -672,7 +672,7 @@ function showAuth(after, mode = "login") {
     <h2>${reg ? t("auth.register") : t("auth.login")}</h2>
     <form id="authForm">
       <label for="aMail">${t("auth.email")}</label><input type="email" id="aMail" required autocomplete="email">
-      ${reg ? `<label for="aUser">${t("auth.username")}</label><input type="text" id="aUser" required minlength="3" maxlength="30" autocomplete="username">` : ""}
+      ${reg ? `<label for="aUser">${t("auth.username")}</label><input type="text" id="aUser" required minlength="3" maxlength="30" pattern="[^@]+" autocomplete="username">` : ""}
       <label for="aPw">${t("auth.password")}</label><input type="password" id="aPw" required minlength="8" autocomplete="${reg ? "new-password" : "current-password"}">
       <p class="error" id="authErr"></p>
       <div class="actions"><button type="submit" class="btn primary">${reg ? t("auth.register") : t("auth.login")}</button>
@@ -725,14 +725,17 @@ async function refreshUser() {
 document.getElementById("btnUser").onclick = () => {
   if (!user) return showAuth();
   sheet.innerHTML = `${closeBtn()}
-    <h2 class="hello">${throneMark}${t("m.user.hello", { u: esc(user.username) })}${user.isAdmin ? ` <span class="badge">${t("mod.admin")}</span>` : ""}</h2>
+    <h2 class="hello">${throneMark}${t("m.user.hello", { u: esc(user.username) })}</h2>
+    ${user.isAdmin ? `<span class="badge">👑 ${t("mod.admin")}</span>` : ""}
     <div class="actions">${user.isAdmin ? `<button type="button" class="btn primary" id="reports">${t("mod.reports", { n: user.openReports })}</button>` : ""}
     <button type="button" class="btn" id="logout">${t("auth.logout")}</button>
+    <button type="button" class="btn" id="rename">${t("acc.rename")}</button>
     <button type="button" class="btn" id="changePw">${t("acc.changePw")}</button>
     <button type="button" class="btn danger" id="delAcc">${t("acc.delete")}</button></div>`;
   sheet.hidden = false;
   document.getElementById("logout").onclick = async () => { await db.auth.signOut(); await refreshUser(); closeSheet(); };
   document.getElementById("changePw").onclick = showNewPassword;
+  document.getElementById("rename").onclick = showRename;
   document.getElementById("delAcc").onclick = showDeleteAccount;
   if (user.isAdmin) document.getElementById("reports").onclick = showReports;
 };
@@ -758,6 +761,38 @@ function showForgot(after) {
     const { error } = await db.auth.resetPasswordForEmail(fMail.value.trim(), { redirectTo: location.origin + location.pathname });
     msg.className = error ? "error" : "ok";
     msg.textContent = error ? t("auth.resetFailed", { e: error.message }) : t("auth.resetSent");
+  };
+}
+
+function showRename() {
+  sheet.innerHTML = `
+    ${closeBtn()}
+    <h2>${t("acc.rename")}</h2>
+    <form id="renameForm">
+      <label for="rName">${t("acc.newName")}</label>
+      <input type="text" id="rName" required minlength="3" maxlength="30" pattern="[^@]+" autocomplete="username" value="${esc(user.username.includes("@") ? "" : user.username)}">
+      <p class="muted">${t("acc.renameHint")}</p>
+      <p class="error" id="renameMsg"></p>
+      <div class="actions"><button type="submit" class="btn primary">${t("acc.renameSave")}</button>
+      <button type="button" class="btn" id="renameBack">${t("cancel")}</button></div>
+    </form>`;
+  sheet.hidden = false;
+  document.getElementById("renameBack").onclick = () => document.getElementById("btnUser").click();
+  document.getElementById("renameForm").onsubmit = async e => {
+    e.preventDefault();
+    const msg = document.getElementById("renameMsg");
+    const { data, error } = await db.rpc("set_username", { new_name: rName.value });
+    if (error) {
+      const code = ["taken", "length", "at_sign"].find(c => error.message.includes(c));
+      msg.className = "error";
+      msg.textContent = code ? t({ taken: "acc.err.taken", length: "acc.err.length", at_sign: "acc.err.at" }[code]) : t("acc.err.other", { e: error.message });
+      return;
+    }
+    // Eigener Name in schon geladenen Bewertungen sofort aktualisieren
+    for (const list of reviews.values()) list.forEach(r => { if (r.user_id === user.id && r.profiles) r.profiles.username = data; });
+    await refreshUser();
+    msg.className = "ok";
+    msg.textContent = t("acc.renamed", { u: data });
   };
 }
 

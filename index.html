@@ -258,7 +258,7 @@ footer a { color: var(--muted); }
             <input type="email" id="aMail" required autocomplete="email">
             <div id="userField">
               <label for="aUser" data-i18n="auth.username"></label>
-              <input type="text" id="aUser" required minlength="3" maxlength="30" autocomplete="username">
+              <input type="text" id="aUser" required minlength="3" maxlength="30" pattern="[^@]+" autocomplete="username">
             </div>
             <div id="pwField">
               <label for="aPw" data-i18n="auth.password"></label>
