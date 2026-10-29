@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2a1f4d">
+<title>Impressum · Rate My Throne</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="vendor/fonts.css">
+<link rel="stylesheet" href="legal.css">
+</head>
+<body>
+<header>
+  <a class="brand" href="./"><svg viewBox="86 100 340 332" aria-hidden="true"><path d="M120 300 104 150l84 70 68-110 68 110 84-70-16 150z" fill="#e3b341"/><ellipse cx="256" cy="330" rx="142" ry="74" fill="none" stroke="#e3b341" stroke-width="36"/></svg>Rate My&nbsp;<span>Throne</span></a>
+  <a class="lang" data-lang-switch href="?lang=en">EN</a>
+</header>
+
+<main>
+  <!-- Platzhalter (gelb markiert) vor dem Start durch die echten Angaben ersetzen -->
+  <article lang="de" data-show="de">
+    <h1>Impressum</h1>
+    <div class="card">
+      <h2>Angaben gemäß § 5 DDG</h2>
+      <p><span class="todo">[Vorname Nachname]</span><br>
+      <span class="todo">[Straße Hausnummer]</span><br>
+      <span class="todo">[PLZ Ort]</span><br>
+      Deutschland</p>
+
+      <h2>Kontakt</h2>
+      <p>E-Mail: <span class="todo">[kontakt@…]</span></p>
+
+      <h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2>
+      <p><span class="todo">[Vorname Nachname]</span>, Anschrift wie oben</p>
+    </div>
+
+    <h2>Bewertungen und Kommentare</h2>
+    <p>Bewertungen und Kommentare auf Rate My Throne stammen von den Nutzerinnen und Nutzern und geben deren Meinung wieder. Wir prüfen sie nicht vor der Veröffentlichung. Rechtswidrige Inhalte entfernen wir, sobald wir davon erfahren. Unangemessene Bewertungen können direkt in der App über „Melden“ gemeldet werden.</p>
+
+    <h2>Kartendaten</h2>
+    <p>Standorte öffentlicher Toiletten und Kartenbilder: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-Mitwirkende, verfügbar unter der Open Database License (ODbL).</p>
+
+    <h2>Haftung für Links</h2>
+    <p>Die App enthält Links zu Websites Dritter, etwa zu Google Maps. Auf deren Inhalte haben wir keinen Einfluss; dafür ist der jeweilige Anbieter verantwortlich.</p>
+
+    <h2>Verbraucherstreitbeilegung</h2>
+    <p>Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+
+    <nav class="back"><a href="./">Startseite</a><a href="karte.html">Karte</a><a href="datenschutz.html">Datenschutz</a></nav>
+  </article>
+
+  <article lang="en" data-show="en" hidden>
+    <h1>Legal notice</h1>
+    <p class="muted">Translation for convenience. The German version is legally binding.</p>
+    <div class="card">
+      <h2>Information according to § 5 DDG (German Digital Services Act)</h2>
+      <p><span class="todo">[First name Last name]</span><br>
+      <span class="todo">[Street and number]</span><br>
+      <span class="todo">[Postcode City]</span><br>
+      Germany</p>
+
+      <h2>Contact</h2>
+      <p>Email: <span class="todo">[contact@…]</span></p>
+
+      <h2>Responsible for content according to § 18 (2) MStV</h2>
+      <p><span class="todo">[First name Last name]</span>, address as above</p>
+    </div>
+
+    <h2>Reviews and comments</h2>
+    <p>Reviews and comments on Rate My Throne are written by users and reflect their opinions. We do not check them before publication. We remove unlawful content as soon as we become aware of it. Inappropriate reviews can be reported directly in the app via “Report”.</p>
+
+    <h2>Map data</h2>
+    <p>Locations of public toilets and map images: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, available under the Open Database License (ODbL).</p>
+
+    <h2>Links</h2>
+    <p>The app contains links to third-party websites such as Google Maps. We have no influence on their content; the respective provider is responsible for it.</p>
+
+    <h2>Consumer dispute resolution</h2>
+    <p>We are neither willing nor obliged to take part in dispute resolution proceedings before a consumer arbitration board.</p>
+
+    <nav class="back"><a href="./">Home</a><a href="karte.html">Map</a><a href="datenschutz.html">Privacy policy</a></nav>
+  </article>
+</main>
+
+<script src="i18n.js"></script>
+<script>
+applyI18n();
+document.querySelectorAll("[data-show]").forEach(a => { a.hidden = a.dataset.show !== LANG; });
+document.title = (LANG === "de" ? "Impressum" : "Legal notice") + " · Rate My Throne";
+</script>
+</body>
+</html>

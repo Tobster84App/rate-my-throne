@@ -38,6 +38,9 @@ const I18N = {
     "mod.noReports": "Keine offenen Meldungen. Alles sauber im Königreich.",
     "mod.reportCount": "{n}× gemeldet", "mod.byUser": "von {u}", "mod.noComment": "(ohne Kommentar)",
     "mod.dismiss": "Meldungen verwerfen", "mod.deleteReview": "Bewertung löschen", "mod.show": "Auf Karte zeigen", "mod.admin": "Admin",
+    "hist.recent": "Letzte 3 Monate", "hist.before": "davor", "hist.better": "besser", "hist.worse": "schlechter", "hist.same": "unverändert",
+    "hist.again": "Erneut bewerten", "hist.wait": "Deine letzte Bewertung ist vom {d}. Eine neue ist ab dem {next} möglich.",
+    "hist.tooSoon": "Du kannst diesen Thron frühestens 30 Tage nach deiner letzten Bewertung erneut bewerten.",
 
     // Startseite
     "h.title": "Rate My Throne – Du musst. Wir wissen, wo.",
@@ -81,7 +84,7 @@ const I18N = {
     "h.faq.q4": "In welchen Städten funktioniert das?", "h.faq.a4": "Überall, wo OpenStreetMap öffentliche Toiletten kennt – also in sehr vielen Städten weltweit. Bewertungen gibt es dort, wo unsere Community schon war. Gerade vor allem in Berlin. Hilf uns, das zu ändern.",
     "h.faq.q5": "Muss ich meinen Standort freigeben?", "h.faq.a5": "Nur, wenn du den nächsten Thron zu deinem Standort finden willst. Dein Standort wird dabei nur in deinem Browser verwendet und nicht gespeichert.",
     "h.footer.osm": "Kartendaten © <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap</a>-Mitwirkende",
-    "h.footer.map": "Karte", "h.footer.imprint": "Impressum (folgt)", "h.footer.privacy": "Datenschutz (folgt)", "h.footer.soon": "Folgt vor dem offiziellen Start",
+    "h.footer.map": "Karte", "h.footer.imprint": "Impressum", "h.footer.privacy": "Datenschutz", "h.footer.soon": "Folgt vor dem offiziellen Start",
 
     // Karte
     "m.title": "Karte · Rate My Throne",
@@ -155,6 +158,9 @@ const I18N = {
     "mod.noReports": "No open reports. All clean in the kingdom.",
     "mod.reportCount": "reported {n}×", "mod.byUser": "by {u}", "mod.noComment": "(no comment)",
     "mod.dismiss": "Dismiss reports", "mod.deleteReview": "Delete review", "mod.show": "Show on map", "mod.admin": "Admin",
+    "hist.recent": "Last 3 months", "hist.before": "before", "hist.better": "better", "hist.worse": "worse", "hist.same": "unchanged",
+    "hist.again": "Rate again", "hist.wait": "Your last review is from {d}. You can rate again from {next}.",
+    "hist.tooSoon": "You can rate this throne again 30 days after your last review at the earliest.",
 
     "h.title": "Rate My Throne – You gotta go. We know where.",
     "h.description": "Find and rate public toilets in any city – with the Rate My Throne community.",
@@ -197,7 +203,7 @@ const I18N = {
     "h.faq.q4": "Which cities does it work in?", "h.faq.a4": "Anywhere OpenStreetMap knows public toilets – that's a lot of cities worldwide. Reviews exist wherever our community has already been. Right now that's mostly Berlin. Help us change that.",
     "h.faq.q5": "Do I have to share my location?", "h.faq.a5": "Only if you want to find the nearest throne to where you are. Your location is used in your browser only and never stored.",
     "h.footer.osm": "Map data © <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap</a> contributors",
-    "h.footer.map": "Map", "h.footer.imprint": "Legal notice (coming soon)", "h.footer.privacy": "Privacy policy (coming soon)", "h.footer.soon": "Coming before the official launch",
+    "h.footer.map": "Map", "h.footer.imprint": "Legal notice", "h.footer.privacy": "Privacy policy", "h.footer.soon": "Coming before the official launch",
 
     "m.title": "Map · Rate My Throne",
     "m.info.aria": "Overview of the visible map area", "m.info.heading": "Around here",

@@ -1,11 +1,12 @@
 # Rate My Throne – Projektplan
 
-Stand: 29.10.2026 · Version 0.4
+Stand: 29.10.2026 · Version 0.6
 
 ## ⚠️ Vor dem offiziellen Start (Pflicht)
-- [ ] Impressum (Name + ladungsfähige Anschrift) – Erinnerung vereinbart
-- [ ] Datenschutzerklärung
-- [ ] Cookie-Einwilligung, sobald Werbung eingebaut wird
+- [ ] Impressum: Seite steht (impressum.html), gelbe Platzhalter mit Name, Anschrift, E-Mail füllen
+- [ ] Datenschutzerklärung: Entwurf steht (datenschutz.html), Platzhalter füllen, Übermittlungsgrundlagen (GitHub, Supabase) prüfen, AV-Vertrag mit Supabase abschließen
+- [ ] Rechtstexte von Fachleuten prüfen lassen (Entwurf ist keine Rechtsberatung)
+- [ ] Cookie-Einwilligung erst nötig, sobald Werbung oder Statistik eingebaut wird (derzeit nur technisch notwendige Speicherung)
 - [ ] Eigene Domain (ratemythrone.de/.com/.net waren laut Tobias am 29.10.2026 frei)
 
 ## Stand
@@ -15,12 +16,16 @@ Stand: 29.10.2026 · Version 0.4
 - Datenbank & Konten: Supabase (Projekt „Rate My Throne“, eu-west-1)
 - Code: https://github.com/Tobster84App/rate-my-throne (Kopie in Google Drive)
 
+## Erledigt seit 0.4
+- App-Symbol (Krone aus Toilettensitz), als App installierbar
+- Passwort vergessen/ändern, Konto löschen
+- Moderation: Melden, eigene Bewertungen löschen, Admin-Übersicht (Admin: Konto kerntobias84@gmail.com)
+- Bewertungsverlauf: erneut bewerten nach 30 Tagen, Trend „letzte 3 Monate vs. davor“
+- Schriften und Bibliotheken lokal (vendor/), keine Verbindung zu Google Fonts oder CDNs
+
 ## Nächste Schritte
-1. PWA: App-Symbol, auf Startbildschirm installierbar
-2. Moderation: Kommentare melden/löschen
-3. Konto löschen, Passwort vergessen
-4. Eigener E-Mail-Versand (für Bestätigungsmails, Passwort vergessen)
-5. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten
+1. Eigener E-Mail-Versand (für Bestätigungsmails, Passwort vergessen)
+2. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten, dann Cookie-Einwilligung nötig
 
 ## Toiletten-Daten (seit 29.10.2026)
 - OSM-Toiletten liegen in unserer Datenbank (Tabelle osm_toilets), die App fragt Overpass nicht mehr direkt
