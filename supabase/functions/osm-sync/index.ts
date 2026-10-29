@@ -33,10 +33,8 @@ async function overpass(query: string) {
   const errors: string[] = [];
   for (const url of OVERPASS) {
     try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": UA },
-        body: "data=" + encodeURIComponent(query),
+      const res = await fetch(url + "?data=" + encodeURIComponent(query), {
+        headers: { "Accept": "application/json", "User-Agent": UA },
         signal: AbortSignal.timeout(60000),
       });
       if (!res.ok) throw new Error("HTTP " + res.status);
