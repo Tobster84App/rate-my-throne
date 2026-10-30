@@ -371,7 +371,7 @@ $("authForm").onsubmit = async e => {
       const username = $("aUser").value.trim();
       const { data: taken } = await db.from("profiles").select("id").ilike("username", username.replace(/[\\%_]/g, "\\$&")).limit(1);
       if (taken?.length) { err.textContent = t("auth.taken"); return; }
-      const { data, error } = await db.auth.signUp({ email, password, options: { data: { username } } });
+      const { data, error } = await db.auth.signUp({ email, password, options: { data: { username, lang: LANG } } });
       if (error) { err.textContent = t("auth.regFailed", { e: error.message }); return; }
       if (!data.session) { $("authHint").hidden = false; $("authHint").textContent = t("h.join.confirm"); return; }
     } else {
