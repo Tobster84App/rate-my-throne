@@ -75,6 +75,12 @@ T = {
   dict(title="Confirm it's you", text="We need a quick confirmation for an important change to your Rate My Throne account.",
        code="Your confirmation code:", hint="Didn't change anything? Ignore this email and change your password to be safe.")),
 }
+# Links zeigen auf unsere Karte statt direkt auf Supabase: Der Einmal-Code wird dort erst nach einem Klick eingelöst
+# (Mail-Virenscanner öffnen Links automatisch und würden ihn sonst verbrauchen).
+TYPES = {"confirm-signup": "email", "invite-user": "invite", "magic-link": "magiclink", "change-email": "email_change", "reset-password": "recovery"}
 for name, (de, en) in T.items():
-    open(name + ".html", "w", encoding="utf-8").write(page(de, en))
+    html = page(de, en)
+    if name in TYPES:
+        html = html.replace("{{ .ConfirmationURL }}", "https://www.rate-my-throne.com/karte.html?token_hash={{ .TokenHash }}&amp;type=" + TYPES[name])
+    open(name + ".html", "w", encoding="utf-8").write(html)
     print(name + ".html")

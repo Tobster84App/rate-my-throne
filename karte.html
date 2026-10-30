@@ -869,6 +869,35 @@ db.auth.onAuthStateChange(event => {
   if (event === "PASSWORD_RECOVERY") setTimeout(async () => { await refreshUser(); showNewPassword(); }, 0);
 });
 
+// Links aus unseren E-Mails führen hierher (?token_hash=…&type=…). Der Code wird erst nach einem Klick eingelöst,
+// weil Virenscanner von Mailprogrammen Links automatisch öffnen und Einmal-Links sonst vorher verbrauchen.
+function handleEmailLink() {
+  const q = new URLSearchParams(location.search), h = new URLSearchParams(location.hash.slice(1));
+  const tokenHash = q.get("token_hash"), type = q.get("type");
+  const failed = h.get("error_code") || q.get("error_code");
+  if (!tokenHash && !failed) return;
+  history.replaceState(null, "", location.pathname);
+  const invalid = () => {
+    sheet.innerHTML = `${closeBtn()}<h2>${t("link.invalidTitle")}</h2><p>${t("link.invalid")}</p>
+      <div class="actions"><button type="button" class="btn primary" id="newLink">${t("link.newLink")}</button></div>`;
+    sheet.hidden = false;
+    document.getElementById("newLink").onclick = () => showForgot();
+  };
+  if (!tokenHash) return invalid();
+  const recovery = type === "recovery";
+  sheet.innerHTML = `${closeBtn()}<h2>${recovery ? t("auth.newPwTitle") : t("link.confirmTitle")}</h2>
+    <p class="muted">${t("link.text")}</p><p class="error" id="linkErr"></p>
+    <div class="actions"><button type="button" class="btn primary" id="linkGo">${t("link.go")}</button></div>`;
+  sheet.hidden = false;
+  document.getElementById("linkGo").onclick = async () => {
+    const { error } = await db.auth.verifyOtp({ token_hash: tokenHash, type });
+    if (error) return invalid();
+    await refreshUser();
+    if (recovery) return showNewPassword();
+    sheet.innerHTML = `${closeBtn()}<h2 class="hello">${throneMark}${t("link.confirmed")}</h2>`;
+  };
+}
+
 // ===== Toilette hinzufügen =====
 let adding = false;
 const btnAdd = document.getElementById("btnAdd");
@@ -907,7 +936,7 @@ map.on("click", e => {
   };
 });
 
-refreshUser(); loadToilets();
+refreshUser(); loadToilets(); handleEmailLink();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 </body>
