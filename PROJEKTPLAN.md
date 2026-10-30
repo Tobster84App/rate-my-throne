@@ -3,11 +3,12 @@
 Stand: 30.10.2026 · Version 0.7
 
 ## ⚠️ Vor dem offiziellen Start (Pflicht)
-- [ ] Impressum: Seite steht (impressum.html), gelbe Platzhalter mit Name, Anschrift, E-Mail füllen
-- [ ] Datenschutzerklärung: Entwurf steht (datenschutz.html), Platzhalter füllen, Übermittlungsgrundlagen (GitHub, Supabase) prüfen, AV-Vertrag mit Supabase abschließen
+- [x] Impressum: Name, Anschrift, E-Mail eingetragen (30.10.2026)
+- [ ] Datenschutzerklärung: Verantwortlicher eingetragen; noch offen: Übermittlungsgrundlagen (GitHub, Supabase) prüfen, AV-Vertrag mit Supabase abschließen
 - [ ] Rechtstexte von Fachleuten prüfen lassen (Entwurf ist keine Rechtsberatung)
 - [ ] Cookie-Einwilligung erst nötig, sobald Werbung oder Statistik eingebaut wird (derzeit nur technisch notwendige Speicherung)
-- [ ] Eigene Domain (ratemythrone.de/.com/.net waren laut Tobias am 29.10.2026 frei)
+- [ ] Eigene Domain www.rate-my-throne.com (All-Inkl Privat Plus, DNS auf GitHub Pages gestellt am 30.10.2026); in GitHub eintragen, HTTPS erzwingen, Supabase-URLs anpassen
+- [ ] E-Mail-Versand über Brevo (Absender noreply@rate-my-throne.com), SPF um Brevo ergänzen, Brevo und All-Inkl in Datenschutzerklärung aufnehmen
 
 ## Stand
 - Startseite (index.html): Erklärung, Live-Zahlen aus der Datenbank, Registrierung/Anmeldung, FAQ
