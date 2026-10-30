@@ -1,6 +1,6 @@
 # Rate My Throne – Projektplan
 
-Stand: 29.10.2026 · Version 0.6
+Stand: 30.10.2026 · Version 0.7
 
 ## ⚠️ Vor dem offiziellen Start (Pflicht)
 - [ ] Impressum: Seite steht (impressum.html), gelbe Platzhalter mit Name, Anschrift, E-Mail füllen
@@ -22,6 +22,8 @@ Stand: 29.10.2026 · Version 0.6
 - Moderation: Melden, eigene Bewertungen löschen, Admin-Übersicht (Admin: Konto kerntobias84@gmail.com)
 - Bewertungsverlauf: erneut bewerten nach 30 Tagen, Trend „letzte 3 Monate vs. davor“
 - Schriften und Bibliotheken lokal (vendor/), keine Verbindung zu Google Fonts oder CDNs
+- Benutzernamen ändern
+- Eingetragene Toiletten löschen: eigene, solange niemand anderes sie bewertet hat; Admin alle (Bewertungen werden mitgelöscht)
 
 ## Nächste Schritte
 1. Eigener E-Mail-Versand (für Bestätigungsmails, Passwort vergessen)
