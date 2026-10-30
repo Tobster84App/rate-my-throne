@@ -338,7 +338,7 @@ async function loadOwn(box) {
     .gte("lat", box[0]).lte("lat", box[2]).gte("lon", box[1]).lte("lon", box[3]);
   if (error) throw new Error(t("m.err.own") + ": " + error.message);
   for (const tl of data) {
-    toilets.set(tl.id, { id: tl.id, lat: tl.lat, lon: tl.lon, name: tl.name,
+    toilets.set(tl.id, { id: tl.id, lat: tl.lat, lon: tl.lon, name: tl.name, own: true, createdBy: tl.created_by,
       source: tl.profiles?.username ? t("m.toilet.by", { u: tl.profiles.username }) : t("m.toilet.community"),
       fee: yn(tl.fee), wheelchair: yn(tl.wheelchair), changing: yn(tl.changing_table) });
   }
@@ -484,6 +484,7 @@ function showToilet(tl, dist) {
       <a class="btn gold" href="${mapsLink(tl)}" target="_blank" rel="noopener">${t("m.detail.route")}</a>
       <span id="formArea"></span>
     </div>
+    ${canDeleteToilet(tl, list) ? `<div class="actions"><button type="button" class="btn small danger" id="delToilet">${t("toilet.delete")}</button></div><p class="error" id="delToiletMsg"></p>` : ""}
     <div>${list.slice().sort((x, y) => y.created_at.localeCompare(x.created_at)).map(r => `
       <div class="review" data-id="${r.id}"><span class="rscore" style="background:${scoreColor(revScore(r))}">${fmtNum(revScore(r), 1)}</span><strong>${esc(r.profiles?.username ?? "?")}</strong> <span class="muted">${new Date(r.created_at).toLocaleDateString(LOCALE)}</span>
         <div class="muted">${CATS.map(c => c.label + " " + r[c.key]).join(" · ")}${r.free ? " · " + t("m.review.free") : ""}${r.barrierfree ? " · " + t("m.review.barrierfree") : ""}${r.changing ? " · " + t("m.review.changing") : ""}</div>
@@ -491,6 +492,7 @@ function showToilet(tl, dist) {
         ${reviewActions(r)}</div>`).join("")}</div>`;
   sheet.hidden = false;
   bindReviewActions(tl);
+  bindToiletDelete(tl);
   const area = document.getElementById("formArea");
   if (!user) {
     area.innerHTML = `<button type="button" class="btn primary" id="loginToRate">${t("m.detail.loginToRate")}</button>`;
@@ -506,6 +508,31 @@ function showToilet(tl, dist) {
       document.getElementById("rateBtn").onclick = () => showRatingForm(tl);
     }
   }
+}
+
+// Eingetragene Toiletten (nicht OpenStreetMap): eigene ohne fremde Bewertungen oder als Admin löschbar
+function canDeleteToilet(tl, list) {
+  if (!user || !tl.own) return false;
+  return user.isAdmin || tl.createdBy === user.id;
+}
+
+function bindToiletDelete(tl) {
+  const btn = document.getElementById("delToilet");
+  if (!btn) return;
+  const msg = document.getElementById("delToiletMsg");
+  btn.onclick = async () => {
+    const foreign = (reviews.get(tl.id) || []).some(r => r.user_id !== user.id);
+    if (foreign && !user.isAdmin) { msg.textContent = t("toilet.notAllowed"); return; }
+    // Erster Klick fragt nach, zweiter löscht
+    if (!btn.dataset.sure) { btn.dataset.sure = "1"; btn.textContent = t("toilet.deleteYes"); btn.classList.add("solid"); msg.textContent = t("toilet.deleteSure"); return; }
+    const { data, error } = await db.from("toilets").delete().eq("id", tl.id).select("id");
+    if (error) { msg.textContent = t("toilet.deleteFailed", { e: error.message }); return; }
+    if (!data.length) { msg.textContent = t("toilet.notAllowed"); return; }
+    toilets.delete(tl.id); reviews.delete(tl.id);
+    if (nearestId === tl.id) { nearestId = null; if (routeLine) { routeLine.remove(); routeLine = null; } }
+    render();
+    sheet.innerHTML = `${closeBtn()}<p class="muted empty">${throneMark}<span>${t("toilet.deleted")}</span></p>`;
+  };
 }
 
 // Gesamtnote einer einzelnen Bewertung
@@ -874,7 +901,7 @@ map.on("click", e => {
     const { data, error } = await db.from("toilets").insert({ name: nName.value.trim(), lat: e.latlng.lat, lon: e.latlng.lng,
       fee: nFee.checked, wheelchair: nWheel.checked, changing_table: nChange.checked }).select().single();
     if (error) { document.getElementById("addErr").textContent = t("m.rate.failed", { e: error.message }); return; }
-    const tl = { id: data.id, lat: data.lat, lon: data.lon, name: data.name, source: t("m.toilet.by", { u: user.username }),
+    const tl = { id: data.id, lat: data.lat, lon: data.lon, name: data.name, own: true, createdBy: user.id, source: t("m.toilet.by", { u: user.username }),
       fee: yn(data.fee), wheelchair: yn(data.wheelchair), changing: yn(data.changing_table) };
     toilets.set(tl.id, tl); reviews.set(tl.id, []); render(); showToilet(tl);
   };

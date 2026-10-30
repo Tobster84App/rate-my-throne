@@ -46,6 +46,10 @@ const I18N = {
     "acc.renamed": "Gespeichert. Du heißt jetzt {u}.", "acc.err.taken": "Dieser Benutzername ist schon vergeben.",
     "acc.err.length": "Der Benutzername muss 3 bis 30 Zeichen lang sein.", "acc.err.at": "Der Benutzername darf kein @ enthalten.",
     "acc.err.other": "Ändern fehlgeschlagen: {e}",
+    "toilet.delete": "Toilette löschen", "toilet.deleteSure": "Wirklich löschen? Bewertungen dazu werden mitgelöscht.",
+    "toilet.deleteYes": "Ja, löschen", "toilet.deleted": "Toilette gelöscht.",
+    "toilet.notAllowed": "Diese Toilette wurde schon von anderen bewertet. Löschen kann sie jetzt nur noch ein Admin.",
+    "toilet.deleteFailed": "Löschen fehlgeschlagen: {e}",
 
     // Startseite
     "h.title": "Rate My Throne – Du musst. Wir wissen, wo.",
@@ -171,6 +175,10 @@ const I18N = {
     "acc.renamed": "Saved. You are now {u}.", "acc.err.taken": "That username is already taken.",
     "acc.err.length": "Your username must be 3 to 30 characters long.", "acc.err.at": "Your username must not contain @.",
     "acc.err.other": "Couldn't change it: {e}",
+    "toilet.delete": "Delete toilet", "toilet.deleteSure": "Really delete? Its reviews will be deleted too.",
+    "toilet.deleteYes": "Yes, delete", "toilet.deleted": "Toilet deleted.",
+    "toilet.notAllowed": "Others have already reviewed this toilet. Only an admin can delete it now.",
+    "toilet.deleteFailed": "Couldn't delete: {e}",
 
     "h.title": "Rate My Throne – You gotta go. We know where.",
     "h.description": "Find and rate public toilets in any city – with the Rate My Throne community.",
