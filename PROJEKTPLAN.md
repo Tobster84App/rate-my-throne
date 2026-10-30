@@ -7,13 +7,14 @@ Stand: 30.10.2026 · Version 0.7
 - [ ] Datenschutzerklärung: Verantwortlicher eingetragen; noch offen: Übermittlungsgrundlagen (GitHub, Supabase) prüfen, AV-Vertrag mit Supabase abschließen
 - [ ] Rechtstexte von Fachleuten prüfen lassen (Entwurf ist keine Rechtsberatung)
 - [ ] Cookie-Einwilligung erst nötig, sobald Werbung oder Statistik eingebaut wird (derzeit nur technisch notwendige Speicherung)
-- [ ] Eigene Domain www.rate-my-throne.com (All-Inkl Privat Plus, DNS auf GitHub Pages gestellt am 30.10.2026); in GitHub eintragen, HTTPS erzwingen, Supabase-URLs anpassen
-- [ ] E-Mail-Versand über Brevo (Absender noreply@rate-my-throne.com), SPF um Brevo ergänzen, Brevo und All-Inkl in Datenschutzerklärung aufnehmen
+- [ ] Eigene Domain www.rate-my-throne.com: DNS, GitHub und Supabase-URLs erledigt (30.10.2026); offen: „Enforce HTTPS“ bei GitHub setzen, sobald Zertifikat da
+- [x] E-Mail-Versand über Brevo (Absender noreply@rate-my-throne.com), Domain bei Brevo authentifiziert, Test-Registrierung erfolgreich (30.10.2026)
+- [ ] AV-Verträge mit Brevo und All-Inkl abschließen (in Datenschutzerklärung gelb markiert)
 
 ## Stand
 - Startseite (index.html): Erklärung, Live-Zahlen aus der Datenbank, Registrierung/Anmeldung, FAQ
 - Karte (karte.html): öffentliche Toiletten aus OpenStreetMap, Bewertungen, Infokarte, „Nächste Toilette finden“ mit Route in Google Maps
-- Online: https://tobster84app.github.io/rate-my-throne/
+- Online: https://www.rate-my-throne.com (alte Adresse tobster84app.github.io/rate-my-throne/ leitet weiter)
 - Datenbank & Konten: Supabase (Projekt „Rate My Throne“, eu-west-1)
 - Code: https://github.com/Tobster84App/rate-my-throne (Kopie in Google Drive)
 
@@ -27,7 +28,7 @@ Stand: 30.10.2026 · Version 0.7
 - Eingetragene Toiletten löschen: eigene, solange niemand anderes sie bewertet hat; Admin alle (Bewertungen werden mitgelöscht)
 
 ## Nächste Schritte
-1. Eigener E-Mail-Versand (für Bestätigungsmails, Passwort vergessen)
+1. Mail-Vorlagen (Deutsch/Englisch, eigenes Design)
 2. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten, dann Cookie-Einwilligung nötig
 
 ## Toiletten-Daten (seit 29.10.2026)
