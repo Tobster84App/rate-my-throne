@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<body style="margin:0;padding:0;background:#f5f3fa;font-family:Arial,Helvetica,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f3fa;"><tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden;">
+<tr><td style="background:#2a1f4d;padding:18px 24px;">
+<img src="https://www.rate-my-throne.com/icons/icon-192.png" width="36" height="36" alt="" style="vertical-align:middle;border:0;">
+<span style="vertical-align:middle;margin-left:8px;font-size:20px;font-weight:bold;color:#ffffff;">Rate My <span style="color:#e3b341;">Throne</span></span>
+</td></tr>
+<tr><td style="padding:28px 24px;">
+{{ if and .Data.lang (eq .Data.lang "en") }}
+<h1 style="margin:0 0 12px;font-size:24px;line-height:1.25;color:#2a1f4d;">Confirm it's you</h1>
+<p style="margin:0 0 24px;font-size:16px;line-height:1.5;color:#1f1a2e;">We need a quick confirmation for an important change to your Rate My Throne account.</p>
+<p style="margin:0 0 8px;font-size:14px;color:#6b6480;">Your confirmation code:</p>
+<p style="margin:0 0 8px;font-size:30px;font-weight:bold;letter-spacing:6px;color:#2a1f4d;">{{ .Token }}</p>
+<p style="margin:24px 0 0;font-size:13px;line-height:1.5;color:#6b6480;">Didn't change anything? Ignore this email and change your password to be safe.</p>
+{{ else }}
+<h1 style="margin:0 0 12px;font-size:24px;line-height:1.25;color:#2a1f4d;">Bestätige, dass du es bist</h1>
+<p style="margin:0 0 24px;font-size:16px;line-height:1.5;color:#1f1a2e;">Für eine wichtige Änderung an deinem Konto bei Rate My Throne brauchen wir eine kurze Bestätigung.</p>
+<p style="margin:0 0 8px;font-size:14px;color:#6b6480;">Dein Bestätigungscode:</p>
+<p style="margin:0 0 8px;font-size:30px;font-weight:bold;letter-spacing:6px;color:#2a1f4d;">{{ .Token }}</p>
+<p style="margin:24px 0 0;font-size:13px;line-height:1.5;color:#6b6480;">Du hast nichts geändert? Dann ignoriere diese E-Mail und ändere zur Sicherheit dein Passwort.</p>
+{{ end }}
+</td></tr>
+<tr><td style="padding:16px 24px;border-top:1px solid #e3dfee;font-size:12px;color:#6b6480;">
+Rate My Throne · <a href="https://www.rate-my-throne.com/impressum.html" style="color:#6b6480;">Impressum / Legal notice</a>
+</td></tr>
+</table>
+</td></tr></table>
+</body>
+</html>
