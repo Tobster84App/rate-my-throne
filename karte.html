@@ -78,6 +78,8 @@ main { position: relative; flex: 1; min-height: 0; }
 .fab.gold { background: var(--gold); color: var(--royal); }
 @media (prefers-color-scheme: dark) { .fab { color: var(--gold); } .fab.gold { color: var(--royal); } #btnNearest, #btnNearest:hover { background: var(--gold); color: var(--royal); } }
 .fab.active { outline: 3px solid var(--gold); }
+.fab { position: relative; }
+.fab-badge { position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--gold); color: var(--royal); font: 800 12px/20px var(--display); text-align: center; }
 
 #status { position: absolute; z-index: 950; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: calc(100% - 160px);
   background: var(--royal); color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 13px; box-shadow: var(--shadow); text-align: center; }
@@ -177,7 +179,7 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
   <aside id="info" data-i18n-aria-label="m.info.aria">
     <h2 data-i18n="m.info.heading">Hier in der Gegend</h2>
     <div class="stats">
-      <div class="stat"><span data-i18n="m.info.toilets">Toiletten</span><strong id="sCount">–</strong><small data-i18n="m.info.toiletsNote">im sichtbaren Kartenausschnitt</small></div>
+      <div class="stat"><span data-i18n="m.info.toilets">Toiletten</span><strong id="sCount">–</strong><small id="sCountNote" data-i18n="m.info.toiletsNote">im sichtbaren Kartenausschnitt</small></div>
       <div class="stat"><span data-i18n="m.info.avg">Ø Bewertung</span><strong id="sAvg">–</strong><small id="sAvgNote" data-i18n="m.info.noReviews">noch keine Bewertungen</small></div>
       <div class="stat"><span data-i18n="m.info.nearest">Nächste</span><strong id="sNear">–</strong><small id="sNearNote" data-i18n="m.info.fromCenter">ab Kartenmitte</small></div>
     </div>
@@ -188,6 +190,10 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
   </aside>
 
   <div class="fabs">
+    <button id="btnFilter" class="fab" type="button" data-i18n-aria-label="f.title" data-i18n-title="f.title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4z"/></svg>
+      <span class="fab-badge" id="filterCount" hidden></span>
+    </button>
     <button id="btnAdd" class="fab gold" type="button" data-i18n-aria-label="m.fab.add" data-i18n-title="m.fab.add">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
     </button>
@@ -253,9 +259,34 @@ function markerIcon(tl) {
     html: `<div class="${cls}" style="background:${scoreColor(a)}"><b>${a == null ? "WC" : fmtNum(a, 1)}</b></div>` });
 }
 
+// ===== Filter: kostenlos, barrierefrei, Wickeltisch, ab 4 Sternen, nur bewertete =====
+// Toiletten ohne Angabe bleiben bei den Ausstattungs-Filtern sichtbar; ausgeblendet wird nur, was ausdrücklich nicht passt.
+const FILTERS = ["free", "wheelchair", "changing", "good", "rated"];
+let filters = new Set();
+try { filters = new Set(JSON.parse(localStorage.getItem("rmt-filters") || "[]").filter(f => FILTERS.includes(f))); } catch {}
+
+// Ausstattung aus OSM bzw. Eintrag; „ja“ auch, wenn mindestens die Hälfte der Bewertungen es ankreuzt.
+// Ergebnis: "yes", "no", "limited" oder undefined (noch keine Angabe)
+function feature(tl, key) {
+  const list = reviews.get(tl.id) || [];
+  const reviewKey = { free: "free", wheelchair: "barrierfree", changing: "changing" }[key];
+  const tag = key === "free" ? (tl.fee === "no" ? "yes" : tl.fee === "yes" ? "no" : undefined) : tl[key];
+  if (tag === "yes" || (list.length && list.filter(r => r[reviewKey]).length * 2 >= list.length)) return "yes";
+  return tag === "no" || tag === "limited" ? tag : undefined;
+}
+function passes(tl) {
+  for (const f of filters) {
+    if (f === "rated" && avg(tl.id) == null) return false;
+    if (f === "good" && !(avg(tl.id) >= 4)) return false;
+    if (f !== "rated" && f !== "good" && feature(tl, f) === "no") return false;
+  }
+  return true;
+}
+const shown = () => [...toilets.values()].filter(passes);
+
 function render() {
   layer.clearLayers();
-  for (const tl of toilets.values()) {
+  for (const tl of shown()) {
     L.marker([tl.lat, tl.lon], { icon: markerIcon(tl), zIndexOffset: tl.id === nearestId ? 1000 : 0 })
       .on("click", () => showToilet(tl)).addTo(layer);
   }
@@ -274,7 +305,7 @@ const walkMin = m => Math.max(1, Math.round(m / 80)); // ca. 4,8 km/h
 
 function nearestFrom(pos) {
   let best = null, bestD = Infinity;
-  for (const tl of toilets.values()) {
+  for (const tl of shown()) {
     const d = distance(pos, [tl.lat, tl.lon]);
     if (d < bestD) { best = tl; bestD = d; }
   }
@@ -283,8 +314,9 @@ function nearestFrom(pos) {
 
 function updateInfo() {
   const b = map.getBounds();
-  const visible = [...toilets.values()].filter(tl => b.contains([tl.lat, tl.lon]));
+  const visible = shown().filter(tl => b.contains([tl.lat, tl.lon]));
   document.getElementById("sCount").textContent = visible.length;
+  document.getElementById("sCountNote").textContent = t(filters.size ? "m.info.toiletsFiltered" : "m.info.toiletsNote");
   const rated = visible.map(tl => avg(tl.id)).filter(a => a != null);
   const sAvg = document.getElementById("sAvg");
   if (rated.length) {
@@ -461,7 +493,7 @@ const sheet = document.getElementById("sheet");
 function closeSheet() { sheet.hidden = true; sheet.innerHTML = ""; }
 const throneMark = `<svg viewBox="86 100 340 332" aria-hidden="true"><path d="M120 300 104 150l84 70 68-110 68 110 84-70-16 150z" fill="#e3b341"/><ellipse cx="256" cy="330" rx="142" ry="74" fill="none" stroke="#e3b341" stroke-width="36"/></svg>`;
 const closeBtn = () => `<button class="close" type="button" onclick="closeSheet()" aria-label="${t("close")}">✕</button>`;
-const chip = (label, v) => `<span class="chip ${v === "yes" ? "yes" : v === "no" ? "no" : ""}">${label}: ${v === "yes" ? t("yes") : v === "no" ? t("no") : v ? esc(v) : "?"}</span>`;
+const chip = (label, v) => `<span class="chip ${v === "yes" ? "yes" : v === "no" ? "no" : ""}">${label}: ${v === "yes" ? t("yes") : v === "no" ? t("no") : v === "limited" ? t("m.chip.limited") : t("m.chip.unknown")}</span>`;
 
 function showToilet(tl, dist) {
   const list = reviews.get(tl.id) || [];
@@ -471,7 +503,7 @@ function showToilet(tl, dist) {
     ${closeBtn()}
     <h2>${esc(tl.name)}</h2>
     <div class="muted">${d != null ? t("m.detail.away", { d: fmtDist(d), min: walkMin(d) }) : ""}${t("m.detail.source", { s: esc(tl.source) })}${tl.hours ? t("m.detail.hours", { h: esc(tl.hours) }) : ""}</div>
-    <div class="chips">${chip(t("m.chip.fee"), tl.fee)}${chip(t("m.chip.wheelchair"), tl.wheelchair)}${chip(t("m.chip.changing"), tl.changing)}</div>
+    <div class="chips">${chip(t("m.chip.free"), feature(tl, "free"))}${chip(t("m.chip.wheelchair"), feature(tl, "wheelchair"))}${chip(t("m.chip.changing"), feature(tl, "changing"))}</div>
     ${a == null ? `<p class="muted empty">${throneMark}<span>${t("m.detail.noReviews")}</span></p>` : `
       <div class="score"><div class="big" style="color:${scoreColor(a)}">${fmtNum(a, 1)}<small> / 5</small></div>
       <div class="muted">${list.length === 1 ? t("m.detail.count1") : t("m.detail.countN", { n: list.length })}</div></div>
@@ -897,6 +929,32 @@ function handleEmailLink() {
     sheet.innerHTML = `${closeBtn()}<h2 class="hello">${throneMark}${t("link.confirmed")}</h2>`;
   };
 }
+
+// ===== Filter-Fenster =====
+function updateFilterBtn() {
+  const badge = document.getElementById("filterCount");
+  badge.textContent = filters.size; badge.hidden = !filters.size;
+  document.getElementById("btnFilter").classList.toggle("active", filters.size > 0);
+}
+function setFilters(set) {
+  filters = set;
+  try { localStorage.setItem("rmt-filters", JSON.stringify([...set])); } catch {}
+  // Hervorgehobener Thron passt nicht mehr: Markierung und Linie entfernen
+  if (nearestId && toilets.has(nearestId) && !passes(toilets.get(nearestId))) { nearestId = null; if (routeLine) { routeLine.remove(); routeLine = null; } }
+  render(); updateFilterBtn();
+}
+document.getElementById("btnFilter").onclick = () => {
+  sheet.innerHTML = `${closeBtn()}<h2>${t("f.title")}</h2>
+    <form id="filterForm">${FILTERS.map(f => `<label class="check"><input type="checkbox" value="${f}" ${filters.has(f) ? "checked" : ""}> ${t("f." + f)}</label>`).join("")}
+    <p class="muted">${t("f.hint")}</p>
+    <div class="actions"><button type="submit" class="btn primary">${t("f.apply")}</button>
+    <button type="button" class="btn" id="filterReset">${t("f.reset")}</button></div></form>`;
+  sheet.hidden = false;
+  const form = document.getElementById("filterForm");
+  form.onsubmit = e => { e.preventDefault(); setFilters(new Set([...form.querySelectorAll("input:checked")].map(i => i.value))); closeSheet(); };
+  document.getElementById("filterReset").onclick = () => { setFilters(new Set()); closeSheet(); };
+};
+updateFilterBtn();
 
 // ===== Toilette hinzufügen =====
 let adding = false;

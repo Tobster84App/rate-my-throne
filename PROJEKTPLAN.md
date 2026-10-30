@@ -29,6 +29,7 @@ Stand: 30.10.2026 · Version 0.8
 - Eigene Domain, Postfach info@rate-my-throne.com, Mail-Versand über Brevo
 - Mail-Vorlagen DE/EN für alle sechs Supabase-Mails (supabase/email-templates, erzeugt mit build.py, in Supabase von Hand eingetragen)
 - Mail-Links führen auf die Karte und werden erst nach Klick auf „Weiter“ eingelöst (Schutz vor Link-Scannern in Firmen-Postfächern)
+- Filter: kostenlos, barrierefrei, Wickeltisch, ab 4 Sternen, nur bewertete (Toiletten ohne Angabe bleiben sichtbar, „Nächsten Thron finden“ beachtet die Filter)
 
 ## Nächste Schritte
 1. Mail-Limit in Supabase (Authentication → Rate Limits) von 30 auf ca. 100 pro Stunde erhöhen
