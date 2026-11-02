@@ -4,12 +4,14 @@ Stand: 02.11.2026 · Version 0.9
 
 ## ⚠️ Vor dem offiziellen Start (Pflicht)
 - [x] Impressum: Name, Anschrift, E-Mail eingetragen (30.10.2026)
-- [ ] Datenschutzerklärung: Verantwortlicher eingetragen; noch offen: Übermittlungsgrundlagen (GitHub, Supabase) prüfen, AV-Vertrag mit Supabase abschließen
+- [ ] Datenschutzerklärung: Verantwortlicher und Dienstleister eingetragen; noch offen: Übermittlungsgrundlagen (GitHub, Supabase-DPA) prüfen, gelbe Markierungen auflösen
 - [ ] Rechtstexte von Fachleuten prüfen lassen (Entwurf ist keine Rechtsberatung)
 - [ ] Cookie-Einwilligung erst nötig, sobald Werbung oder Statistik eingebaut wird (derzeit nur technisch notwendige Speicherung)
 - [x] Eigene Domain www.rate-my-throne.com: DNS (All-Inkl), GitHub Pages mit HTTPS, Supabase-URLs (30.10.2026)
 - [x] E-Mail-Versand über Brevo (Absender noreply@rate-my-throne.com), Domain bei Brevo authentifiziert, Test-Registrierung erfolgreich (30.10.2026)
-- [ ] AV-Verträge mit Brevo und All-Inkl abschließen (in Datenschutzerklärung gelb markiert)
+- [x] AV-Vertrag Supabase: seit 01.08.2026 Bestandteil der Nutzungsbedingungen (Antwort Supabase Privacy Team, 02.11.2026); offen: Übermittlungsgrundlage im DPA prüfen
+- [ ] AV-Vertrag All-Inkl: im Member-Bereich unter Stammdaten → Auftragsverarbeitung abschließen (Antwort Support, 02.11.2026)
+- [ ] AV-Vertrag Brevo: laut Brevo Teil der Nutzungsbedingungen; Bestätigung und Firmierung vom Support ausstehend
 
 ## Stand
 - Startseite (index.html): Erklärung, Live-Zahlen aus der Datenbank, Registrierung/Anmeldung, FAQ
