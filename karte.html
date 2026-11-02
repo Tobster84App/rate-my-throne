@@ -70,6 +70,18 @@ main { position: relative; flex: 1; min-height: 0; }
 #btnNearest { background: var(--royal); color: #fff; border: none; border-radius: 12px; padding: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; }
 #btnNearest:hover { background: var(--royal-2); }
 #btnNearest svg { width: 18px; height: 18px; }
+.nearest-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+#btnSearch { width: 46px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--royal); display: grid; place-items: center; }
+#btnSearch svg { width: 20px; height: 20px; }
+@media (prefers-color-scheme: dark) { #btnSearch { color: var(--gold); } }
+.plan[hidden] { display: none; }
+.plan { display: flex; align-items: center; gap: 8px; font-size: 13px; background: var(--bg); border-radius: 10px; padding: 6px 8px 6px 10px; }
+.plan span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plan button { border: none; background: none; color: var(--muted); font-size: 16px; line-height: 1; padding: 2px 4px; }
+.plan-pin { font-size: 30px; line-height: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+.results { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
+.results button { width: 100%; text-align: left; border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 10px; padding: 10px 12px; }
+.results small { display: block; color: var(--muted); }
 
 /* Runde Kartenknöpfe */
 .fabs { position: absolute; z-index: 900; left: max(16px, env(safe-area-inset-left, 0px)); bottom: 24px; display: grid; gap: 10px; }
@@ -183,10 +195,16 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
       <div class="stat"><span data-i18n="m.info.avg">Ø Bewertung</span><strong id="sAvg">–</strong><small id="sAvgNote" data-i18n="m.info.noReviews">noch keine Bewertungen</small></div>
       <div class="stat"><span data-i18n="m.info.nearest">Nächste</span><strong id="sNear">–</strong><small id="sNearNote" data-i18n="m.info.fromCenter">ab Kartenmitte</small></div>
     </div>
-    <button id="btnNearest" type="button">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
-      <span data-i18n="m.btn.nearest">Nächsten Thron finden</span>
-    </button>
+    <div class="nearest-row">
+      <button id="btnNearest" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+        <span data-i18n="m.btn.nearest">Nächsten Thron finden</span>
+      </button>
+      <button id="btnSearch" type="button" data-i18n-aria-label="s.btn" data-i18n-title="s.btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+      </button>
+    </div>
+    <div class="plan" id="planBar" hidden><span>📍 <b id="planName"></b></span><button type="button" id="planClear" data-i18n-aria-label="s.clear" data-i18n-title="s.clear">✕</button></div>
   </aside>
 
   <div class="fabs">
@@ -223,6 +241,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let user = null;                 // { id, username, isAdmin } wenn angemeldet
 let myReports = new Set();       // Bewertungen, die ich schon gemeldet habe
 let myPos = null;                // [lat, lon] des Nutzers, sobald bekannt
+let planPos = null;              // [lat, lon] eines gesuchten Ortes (Toilettenpause vorplanen)
 let nearestId = null;            // hervorgehobene Toilette
 const toilets = new Map();       // id -> toilet (OSM und eigene)
 const reviews = new Map();       // toiletId -> [review]
@@ -328,10 +347,10 @@ function updateInfo() {
     sAvg.textContent = "–"; sAvg.style.color = "";
     document.getElementById("sAvgNote").textContent = t("m.info.noReviews");
   }
-  const from = myPos || [map.getCenter().lat, map.getCenter().lng];
+  const from = planPos || myPos || [map.getCenter().lat, map.getCenter().lng];
   const n = nearestFrom(from);
   document.getElementById("sNear").textContent = n ? fmtDist(n.dist) : "–";
-  document.getElementById("sNearNote").textContent = n ? (myPos ? t("m.info.fromYou", { min: walkMin(n.dist) }) : t("m.info.fromCenter")) : t("m.info.noneLoaded");
+  document.getElementById("sNearNote").textContent = n ? (planPos ? t("m.info.fromPlan", { min: walkMin(n.dist) }) : myPos ? t("m.info.fromYou", { min: walkMin(n.dist) }) : t("m.info.fromCenter")) : t("m.info.noneLoaded");
 }
 
 // ===== Daten laden =====
@@ -462,6 +481,7 @@ function locate() {
 }
 
 document.getElementById("btnLocate").onclick = async () => {
+  clearPlan();
   status(t("m.status.locating"));
   try { const pos = await locate(); map.setView(pos, 16); status(""); }
   catch (err) { status(err.message, 4000); }
@@ -469,9 +489,11 @@ document.getElementById("btnLocate").onclick = async () => {
 
 document.getElementById("btnNearest").onclick = async () => {
   status(t("m.status.searching"));
-  let from;
-  try { from = await locate(); }
-  catch { from = [map.getCenter().lat, map.getCenter().lng]; status(t("m.status.fallback"), 2500); }
+  let from = planPos;   // Gesuchter Ort hat Vorrang vor dem eigenen Standort
+  if (!from) {
+    try { from = await locate(); }
+    catch { from = [map.getCenter().lat, map.getCenter().lng]; status(t("m.status.fallback"), 2500); }
+  }
   map.setView(from, Math.max(map.getZoom(), 15), { animate: false });
   clearTimeout(moveTimer);
   await loadToilets();
@@ -486,6 +508,62 @@ document.getElementById("btnNearest").onclick = async () => {
   showToilet(n.toilet, n.dist);
 };
 
+// ===== Ortssuche (Nominatim von OpenStreetMap): Toilettenpausen vorab planen =====
+// Gesucht wird nur auf Knopfdruck, nicht bei jedem Tastendruck (Nutzungsregeln von Nominatim: höchstens 1 Anfrage pro Sekunde).
+let planMarker = null, lastSearch = 0;
+function setPlan(lat, lon, name) {
+  planPos = [lat, lon];
+  if (planMarker) planMarker.setLatLng(planPos);
+  else planMarker = L.marker(planPos, { icon: L.divIcon({ className: "", iconSize: [30, 30], iconAnchor: [15, 28], html: '<div class="plan-pin">📍</div>' }), interactive: false, zIndexOffset: 2000 }).addTo(map);
+  document.getElementById("planName").textContent = name;
+  document.getElementById("planBar").hidden = false;
+  nearestId = null; if (routeLine) { routeLine.remove(); routeLine = null; }
+  map.setView(planPos, 16);
+  updateInfo();
+}
+function clearPlan() {
+  if (!planPos) return;
+  planPos = null;
+  if (planMarker) { planMarker.remove(); planMarker = null; }
+  document.getElementById("planBar").hidden = true;
+  updateInfo();
+}
+document.getElementById("planClear").onclick = clearPlan;
+document.getElementById("btnSearch").onclick = () => {
+  sheet.innerHTML = `${closeBtn()}<h2>${t("s.title")}</h2>
+    <p class="muted">${t("s.hint")}</p>
+    <form id="searchForm"><input type="text" id="sQuery" required minlength="2" maxlength="120" autocomplete="off" placeholder="${t("s.placeholder")}">
+    <div class="actions"><button type="submit" class="btn primary" id="sGo">${t("s.go")}</button></div></form>
+    <p class="error" id="sMsg"></p><ul class="results" id="sResults"></ul>
+    <p class="muted">${t("s.credit")}</p>`;
+  sheet.hidden = false;
+  const input = document.getElementById("sQuery"), msg = document.getElementById("sMsg"), list = document.getElementById("sResults"), go = document.getElementById("sGo");
+  input.focus();
+  document.getElementById("searchForm").onsubmit = async e => {
+    e.preventDefault();
+    if (Date.now() - lastSearch < 1100) return;
+    lastSearch = Date.now();
+    go.disabled = true; msg.className = "muted"; msg.textContent = t("s.searching"); list.innerHTML = "";
+    try {
+      const res = await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=" + LANG + "&q=" + encodeURIComponent(input.value.trim()));
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const places = await res.json();
+      msg.className = "error"; msg.textContent = places.length ? "" : t("s.none");
+      list.innerHTML = places.map((p, i) => {
+        const parts = p.display_name.split(", ");
+        return `<li><button type="button" data-i="${i}"><b>${esc(parts[0])}</b><small>${esc(parts.slice(1, 4).join(", "))}</small></button></li>`;
+      }).join("");
+      list.querySelectorAll("button").forEach(btn => btn.onclick = () => {
+        const p = places[+btn.dataset.i];
+        closeSheet();
+        setPlan(+p.lat, +p.lon, p.display_name.split(", ").slice(0, 2).join(", "));
+      });
+    } catch (err) {
+      msg.className = "error"; msg.textContent = t("s.failed", { e: err.message });
+    } finally { go.disabled = false; }
+  };
+};
+
 const mapsLink = tl => `https://www.google.com/maps/dir/?api=1&destination=${tl.lat},${tl.lon}&travelmode=walking`;
 
 // ===== Detailansicht & Bewertung =====
@@ -498,11 +576,12 @@ const chip = (label, v) => `<span class="chip ${v === "yes" ? "yes" : v === "no"
 function showToilet(tl, dist) {
   const list = reviews.get(tl.id) || [];
   const a = avg(tl.id);
-  const d = dist ?? (myPos ? distance(myPos, [tl.lat, tl.lon]) : null);
+  const origin = planPos || myPos;
+  const d = dist ?? (origin ? distance(origin, [tl.lat, tl.lon]) : null);
   sheet.innerHTML = `
     ${closeBtn()}
     <h2>${esc(tl.name)}</h2>
-    <div class="muted">${d != null ? t("m.detail.away", { d: fmtDist(d), min: walkMin(d) }) : ""}${t("m.detail.source", { s: esc(tl.source) })}${tl.hours ? t("m.detail.hours", { h: esc(tl.hours) }) : ""}</div>
+    <div class="muted">${d != null ? t(planPos ? "m.detail.awayPlan" : "m.detail.away", { d: fmtDist(d), min: walkMin(d) }) : ""}${t("m.detail.source", { s: esc(tl.source) })}${tl.hours ? t("m.detail.hours", { h: esc(tl.hours) }) : ""}</div>
     <div class="chips">${chip(t("m.chip.free"), feature(tl, "free"))}${chip(t("m.chip.wheelchair"), feature(tl, "wheelchair"))}${chip(t("m.chip.changing"), feature(tl, "changing"))}</div>
     ${a == null ? `<p class="muted empty">${throneMark}<span>${t("m.detail.noReviews")}</span></p>` : `
       <div class="score"><div class="big" style="color:${scoreColor(a)}">${fmtNum(a, 1)}<small> / 5</small></div>
