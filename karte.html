@@ -786,7 +786,8 @@ document.getElementById("btnUser").onclick = () => {
   sheet.innerHTML = `${closeBtn()}
     <h2 class="hello">${throneMark}${t("m.user.hello", { u: esc(user.username) })}</h2>
     ${user.isAdmin ? `<span class="badge">👑 ${t("mod.admin")}</span>` : ""}
-    <div class="actions">${user.isAdmin ? `<button type="button" class="btn primary" id="reports">${t("mod.reports", { n: user.openReports })}</button>` : ""}
+    <div class="actions">${user.isAdmin ? `<button type="button" class="btn primary" id="reports">${t("mod.reports", { n: user.openReports })}</button>
+    <button type="button" class="btn primary" id="users">${t("adm.users")}</button>` : ""}
     <button type="button" class="btn" id="logout">${t("auth.logout")}</button>
     <button type="button" class="btn" id="rename">${t("acc.rename")}</button>
     <button type="button" class="btn" id="changePw">${t("acc.changePw")}</button>
@@ -796,8 +797,24 @@ document.getElementById("btnUser").onclick = () => {
   document.getElementById("changePw").onclick = showNewPassword;
   document.getElementById("rename").onclick = showRename;
   document.getElementById("delAcc").onclick = showDeleteAccount;
-  if (user.isAdmin) document.getElementById("reports").onclick = showReports;
+  if (user.isAdmin) { document.getElementById("reports").onclick = showReports; document.getElementById("users").onclick = showUsers; }
 };
+
+// Admin: Übersicht aller Konten (ohne E-Mail-Adressen)
+async function showUsers() {
+  const { data, error } = await db.rpc("admin_users");
+  const date = d => new Date(d).toLocaleDateString(LOCALE);
+  const list = data ?? [];
+  sheet.innerHTML = `${closeBtn()}
+    <h2>${t("adm.usersTitle")}</h2>
+    ${error ? `<p class="error">${t("adm.failed", { e: esc(error.message) })}</p>` : `<p class="muted">${t("adm.summary", { n: list.length, c: list.filter(u => u.confirmed).length })}</p>`}
+    ${list.map(u => `<div class="report-item">
+      <strong>${u.username ? esc(u.username) : `<span class="muted">${t("adm.noName")}</span>`}</strong>${u.is_admin ? ` <span class="badge">👑 ${t("mod.admin")}</span>` : ""}
+      <div class="muted">${t("adm.since", { d: date(u.created_at) })} · ${u.last_sign_in_at ? t("adm.last", { d: date(u.last_sign_in_at) }) : t("adm.never")}${u.confirmed ? "" : " · " + t("adm.unconfirmed")}</div>
+      <div class="muted">${t("adm.counts", { r: u.reviews, t: u.toilets })}</div>
+    </div>`).join("")}`;
+  sheet.hidden = false;
+}
 
 // ===== Passwort vergessen / neues Passwort / Konto löschen =====
 function showForgot(after) {

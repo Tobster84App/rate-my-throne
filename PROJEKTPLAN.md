@@ -1,6 +1,6 @@
 # Rate My Throne – Projektplan
 
-Stand: 30.10.2026 · Version 0.8
+Stand: 02.11.2026 · Version 0.9
 
 ## ⚠️ Vor dem offiziellen Start (Pflicht)
 - [x] Impressum: Name, Anschrift, E-Mail eingetragen (30.10.2026)
@@ -14,7 +14,7 @@ Stand: 30.10.2026 · Version 0.8
 ## Stand
 - Startseite (index.html): Erklärung, Live-Zahlen aus der Datenbank, Registrierung/Anmeldung, FAQ
 - Karte (karte.html): öffentliche Toiletten aus OpenStreetMap, Bewertungen, Infokarte, „Nächste Toilette finden“ mit Route in Google Maps
-- Online: https://www.rate-my-throne.com (alte Adresse tobster84app.github.io/rate-my-throne/ leitet weiter)
+- Online: https://www.rate-my-throne.com (alte Adresse tobster84app.github.io/rate-my-throne/ leitet weiter; rate-my-throne.de, rate-my-throne.net und ratemythrone.de leiten bei All-Inkl auf die .com-Adresse weiter)
 - Datenbank & Konten: Supabase (Projekt „Rate My Throne“, eu-west-1)
 - Code: https://github.com/Tobster84App/rate-my-throne (Kopie in Google Drive)
 
@@ -30,6 +30,7 @@ Stand: 30.10.2026 · Version 0.8
 - Mail-Vorlagen DE/EN für alle sechs Supabase-Mails (supabase/email-templates, erzeugt mit build.py, in Supabase von Hand eingetragen)
 - Mail-Links führen auf die Karte und werden erst nach Klick auf „Weiter“ eingelöst (Schutz vor Link-Scannern in Firmen-Postfächern)
 - Filter: kostenlos, barrierefrei, Wickeltisch, ab 4 Sternen, nur bewertete (Toiletten ohne Angabe bleiben sichtbar, „Nächsten Thron finden“ beachtet die Filter)
+- Nutzer-Übersicht für Admins (Benutzername, Registrierung, letzte Anmeldung, Zahl der Bewertungen/Toiletten; ohne E-Mail-Adressen), Skript supabase/migrations/20261102_admin_users.sql
 
 ## Nächste Schritte
 1. Mail-Limit in Supabase (Authentication → Rate Limits) von 30 auf ca. 100 pro Stunde erhöhen
