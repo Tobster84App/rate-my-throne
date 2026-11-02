@@ -110,6 +110,7 @@ section { padding-block: clamp(64px, 9vw, 104px); }
 /* Werbefilm */
 .film { padding-block: clamp(48px, 7vw, 80px) 0; }
 .film video { display: block; width: 100%; height: auto; border-radius: 20px; box-shadow: var(--shadow); background: var(--royal); }
+.film video.portrait { width: auto; max-width: 100%; max-height: 80vh; margin: 0 auto; }
 
 /* Vorab planen */
 .plan-demo { gap: 12px; }
@@ -208,6 +209,14 @@ footer a { color: var(--muted); }
              poster="media/rate-my-throne-werbefilm-16x9-poster.jpg" data-i18n-aria-label="h.film.aria">
         <source src="media/rate-my-throne-werbefilm-16x9-stumm.mp4" type="video/mp4">
       </video>
+      <script>
+        // Handy im Hochformat: Hochformat-Fassung des Films zeigen
+        if (matchMedia("(max-width: 640px) and (orientation: portrait)").matches) {
+          const v = document.currentScript.previousElementSibling;
+          v.classList.add("portrait"); v.removeAttribute("poster");
+          v.querySelector("source").src = "media/rate-my-throne-werbefilm-9x16.mp4"; v.load();
+        }
+      </script>
     </div>
   </section>
 
