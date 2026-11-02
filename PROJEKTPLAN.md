@@ -32,6 +32,7 @@ Stand: 02.11.2026 · Version 0.9
 - Filter: kostenlos, barrierefrei, Wickeltisch, ab 4 Sternen, nur bewertete (Toiletten ohne Angabe bleiben sichtbar, „Nächsten Thron finden“ beachtet die Filter)
 - Nutzer-Übersicht für Admins (Benutzername, Registrierung, letzte Anmeldung, Zahl der Bewertungen/Toiletten; ohne E-Mail-Adressen), Skript supabase/migrations/20261102_admin_users.sql
 - Ortssuche (Nominatim/OpenStreetMap) zum Vorplanen: gesuchter Ort ersetzt den eigenen Standort für „Nächsten Thron finden“ und die Entfernungen; Datenschutzerklärung ergänzt
+- Startseite: Abschnitt „Vorab planen“ (Ortssuche, Filter, mit Kind) mit Knopf, der die Ortssuche direkt öffnet; FAQ aktualisiert
 
 ## Nächste Schritte
 1. Mail-Limit in Supabase (Authentication → Rate Limits) von 30 auf ca. 100 pro Stunde erhöhen

@@ -1091,6 +1091,8 @@ map.on("click", e => {
 });
 
 refreshUser(); loadToilets(); handleEmailLink();
+// Von der Startseite „Ort suchen“: Suchfenster gleich öffnen
+if (new URLSearchParams(location.search).has("suche")) { history.replaceState(null, "", location.pathname); document.getElementById("btnSearch").click(); }
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 </body>

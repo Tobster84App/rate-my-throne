@@ -107,6 +107,18 @@ section { padding-block: clamp(64px, 9vw, 104px); }
 .quote { margin: 0; font-size: 15px; border-top: 1px solid var(--line); padding-top: 12px; }
 .quote cite { display: block; color: var(--muted); font-style: normal; font-size: 13px; margin-top: 4px; }
 
+/* Vorab planen */
+.plan-demo { gap: 12px; }
+.plan-demo .fake-search { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-size: 15px; }
+.plan-demo .fake-search svg { width: 18px; height: 18px; flex: none; color: var(--muted); }
+.plan-demo .chip { background: var(--line); color: var(--muted); }
+.plan-demo .chip.on { background: var(--gold); color: var(--royal); }
+.plan-demo .hit { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; background: var(--surface); border-radius: 12px; padding: 12px 14px; border: 1px solid var(--line); }
+.plan-demo .hit .pin-mini { width: 30px; height: 30px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); background: var(--good); display: grid; place-items: center; }
+.plan-demo .hit .pin-mini b { transform: rotate(45deg); color: #fff; font: 800 11px/1 var(--display); }
+.plan-demo .hit small { display: block; color: var(--muted); font-size: 13px; }
+.plan-demo .hit .dist { font-weight: 700; font-size: 14px; white-space: nowrap; }
+
 /* Mitmachen */
 .join { background: radial-gradient(120% 120% at 0% 0%, var(--royal-2), var(--royal) 60%, var(--royal-3)); color: #fff; position: relative; overflow: hidden; }
 .join .crown-bg { right: auto; left: -12%; opacity: .1; transform: translateY(-50%) rotate(10deg); }
@@ -235,6 +247,31 @@ footer a { color: var(--muted); }
         <div class="bar"><span data-i18n="cat.access"></span><i style="--w:88%"></i><b class="num1" data-v="4.4">4,4</b></div>
         <div class="chips"><span class="chip" data-i18n="h.sample.chip1"></span><span class="chip" data-i18n="h.sample.chip2"></span></div>
         <p class="quote"><span data-i18n="h.sample.quote"></span><cite data-i18n="h.sample.cite"></cite></p>
+      </aside>
+    </div>
+  </section>
+
+  <section id="vorplanen">
+    <div class="wrap split">
+      <div>
+        <span class="eyebrow" data-i18n="h.plan.eyebrow">Vorab planen</span>
+        <h2 style="margin-top:12px" data-i18n="h.plan.title"></h2>
+        <p class="lead" data-i18n="h.plan.lead"></p>
+        <ul class="checks">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#e3b341"/><path d="m7 12.5 3.2 3L17 9" stroke="#2a1f4d" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div><b data-i18n="h.plan.c1.title"></b><span data-i18n="h.plan.c1.text"></span></div></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#e3b341"/><path d="m7 12.5 3.2 3L17 9" stroke="#2a1f4d" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div><b data-i18n="h.plan.c2.title"></b><span data-i18n="h.plan.c2.text"></span></div></li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#e3b341"/><path d="m7 12.5 3.2 3L17 9" stroke="#2a1f4d" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div><b data-i18n="h.plan.c3.title"></b><span data-i18n="h.plan.c3.text"></span></div></li>
+        </ul>
+        <div class="ctas" style="margin-top:24px"><a class="btn royal" href="karte.html?suche=1" data-i18n="h.plan.cta">Ort suchen</a></div>
+      </div>
+      <aside class="sample plan-demo" data-i18n-aria-label="h.plan.aria">
+        <span class="tag" data-i18n="h.sample.tag">Beispiel</span>
+        <div class="fake-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><span data-i18n="h.plan.demoQuery"></span></div>
+        <div class="chips"><span class="chip on" data-i18n="h.plan.demoF1"></span><span class="chip on" data-i18n="h.plan.demoF2"></span><span class="chip" data-i18n="h.plan.demoF3"></span></div>
+        <div class="hit"><span class="pin-mini"><b class="num1" data-v="4.6">4,6</b></span><div><b data-i18n="h.plan.demoName"></b><small data-i18n="h.plan.demoInfo"></small></div><span class="dist" data-i18n="h.plan.demoDist"></span></div>
       </aside>
     </div>
   </section>
