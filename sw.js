@@ -16,6 +16,8 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
+  // Videos nicht zwischenspeichern (groß, werden in Teilstücken geladen)
+  if (url.pathname.includes("/media/")) return;
   e.respondWith(
     fetch(e.request)
       .then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return res; })

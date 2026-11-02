@@ -107,6 +107,10 @@ section { padding-block: clamp(64px, 9vw, 104px); }
 .quote { margin: 0; font-size: 15px; border-top: 1px solid var(--line); padding-top: 12px; }
 .quote cite { display: block; color: var(--muted); font-style: normal; font-size: 13px; margin-top: 4px; }
 
+/* Werbefilm */
+.film { padding-block: clamp(48px, 7vw, 80px) 0; }
+.film video { display: block; width: 100%; height: auto; border-radius: 20px; box-shadow: var(--shadow); background: var(--royal); }
+
 /* Vorab planen */
 .plan-demo { gap: 12px; }
 .plan-demo .fake-search { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-size: 15px; }
@@ -197,6 +201,16 @@ footer a { color: var(--muted); }
 </div>
 
 <main>
+  <!-- Werbefilm (stumm, Endlosschleife). Ohne Videodatei bleibt der Abschnitt ausgeblendet. -->
+  <section class="film" id="film" hidden>
+    <div class="wrap">
+      <video autoplay muted loop playsinline preload="metadata"
+             poster="media/rate-my-throne-werbefilm-16x9-poster.jpg" data-i18n-aria-label="h.film.aria">
+        <source src="media/rate-my-throne-werbefilm-16x9-stumm.mp4" type="video/mp4">
+      </video>
+    </div>
+  </section>
+
   <section id="so-gehts">
     <div class="wrap">
       <div class="section-head">
@@ -428,6 +442,13 @@ async function showSession() {
   $("navJoin").textContent = t("h.nav.map"); $("navJoin").href = "karte.html";
 }
 $("logout").onclick = async e => { e.preventDefault(); await db.auth.signOut(); location.reload(); };
+
+// Werbefilm erst zeigen, wenn die Datei geladen werden kann; bei „Bewegung reduzieren“ nicht automatisch abspielen
+const film = document.querySelector("#film video");
+film.addEventListener("loadedmetadata", () => { $("film").hidden = false; });
+if (film.readyState >= 1) $("film").hidden = false;
+film.querySelector("source").addEventListener("error", () => { $("film").hidden = true; });
+if (matchMedia("(prefers-reduced-motion: reduce)").matches) { film.removeAttribute("autoplay"); film.pause(); film.controls = true; }
 
 loadStats(); showSession();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});

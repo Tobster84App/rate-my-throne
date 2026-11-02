@@ -35,6 +35,7 @@ Stand: 02.11.2026 · Version 0.9
 - Nutzer-Übersicht für Admins (Benutzername, Registrierung, letzte Anmeldung, Zahl der Bewertungen/Toiletten; ohne E-Mail-Adressen), Skript supabase/migrations/20261102_admin_users.sql
 - Ortssuche (Nominatim/OpenStreetMap) zum Vorplanen: gesuchter Ort ersetzt den eigenen Standort für „Nächsten Thron finden“ und die Entfernungen; Datenschutzerklärung ergänzt
 - Startseite: Abschnitt „Vorab planen“ (Ortssuche, Filter, mit Kind) mit Knopf, der die Ortssuche direkt öffnet; FAQ aktualisiert
+- Startseite: Werbefilm (stumm, Endlosschleife) unter den Zahlen; erscheint erst, wenn media/rate-my-throne-werbefilm-16x9-stumm.mp4 und das Poster-Bild im Repository liegen
 
 ## Nächste Schritte
 1. Mail-Limit in Supabase (Authentication → Rate Limits) von 30 auf ca. 100 pro Stunde erhöhen
