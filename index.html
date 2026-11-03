@@ -213,7 +213,7 @@ footer a { color: var(--muted); }
         // Handy im Hochformat: Hochformat-Fassung des Films zeigen
         if (matchMedia("(max-width: 640px) and (orientation: portrait)").matches) {
           const v = document.currentScript.previousElementSibling;
-          v.classList.add("portrait"); v.removeAttribute("poster");
+          v.classList.add("portrait"); v.poster = "media/rate-my-throne-werbefilm-9x16-poster.jpg";
           v.querySelector("source").src = "media/rate-my-throne-werbefilm-9x16.mp4"; v.load();
         }
       </script>
