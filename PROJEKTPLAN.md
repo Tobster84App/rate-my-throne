@@ -35,13 +35,14 @@ Stand: 02.11.2026 · Version 0.9
 - Nutzer-Übersicht für Admins (Benutzername, Registrierung, letzte Anmeldung, Zahl der Bewertungen/Toiletten; ohne E-Mail-Adressen), Skript supabase/migrations/20261102_admin_users.sql
 - Ortssuche (Nominatim/OpenStreetMap) zum Vorplanen: gesuchter Ort ersetzt den eigenen Standort für „Nächsten Thron finden“ und die Entfernungen; Datenschutzerklärung ergänzt
 - Startseite: Abschnitt „Vorab planen“ (Ortssuche, Filter, mit Kind) mit Knopf, der die Ortssuche direkt öffnet; FAQ aktualisiert
+- Aktualität: „zuletzt geprüft“, Kurzmeldungen mit Konto (ok/kein Papier/verschmutzt/geschlossen/defekt, 1 pro Stunde, 48 Std. sichtbar), Daumen hoch/runter ohne Konto (Bremse 30/Stunde je Toilette, 1 pro Tag im Browser)
+- Bewertungen mit Detail-Kriterien (Papier, Seife, Handtrocknung, Geruch, Schloss) und Familie (Kinderwagen, Kindersitz, familienfreundlich); Abzeichen und Filter „Familienfreundlich“; Skript supabase/migrations/20261103_status_details.sql
 - Startseite: Werbefilm (stumm, Endlosschleife) unter den Zahlen; auf Handys im Hochformat die Fassung 9x16; Dateien in media/ (je ca. 2 MB, ohne Tonspur, Poster = Schlussbild)
 
 ## Nächste Schritte
 1. Mail-Limit in Supabase (Authentication → Rate Limits) von 30 auf ca. 100 pro Stunde erhöhen
 2. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten, dann Cookie-Einwilligung nötig
 3. Später: Rankings mit Humor („Thron der Woche“, beste/schlimmste Throne einer Stadt, Ehrentitel für fleißige Bewertende)
-4. In Arbeit: Aktualität (Kurzmeldungen, „zuletzt geprüft“), Detail-Kriterien in Bewertungen, Familienfreundlich-Kennzeichnung
 
 ## Toiletten-Daten (seit 29.10.2026)
 - OSM-Toiletten liegen in unserer Datenbank (Tabelle osm_toilets), die App fragt Overpass nicht mehr direkt

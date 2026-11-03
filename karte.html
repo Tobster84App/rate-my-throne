@@ -155,6 +155,15 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
 .report-form label.check { margin-top: 4px; }
 .badge { display: inline-block; font-size: 12px; font-weight: 700; color: var(--royal); background: var(--gold); border-radius: 999px; padding: 3px 10px; margin: 2px 0 6px; }
 .report-item { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px; }
+.live { background: var(--bg); border-radius: 12px; padding: 10px 12px; margin: 8px 0; font-size: 13px; display: grid; gap: 6px; }
+.live .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.live .tag { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; font-size: 12px; }
+.live .tag.warn { border-color: var(--bad); color: var(--bad); }
+.live .btn.small { padding: 5px 12px; }
+.crit { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; font-size: 13px; color: var(--muted); margin: 6px 0 2px; }
+.crit b { color: var(--fg); font-weight: 600; }
+fieldset { border: 1px solid var(--line); border-radius: 12px; padding: 4px 12px 10px; margin: 12px 0 0; }
+legend { font-weight: 600; font-size: 14px; padding: 0 4px; }
 
 /* Handy: Infokarte oben als kompakte Leiste */
 @media (max-width: 640px) {
@@ -245,6 +254,7 @@ let planPos = null;              // [lat, lon] eines gesuchten Ortes (Toilettenp
 let nearestId = null;            // hervorgehobene Toilette
 const toilets = new Map();       // id -> toilet (OSM und eigene)
 const reviews = new Map();       // toiletId -> [review]
+const live = new Map();          // toiletId -> { reports: [...], votes: [...] } (letzte 90 Tage)
 
 const CATS = ["clean", "equip", "access"].map(key => ({ key, label: t("cat." + key) }));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -280,7 +290,7 @@ function markerIcon(tl) {
 
 // ===== Filter: kostenlos, barrierefrei, Wickeltisch, ab 4 Sternen, nur bewertete =====
 // Toiletten ohne Angabe bleiben bei den Ausstattungs-Filtern sichtbar; ausgeblendet wird nur, was ausdrücklich nicht passt.
-const FILTERS = ["free", "wheelchair", "changing", "good", "rated"];
+const FILTERS = ["free", "wheelchair", "changing", "family", "good", "rated"];
 let filters = new Set();
 try { filters = new Set(JSON.parse(localStorage.getItem("rmt-filters") || "[]").filter(f => FILTERS.includes(f))); } catch {}
 
@@ -288,6 +298,12 @@ try { filters = new Set(JSON.parse(localStorage.getItem("rmt-filters") || "[]").
 // Ergebnis: "yes", "no", "limited" oder undefined (noch keine Angabe)
 function feature(tl, key) {
   const list = reviews.get(tl.id) || [];
+  if (key === "family") {
+    // Nur aus Bewertungen: „ja“, wenn mindestens die Hälfte der Bewertungen mit Angabe es ankreuzt
+    const rated = list.filter(r => r.family != null);
+    if (!rated.length) return undefined;
+    return rated.filter(r => r.family).length * 2 >= rated.length ? "yes" : "no";
+  }
   const reviewKey = { free: "free", wheelchair: "barrierfree", changing: "changing" }[key];
   const tag = key === "free" ? (tl.fee === "no" ? "yes" : tl.fee === "yes" ? "no" : undefined) : tl[key];
   if (tag === "yes" || (list.length && list.filter(r => r[reviewKey]).length * 2 >= list.length)) return "yes";
@@ -297,7 +313,8 @@ function passes(tl) {
   for (const f of filters) {
     if (f === "rated" && avg(tl.id) == null) return false;
     if (f === "good" && !(avg(tl.id) >= 4)) return false;
-    if (f !== "rated" && f !== "good" && feature(tl, f) === "no") return false;
+    if (f === "family" && feature(tl, "family") !== "yes") return false;
+    if (["free", "wheelchair", "changing"].includes(f) && feature(tl, f) === "no") return false;
   }
   return true;
 }
@@ -402,6 +419,14 @@ async function loadReviews(ids) {
     if (error) throw new Error(t("m.err.reviews") + ": " + error.message);
     for (const id of chunk) reviews.set(id, []);
     for (const r of data) reviews.get(r.toilet_ref).push(r);
+    // Kurzmeldungen und Daumen (fehlen die Tabellen noch, bleibt es einfach leer)
+    const since = new Date(Date.now() - 90 * 864e5).toISOString();
+    const [rep, vot] = await Promise.all([
+      db.from("toilet_reports").select("toilet_ref,kind,created_at,user_id").in("toilet_ref", chunk).gte("created_at", since).order("created_at", { ascending: false }),
+      db.from("toilet_votes").select("toilet_ref,up,created_at").in("toilet_ref", chunk).gte("created_at", since)]);
+    for (const id of chunk) live.set(id, { reports: [], votes: [] });
+    (rep.data ?? []).forEach(r => live.get(r.toilet_ref)?.reports.push(r));
+    (vot.data ?? []).forEach(v => live.get(v.toilet_ref)?.votes.push(v));
   }
 }
 
@@ -582,7 +607,8 @@ function showToilet(tl, dist) {
     ${closeBtn()}
     <h2>${esc(tl.name)}</h2>
     <div class="muted">${d != null ? t(planPos ? "m.detail.awayPlan" : "m.detail.away", { d: fmtDist(d), min: walkMin(d) }) : ""}${t("m.detail.source", { s: esc(tl.source) })}${tl.hours ? t("m.detail.hours", { h: esc(tl.hours) }) : ""}</div>
-    <div class="chips">${chip(t("m.chip.free"), feature(tl, "free"))}${chip(t("m.chip.wheelchair"), feature(tl, "wheelchair"))}${chip(t("m.chip.changing"), feature(tl, "changing"))}</div>
+    <div class="chips">${chip(t("m.chip.free"), feature(tl, "free"))}${chip(t("m.chip.wheelchair"), feature(tl, "wheelchair"))}${chip(t("m.chip.changing"), feature(tl, "changing"))}${feature(tl, "family") === "yes" ? `<span class="chip yes">${t("m.chip.family")}</span>` : ""}</div>
+    <div class="live" id="liveBox">${liveHtml(tl)}</div>
     ${a == null ? `<p class="muted empty">${throneMark}<span>${t("m.detail.noReviews")}</span></p>` : `
       <div class="score"><div class="big" style="color:${scoreColor(a)}">${fmtNum(a, 1)}<small> / 5</small></div>
       <div class="muted">${list.length === 1 ? t("m.detail.count1") : t("m.detail.countN", { n: list.length })}</div></div>
@@ -590,7 +616,7 @@ function showToilet(tl, dist) {
       <div class="bars">${CATS.map(c => {
         const m = list.reduce((s, r) => s + r[c.key], 0) / list.length;
         return `<div class="bar"><span>${c.label}</span><i style="--w:${m / 5 * 100}%"></i><b>${fmtNum(m, 1)}</b></div>`;
-      }).join("")}</div>`}
+      }).join("")}</div>${critHtml(list)}`}
     <div class="actions">
       <a class="btn gold" href="${mapsLink(tl)}" target="_blank" rel="noopener">${t("m.detail.route")}</a>
       <span id="formArea"></span>
@@ -604,6 +630,7 @@ function showToilet(tl, dist) {
   sheet.hidden = false;
   bindReviewActions(tl);
   bindToiletDelete(tl);
+  bindLive(tl);
   const area = document.getElementById("formArea");
   if (!user) {
     area.innerHTML = `<button type="button" class="btn primary" id="loginToRate">${t("m.detail.loginToRate")}</button>`;
@@ -644,6 +671,75 @@ function bindToiletDelete(tl) {
     render();
     sheet.innerHTML = `${closeBtn()}<p class="muted empty">${throneMark}<span>${t("toilet.deleted")}</span></p>`;
   };
+}
+
+// ===== Aktualität: „zuletzt geprüft“, Kurzmeldungen (mit Konto) und Daumen (ohne Konto) =====
+const LIVE_KINDS = ["ok", "no_paper", "dirty", "closed", "broken"];
+const LIVE_HOURS = 48;
+function ago(date) {
+  const min = Math.round((Date.now() - new Date(date)) / 60000);
+  if (min < 2) return t("ago.now");
+  if (min < 60) return t("ago.min", { n: min });
+  if (min < 24 * 60) return t("ago.h", { n: Math.round(min / 60) });
+  const d = Math.round(min / 1440);
+  return d === 1 ? t("ago.d1") : t("ago.d", { n: d });
+}
+function liveHtml(tl) {
+  const l = live.get(tl.id) || { reports: [], votes: [] };
+  const times = [...l.reports, ...l.votes, ...(reviews.get(tl.id) || [])].map(x => Date.parse(x.created_at));
+  const last = times.length ? Math.max(...times) : null;
+  const cut = Date.now() - LIVE_HOURS * 36e5;
+  const recent = l.reports.filter(r => Date.parse(r.created_at) >= cut);
+  const latest = LIVE_KINDS.map(k => recent.find(r => r.kind === k)).filter(Boolean);   // je Art die neueste
+  const votes = l.votes.filter(v => Date.parse(v.created_at) >= cut);
+  const up = votes.filter(v => v.up).length, down = votes.length - up;
+  const voted = localVote(tl.id);
+  return `<div><b>${last ? t("live.checked", { ago: ago(last) }) : t("live.never")}</b></div>
+    ${latest.length ? `<div class="row">${latest.map(r => `<span class="tag ${r.kind === "ok" ? "" : "warn"}">${t("live.k." + r.kind)} · ${ago(r.created_at)}</span>`).join("")}</div>` : ""}
+    ${votes.length ? `<div class="muted">${t("live.votes", { up, down })}</div>` : ""}
+    ${user ? `<div class="row"><button type="button" class="btn small" id="liveAsk">${t("live.ask")}</button></div>
+      <div class="row" id="liveKinds" hidden>${LIVE_KINDS.map(k => `<button type="button" class="btn small" data-kind="${k}">${t("live.k." + k)}</button>`).join("")}</div>`
+    : `<div class="row"><span>${t("live.voteHint")}</span><button type="button" class="btn small" data-vote="1" ${voted ? "disabled" : ""}>👍</button><button type="button" class="btn small" data-vote="0" ${voted ? "disabled" : ""}>👎</button></div>
+      <div class="muted">${voted ? t("live.votedAlready") : t("live.loginMore")}</div>`}
+    <p class="error" id="liveMsg"></p>`;
+}
+// Ohne Konto: höchstens ein Daumen pro Toilette und Tag (im Browser gemerkt)
+function localVote(id, set) {
+  try {
+    const all = JSON.parse(localStorage.getItem("rmt-votes") || "{}");
+    if (set) { all[id] = Date.now(); localStorage.setItem("rmt-votes", JSON.stringify(all)); return true; }
+    return all[id] && Date.now() - all[id] < 864e5;
+  } catch { return false; }
+}
+function bindLive(tl) {
+  const box = document.getElementById("liveBox"), msg = () => document.getElementById("liveMsg");
+  const refresh = () => { box.innerHTML = liveHtml(tl); bindLive(tl); };
+  const entry = () => { if (!live.has(tl.id)) live.set(tl.id, { reports: [], votes: [] }); return live.get(tl.id); };
+  const ask = document.getElementById("liveAsk");
+  if (ask) ask.onclick = () => { document.getElementById("liveKinds").hidden = false; ask.hidden = true; };
+  box.querySelectorAll("[data-kind]").forEach(btn => btn.onclick = async () => {
+    const { data, error } = await db.from("toilet_reports").insert({ toilet_ref: tl.id, kind: btn.dataset.kind }).select("toilet_ref,kind,created_at,user_id").single();
+    if (error) { msg().textContent = error.code === "42501" ? t("live.tooSoon") : t("live.failed", { e: error.message }); return; }
+    entry().reports.unshift(data); refresh(); msg().className = "ok"; msg().textContent = t("live.thanks");
+  });
+  box.querySelectorAll("[data-vote]").forEach(btn => btn.onclick = async () => {
+    const up = btn.dataset.vote === "1";
+    const { error } = await db.rpc("vote_toilet", { ref: tl.id, is_up: up });
+    if (error) { msg().textContent = t("live.failed", { e: error.message }); return; }
+    localVote(tl.id, true);
+    entry().votes.push({ toilet_ref: tl.id, up, created_at: new Date().toISOString() });
+    refresh(); msg().className = "ok"; msg().textContent = t("live.thanks");
+  });
+}
+
+// Detail-Kriterien aus den Bewertungen: „Papier: 4 von 5“ (nur Bewertungen mit Angabe zählen)
+const CRITS = ["paper", "soap", "dryer", "smell_ok", "lock_ok", "stroller", "kids_seat"];
+function critHtml(list) {
+  const rows = CRITS.map(k => {
+    const rated = list.filter(r => r[k] != null);
+    return rated.length ? `<span>${t("crit." + k)}: <b>${t("crit.of", { k: rated.filter(r => r[k]).length, n: rated.length })}</b></span>` : "";
+  }).filter(Boolean);
+  return rows.length ? `<div class="muted">${t("crit.title")}</div><div class="crit">${rows.join("")}</div>` : "";
 }
 
 // Gesamtnote einer einzelnen Bewertung
@@ -775,6 +871,10 @@ function showRatingForm(tl) {
     <label class="check"><input type="checkbox" id="fFree"> ${t("m.rate.free")}</label>
     <label class="check"><input type="checkbox" id="fBarrier"> ${t("m.rate.barrierfree")}</label>
     <label class="check"><input type="checkbox" id="fChanging"> ${t("m.rate.changing")}</label>
+    <fieldset><legend>${t("crit.title")}</legend>
+    ${["paper", "soap", "dryer", "smell_ok", "lock_ok"].map(k => `<label class="check"><input type="checkbox" data-crit="${k}"> ${t("crit." + k)}</label>`).join("")}</fieldset>
+    <fieldset><legend>${t("crit.kidsTitle")}</legend>
+    ${["stroller", "kids_seat", "family"].map(k => `<label class="check"><input type="checkbox" data-crit="${k}"> ${t("crit." + k)}</label>`).join("")}</fieldset>
     <label for="fText">${t("m.rate.comment")}</label>
     <textarea id="fText" rows="3" maxlength="500" placeholder="${t("m.rate.placeholder")}"></textarea>
     <p class="error" id="rateErr"></p>
@@ -793,7 +893,8 @@ function showRatingForm(tl) {
     e.preventDefault();
     const err = document.getElementById("rateErr");
     if (CATS.some(c => !vals[c.key])) { err.textContent = t("m.rate.missing"); return; }
-    const { data, error } = await db.from("reviews").insert({ toilet_ref: tl.id, ...vals,
+    const crits = Object.fromEntries([...sheet.querySelectorAll("[data-crit]")].map(c => [c.dataset.crit, c.checked]));
+    const { data, error } = await db.from("reviews").insert({ toilet_ref: tl.id, ...vals, ...crits,
       free: fFree.checked, barrierfree: fBarrier.checked, changing: fChanging.checked,
       comment: fText.value.trim() || null }).select("*, profiles(username)").single();
     if (error) { err.textContent = error.code === "42501" ? t("hist.tooSoon") : t("m.rate.failed", { e: error.message }); return; }
