@@ -164,6 +164,11 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
 .crit b { color: var(--fg); font-weight: 600; }
 fieldset { border: 1px solid var(--line); border-radius: 12px; padding: 4px 12px 10px; margin: 12px 0 0; }
 legend { font-weight: 600; font-size: 14px; padding: 0 4px; }
+.tri { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 14px; }
+.tri span { flex: 1; }
+.tri button { border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-size: 13px; }
+.tri button[aria-pressed="true"][data-v="1"] { background: var(--good); border-color: var(--good); color: #fff; }
+.tri button[aria-pressed="true"][data-v="0"] { background: var(--bad); border-color: var(--bad); color: #fff; }
 
 /* Handy: Infokarte oben als kompakte Leiste */
 @media (max-width: 640px) {
@@ -871,10 +876,9 @@ function showRatingForm(tl) {
     <label class="check"><input type="checkbox" id="fFree"> ${t("m.rate.free")}</label>
     <label class="check"><input type="checkbox" id="fBarrier"> ${t("m.rate.barrierfree")}</label>
     <label class="check"><input type="checkbox" id="fChanging"> ${t("m.rate.changing")}</label>
-    <fieldset><legend>${t("crit.title")}</legend>
-    ${["paper", "soap", "dryer", "smell_ok", "lock_ok"].map(k => `<label class="check"><input type="checkbox" data-crit="${k}"> ${t("crit." + k)}</label>`).join("")}</fieldset>
-    <fieldset><legend>${t("crit.kidsTitle")}</legend>
-    ${["stroller", "kids_seat", "family"].map(k => `<label class="check"><input type="checkbox" data-crit="${k}"> ${t("crit." + k)}</label>`).join("")}</fieldset>
+    ${[["crit.title", ["paper", "soap", "dryer", "smell_ok", "lock_ok"]], ["crit.kidsTitle", ["stroller", "kids_seat", "family"]]].map(([title, keys]) => `
+    <fieldset><legend>${t(title)}</legend><p class="muted" style="margin:2px 0 0">${t("crit.hint")}</p>
+    ${keys.map(k => `<div class="tri" data-crit="${k}"><span>${t("crit." + k)}</span><button type="button" data-v="1" aria-pressed="false">${t("yes")}</button><button type="button" data-v="0" aria-pressed="false">${t("no")}</button></div>`).join("")}</fieldset>`).join("")}
     <label for="fText">${t("m.rate.comment")}</label>
     <textarea id="fText" rows="3" maxlength="500" placeholder="${t("m.rate.placeholder")}"></textarea>
     <p class="error" id="rateErr"></p>
@@ -883,6 +887,12 @@ function showRatingForm(tl) {
   </form>`;
   sheet.hidden = false;
   document.getElementById("rateCancel").onclick = () => showToilet(tl);
+  // Ja/Nein je Kriterium; nichts gewählt (oder erneut antippen) = keine Angabe
+  sheet.querySelectorAll(".tri button").forEach(btn => btn.onclick = () => {
+    const on = btn.getAttribute("aria-pressed") !== "true";
+    btn.parentElement.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", "false"));
+    btn.setAttribute("aria-pressed", String(on));
+  });
   sheet.querySelectorAll(".stars").forEach(group => {
     group.querySelectorAll("button").forEach(btn => btn.onclick = () => {
       const n = +btn.dataset.n; vals[group.dataset.key] = n;
@@ -893,7 +903,10 @@ function showRatingForm(tl) {
     e.preventDefault();
     const err = document.getElementById("rateErr");
     if (CATS.some(c => !vals[c.key])) { err.textContent = t("m.rate.missing"); return; }
-    const crits = Object.fromEntries([...sheet.querySelectorAll("[data-crit]")].map(c => [c.dataset.crit, c.checked]));
+    const crits = Object.fromEntries([...sheet.querySelectorAll(".tri")].map(row => {
+      const on = row.querySelector('[aria-pressed="true"]');
+      return [row.dataset.crit, on ? on.dataset.v === "1" : null];
+    }));
     const { data, error } = await db.from("reviews").insert({ toilet_ref: tl.id, ...vals, ...crits,
       free: fFree.checked, barrierfree: fBarrier.checked, changing: fChanging.checked,
       comment: fText.value.trim() || null }).select("*, profiles(username)").single();
