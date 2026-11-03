@@ -1,6 +1,6 @@
 # Rate My Throne – Projektplan
 
-Stand: 03.11.2026 · Version 0.12
+Stand: 03.11.2026 · Version 0.13
 
 ## ⚠️ Vor dem offiziellen Start (Pflicht)
 - [x] Impressum: Name, Anschrift, E-Mail eingetragen (30.10.2026)
@@ -44,7 +44,7 @@ Stand: 03.11.2026 · Version 0.12
 - Startseite: Werbefilm (stumm, Endlosschleife) unter den Zahlen; auf Handys im Hochformat die Fassung 9x16; Dateien in media/ (je ca. 2 MB, ohne Tonspur, Poster = Schlussbild)
 
 ## Nächste Schritte
-1. Google Search Console einrichten (Domain-Bestätigung per TXT bei All-Inkl), sitemap.xml einreichen
+1. Google Search Console: eingerichtet und Sitemap eingereicht (03.11.2026); Status „Konnte nicht abgerufen werden“ beobachten, Indexierung für Startseite und /toiletten/ beantragt
 2. Links von anderen Seiten sammeln (Tobias plant das)
 3. Städte-Seiten auch auf Englisch; weitere Orte bei Bedarf in tools/staedte.py ergänzen
 4. Vor Werbung prüfen: GitHub Pages ist nicht für überwiegend kommerzielle Seiten gedacht – ggf. Hoster wechseln

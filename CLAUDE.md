@@ -39,6 +39,6 @@ Karte mit OSM- und eigenen Toiletten, Bewertungen mit Trend, Detail-Kriterien un
 - **GitHub Pages erlaubt laut Nutzungsgrenzen keine Seiten, die „primarily directed at … commercial transactions“ sind** – vor Werbung prüfen, ggf. Hoster wechseln.
 - All-Inkl-Stammdaten: Ort „Bruchsal“ → Schwaigern korrigieren, AV-Vertrag neu erzeugen.
 - SQL `20261102_admin_users.sql` (Nutzer-Übersicht) noch nicht ausgeführt; Knopf „Nutzer“ zeigt bis dahin einen Fehler.
-- Google Search Console einrichten (Mail-Limit auf 100/Std. erledigt).
+- Google Search Console eingerichtet (03.11.2026, Domain-Property per TXT). Sitemap anfangs „Konnte nicht abgerufen werden“ (bei neuen Domains üblich); Indexierung für / und /toiletten/ beantragt. Falls nach einigen Tagen weiter Fehler: zweite Sitemap mit anderem Namen anlegen.
 - Städte-Seiten: Orte stehen in `GROUPS` (tools/staedte.py). Stadtmitte und Straßen kommen per Nominatim (Cache `toiletten/orte.json`, `adressen.json`, max. 1000 Straßenabfragen pro Lauf). Orte, deren OSM-Kacheln noch fehlen (Ausland), werden angefordert und erscheinen beim nächsten Lauf. Seiten nur auf Deutsch.
 - Später: Rankings mit Humor; Werbung (vorher Gewerbe-Frage klären, Cookie-Einwilligung, Datenschutz ergänzen).
