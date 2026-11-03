@@ -1,12 +1,12 @@
 # Rate My Throne – Projektplan
 
-Stand: 02.11.2026 · Version 0.9
+Stand: 03.11.2026 · Version 0.10
 
 ## ⚠️ Vor dem offiziellen Start (Pflicht)
 - [x] Impressum: Name, Anschrift, E-Mail eingetragen (30.10.2026)
 - [ ] Datenschutzerklärung: Verantwortlicher und Dienstleister eingetragen; noch offen: Übermittlungsgrundlage GitHub prüfen, gelbe Markierungen auflösen
 - [ ] Rechtstexte von Fachleuten prüfen lassen (Entwurf ist keine Rechtsberatung)
-- [ ] Cookie-Einwilligung erst nötig, sobald Werbung oder Statistik eingebaut wird (derzeit nur technisch notwendige Speicherung)
+- [ ] Cookie-Einwilligung erst nötig, sobald Werbung oder cookie-basierte Statistik eingebaut wird (derzeit nur technisch notwendige Speicherung; Seitenaufrufe werden ohne Cookies gezählt)
 - [x] Eigene Domain www.rate-my-throne.com: DNS (All-Inkl), GitHub Pages mit HTTPS, Supabase-URLs (30.10.2026)
 - [x] E-Mail-Versand über Brevo (Absender noreply@rate-my-throne.com), Domain bei Brevo authentifiziert, Test-Registrierung erfolgreich (30.10.2026)
 - [x] AV-Vertrag Supabase: seit 01.08.2026 Bestandteil der Nutzungsbedingungen (Antwort Supabase Privacy Team, 02.11.2026); Übermittlung USA/Singapur per EU-Standardvertragsklauseln Modul 2 (TIA vom 14.03.2025)
