@@ -11,7 +11,7 @@ Stand: 03.11.2026. Diese Datei kurz halten und bei wichtigen Änderungen selbst 
 - **Hosting:** GitHub Pages, Repo `Tobster84App/rate-my-throne`, Branch `main` = live. Domain www.rate-my-throne.com (DNS bei All-Inkl; .de/.net/ratemythrone.de leiten dort weiter).
 - **Frontend:** reines HTML/CSS/JS ohne Build. `index.html` (Startseite), `karte.html` (App), `impressum.html`, `datenschutz.html`, `i18n.js` (alle Texte DE/EN), `sw.js` (Service Worker, network-first), `media/` (Werbefilm 16x9/9x16).
 - **Bibliotheken lokal** in `vendor/` (Leaflet 1.9.4, supabase-js 2.45.4, Schriften) – keine CDNs, kein Google Fonts.
-- **Datenbank/Konten:** Supabase, Projekt `bzgeqaseogawdptaqzgq`, eu-west-1. Tabellen u. a. `profiles`, `toilets` (eigene Einträge), `reviews`, `review_reports`, `toilet_reports` (Kurzmeldungen), `toilet_votes` (Daumen), `osm_toilets`/`osm_tiles` (OSM-Kopie). Zugriff über RLS und RPCs (`security definer`).
+- **Datenbank/Konten:** Supabase, Projekt `bzgeqaseogawdptaqzgq`, eu-west-1. Tabellen u. a. `profiles`, `toilets` (eigene Einträge), `reviews`, `review_reports`, `toilet_reports` (Kurzmeldungen), `toilet_votes` (Daumen), `page_views` (Seitenaufrufe je Tag), `osm_toilets`/`osm_tiles` (OSM-Kopie). Zugriff über RLS und RPCs (`security definer`).
 - **Datenquellen:** OpenStreetMap (Toiletten werden per pg_net/pg_cron in die DB importiert, Kacheln 1°), Nominatim (Ortssuche), OSM-Kartenbilder. Namensnennung „© OpenStreetMap-Mitwirkende“ (ODbL).
 - **E-Mail:** Supabase Auth über Brevo-SMTP, Absender noreply@rate-my-throne.com; Vorlagen in `supabase/email-templates/` (erzeugt mit `build.py`, in Supabase von Hand eingetragen). Postfächer info@/admin@ bei All-Inkl.
 
@@ -21,6 +21,7 @@ Stand: 03.11.2026. Diese Datei kurz halten und bei wichtigen Änderungen selbst 
 - **Aktualität:** Kurzmeldungen nur mit Konto (1 pro Person/Toilette/Stunde, 48 Std. sichtbar); ohne Konto nur Daumen hoch/runter (ohne Personendaten, Bremse 30/Stunde je Toilette).
 - **Moderation:** eigene Bewertungen löschen, fremde melden, Admin darf alles. Eingetragene Toiletten löschen: eigene ohne fremde Bewertungen, Admin alle.
 - **Mail-Links** führen auf `karte.html?token_hash=…` und werden erst nach Klick auf „Weiter“ eingelöst (Link-Scanner in Firmen-Postfächern verbrauchten sonst die Einmal-Links).
+- **Statistik:** nur Seitenaufrufe je Seite und Tag zählen (keine Besucher, keine IP, nichts im Browser) – so ohne Cookie-Banner möglich; sichtbar nur für Admins.
 - **Datenschutz:** keine Tracking-/Werbe-Cookies, Standort nur im Browser, Ortssuche nur auf Knopfdruck (Nominatim-Regeln).
 
 ## Arbeitsweise
@@ -30,11 +31,11 @@ Stand: 03.11.2026. Diese Datei kurz halten und bei wichtigen Änderungen selbst 
 - Neue Texte immer in `i18n.js` für DE und EN; Projektplan in `PROJEKTPLAN.md` mitpflegen.
 
 ## Aktueller Stand
-Karte mit OSM- und eigenen Toiletten, Bewertungen mit Trend, Detail-Kriterien und Familien-Abzeichen, Filter (kostenlos, barrierefrei, Wickeltisch, familienfreundlich, ab 4 Sternen, nur bewertete), Ortssuche zum Vorplanen, Kurzmeldungen/Daumen, Konten (Registrierung, Passwort vergessen/ändern, Benutzername ändern, Konto löschen), Moderation, Startseite mit Werbefilm und „Vorab planen“, Impressum, Datenschutz, robots.txt/sitemap.xml.
+Karte mit OSM- und eigenen Toiletten, Bewertungen mit Trend, Detail-Kriterien und Familien-Abzeichen, Filter (kostenlos, barrierefrei, Wickeltisch, familienfreundlich, ab 4 Sternen, nur bewertete), Ortssuche zum Vorplanen, Kurzmeldungen/Daumen, Konten (Registrierung, Passwort vergessen/ändern, Benutzername ändern, Konto löschen), Moderation, Admin-Statistik (Seitenaufrufe), Startseite mit Werbefilm und „Vorab planen“, Impressum, Datenschutz, robots.txt/sitemap.xml.
 
 ## Offene Punkte
 - Datenschutz: Übermittlungsgrundlagen GitHub und Supabase-DPA prüfen; Brevo-Support-Bestätigung ausstehend; Rechtstexte prüfen lassen.
 - All-Inkl-Stammdaten: Ort „Bruchsal“ → Schwaigern korrigieren, AV-Vertrag neu erzeugen.
-- SQL `20261102_admin_users.sql` (Nutzer-Übersicht) noch nicht ausgeführt; Knopf „Nutzer“ zeigt bis dahin einen Fehler.
+- SQL noch nicht ausgeführt: `20261102_admin_users.sql` (Nutzer-Übersicht), `20261103_page_views.sql` (Statistik); die Admin-Knöpfe zeigen bis dahin einen Fehler.
 - Supabase-Mail-Limit auf ca. 100/Stunde erhöhen; Google Search Console einrichten.
 - Später: Rankings mit Humor; Werbung (vorher Gewerbe-Frage klären, Cookie-Einwilligung, Datenschutz ergänzen).

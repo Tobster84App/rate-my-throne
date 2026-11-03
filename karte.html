@@ -160,6 +160,10 @@ input[type=text], input[type=email], input[type=password], textarea { width: 100
 .live .tag { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; font-size: 12px; }
 .live .tag.warn { border-color: var(--bad); color: var(--bad); }
 .live .btn.small { padding: 5px 12px; }
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.kpi { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 2px; }
+.kpi span, .kpi small { color: var(--muted); font-size: 12px; }
+.kpi strong { font: 800 22px/1.1 var(--display); font-variant-numeric: tabular-nums; }
 .crit { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; font-size: 13px; color: var(--muted); margin: 6px 0 2px; }
 .crit b { color: var(--fg); font-weight: 600; }
 fieldset { border: 1px solid var(--line); border-radius: 12px; padding: 4px 12px 10px; margin: 12px 0 0; }
@@ -980,7 +984,8 @@ document.getElementById("btnUser").onclick = () => {
     <h2 class="hello">${throneMark}${t("m.user.hello", { u: esc(user.username) })}</h2>
     ${user.isAdmin ? `<span class="badge">👑 ${t("mod.admin")}</span>` : ""}
     <div class="actions">${user.isAdmin ? `<button type="button" class="btn primary" id="reports">${t("mod.reports", { n: user.openReports })}</button>
-    <button type="button" class="btn primary" id="users">${t("adm.users")}</button>` : ""}
+    <button type="button" class="btn primary" id="users">${t("adm.users")}</button>
+    <button type="button" class="btn primary" id="stats">${t("adm.stats")}</button>` : ""}
     <button type="button" class="btn" id="logout">${t("auth.logout")}</button>
     <button type="button" class="btn" id="rename">${t("acc.rename")}</button>
     <button type="button" class="btn" id="changePw">${t("acc.changePw")}</button>
@@ -990,8 +995,26 @@ document.getElementById("btnUser").onclick = () => {
   document.getElementById("changePw").onclick = showNewPassword;
   document.getElementById("rename").onclick = showRename;
   document.getElementById("delAcc").onclick = showDeleteAccount;
-  if (user.isAdmin) { document.getElementById("reports").onclick = showReports; document.getElementById("users").onclick = showUsers; }
+  if (user.isAdmin) { document.getElementById("reports").onclick = showReports; document.getElementById("users").onclick = showUsers; document.getElementById("stats").onclick = showStats; }
 };
+
+// Admin: Seitenaufrufe (Startseite und Karte) pro Tag
+async function showStats() {
+  const { data, error } = await db.rpc("admin_page_views");
+  const rows = data ?? [];
+  const dayOf = n => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);   // Tage in UTC wie in der Datenbank
+  const sum = (from, page) => rows.filter(r => r.day >= from && (!page || r.page === page)).reduce((s, r) => s + Number(r.views), 0);
+  const perDay = [...Array(14)].map((_, i) => { const d = dayOf(i); return { d, n: sum(d, null) - sum(dayOf(i - 1), null) }; });
+  const max = Math.max(1, ...perDay.map(x => x.n));
+  const cell = (label, from) => `<div class="kpi"><span>${label}</span><strong>${fmtNum(sum(from))}</strong>
+    <small>${t("adm.pHome")} ${fmtNum(sum(from, "home"))} · ${t("adm.pMap")} ${fmtNum(sum(from, "map"))}</small></div>`;
+  sheet.innerHTML = `${closeBtn()}<h2>${t("adm.statsTitle")}</h2>
+    ${error ? `<p class="error">${t("adm.failed", { e: esc(error.message) })}</p>` : !rows.length ? `<p class="muted">${t("adm.noData")}</p>` : `
+    <div class="kpis">${cell(t("adm.today"), dayOf(0))}${cell(t("adm.week"), dayOf(6))}${cell(t("adm.month"), dayOf(29))}${cell(t("adm.total"), "0000")}</div>
+    <div class="bars">${perDay.map(x => `<div class="bar"><span>${new Date(x.d + "T12:00:00Z").toLocaleDateString(LOCALE, { weekday: "short", day: "numeric", month: "numeric" })}</span><i style="--w:${x.n / max * 100}%"></i><b>${fmtNum(x.n)}</b></div>`).join("")}</div>`}
+    <p class="muted">${t("adm.statsHint")}</p>`;
+  sheet.hidden = false;
+}
 
 // Admin: Übersicht aller Konten (ohne E-Mail-Adressen)
 async function showUsers() {
@@ -1205,6 +1228,8 @@ map.on("click", e => {
 });
 
 refreshUser(); loadToilets(); handleEmailLink();
+// Seitenaufruf zählen (nur eine Zahl pro Tag, nichts über die Person); bekannte Roboter nicht mitzählen
+if (!navigator.webdriver && !/bot|crawl|spider|slurp|headless|lighthouse|preview/i.test(navigator.userAgent)) db.rpc("count_view", { p: "map" }).then(() => {}, () => {});
 // Von der Startseite „Ort suchen“: Suchfenster gleich öffnen
 if (new URLSearchParams(location.search).has("suche")) { history.replaceState(null, "", location.pathname); document.getElementById("btnSearch").click(); }
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});

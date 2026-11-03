@@ -460,6 +460,8 @@ film.querySelector("source").addEventListener("error", () => { $("film").hidden 
 if (matchMedia("(prefers-reduced-motion: reduce)").matches) { film.removeAttribute("autoplay"); film.pause(); film.controls = true; }
 
 loadStats(); showSession();
+// Seitenaufruf zählen (nur eine Zahl pro Tag, nichts über die Person); bekannte Roboter nicht mitzählen
+if (!navigator.webdriver && !/bot|crawl|spider|slurp|headless|lighthouse|preview/i.test(navigator.userAgent)) db.rpc("count_view", { p: "home" }).then(() => {}, () => {});
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 </body>

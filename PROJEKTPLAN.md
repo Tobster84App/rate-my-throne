@@ -37,6 +37,7 @@ Stand: 02.11.2026 · Version 0.9
 - Startseite: Abschnitt „Vorab planen“ (Ortssuche, Filter, mit Kind) mit Knopf, der die Ortssuche direkt öffnet; FAQ aktualisiert
 - Aktualität: „zuletzt geprüft“, Kurzmeldungen mit Konto (ok/kein Papier/verschmutzt/geschlossen/defekt, 1 pro Stunde, 48 Std. sichtbar), Daumen hoch/runter ohne Konto (Bremse 30/Stunde je Toilette, 1 pro Tag im Browser)
 - Bewertungen mit Detail-Kriterien (Papier, Seife, Handtrocknung, Geruch, Schloss) und Familie (Kinderwagen, Kindersitz, familienfreundlich); Abzeichen und Filter „Familienfreundlich“; Skript supabase/migrations/20261103_status_details.sql
+- Seitenaufrufe je Tag (Startseite/Karte) ohne Personendaten, Admin-Ansicht „Statistik“; Skript supabase/migrations/20261103_page_views.sql
 - Startseite: Werbefilm (stumm, Endlosschleife) unter den Zahlen; auf Handys im Hochformat die Fassung 9x16; Dateien in media/ (je ca. 2 MB, ohne Tonspur, Poster = Schlussbild)
 
 ## Nächste Schritte
