@@ -27,7 +27,7 @@ Stand: 03.11.2026. Diese Datei kurz halten und bei wichtigen Änderungen selbst 
 ## Arbeitsweise
 - **DB-Änderungen** als SQL-Datei in `supabase/migrations/` committen; Tobias führt sie über den Raw-GitHub-Link im Supabase SQL Editor aus (apply_migration-Rückfragen erreichen ihn nicht). `execute_sql` nur zum Lesen/Prüfen.
 - **Tests:** Playwright mit nachgebauten Supabase-Antworten (Scratchpad), vor jedem Commit.
-- **Google-Drive-Kopie** (Ordner „Rate My Throne“) nach Änderungen aktualisieren; alte Versionen in den Papierkorb.
+- **Google-Drive-Kopie** (Ordner „Rate My Throne“): nur Dokumente (Projektplan, CLAUDE.md, SQL-Skripte, Verträge, Anschreiben) nach Änderungen aktualisieren, alte Versionen in den Papierkorb. Code nicht im Drive – Sicherung über GitHub (Code → Download ZIP).
 - Neue Texte immer in `i18n.js` für DE und EN; Projektplan in `PROJEKTPLAN.md` mitpflegen.
 
 ## Aktueller Stand
