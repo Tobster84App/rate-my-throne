@@ -17,14 +17,51 @@ BASE = "https://www.rate-my-throne.com/"
 SUPABASE = "https://bzgeqaseogawdptaqzgq.supabase.co"
 KEY = "sb_publishable_Uoawl08FsfsJwdv3eLVV0A_Zh5tT6EE"
 UA = "RateMyThrone-Staedteseiten/1.0 (+https://www.rate-my-throne.com; info@rate-my-throne.com)"
-MAX_LOOKUPS = 400  # Nominatim-Abfragen pro Lauf (Rest beim nächsten Lauf)
+MAX_LOOKUPS = 1000  # Nominatim-Straßenabfragen pro Lauf (Rest folgt in den nächsten Läufen)
+MAX_LIST = 300      # höchstens so viele Toiletten pro Seite auflisten (die nächsten zur Innenstadt)
 
-# Städte: Name, Mittelpunkt (Innenstadt) und Umkreis in km
-CITIES = [
-    {"slug": "heilbronn", "name": "Heilbronn", "lat": 49.1427, "lon": 9.2109, "km": 6},
-    {"slug": "stuttgart", "name": "Stuttgart", "lat": 48.7784, "lon": 9.1800, "km": 6},
-    {"slug": "schwaigern", "name": "Schwaigern", "lat": 49.1440, "lon": 9.0540, "km": 3},
-]
+# Orte je Gruppe: (Gruppentitel, Ländercode, Umkreis km, Orte). Ein Ort ist "Name" oder ("Name", "Suchbegriff", Ländercode, km).
+GROUPS = {
+    "gross": ("Großstädte in Deutschland", "de", 6, [
+        ("Berlin", None, None, 8), ("Hamburg", None, None, 8), ("München", None, None, 8), ("Köln", None, None, 8),
+        "Frankfurt am Main", "Stuttgart", "Düsseldorf", "Leipzig", "Dortmund", "Essen", "Bremen", "Dresden", "Hannover",
+        "Nürnberg", "Duisburg", "Bochum", "Wuppertal", "Bielefeld", "Bonn", "Münster", "Mannheim", "Karlsruhe", "Augsburg",
+        "Wiesbaden", "Mönchengladbach", "Gelsenkirchen", "Aachen", "Braunschweig", "Kiel", "Chemnitz", "Halle (Saale)",
+        "Magdeburg", "Freiburg im Breisgau", "Krefeld", "Mainz", "Lübeck", "Erfurt", "Oberhausen", "Rostock", "Kassel",
+        "Hagen", "Potsdam", "Saarbrücken", "Hamm", "Ludwigshafen am Rhein", ("Oldenburg", "Oldenburg, Niedersachsen"), "Mülheim an der Ruhr", "Osnabrück",
+        "Leverkusen", "Darmstadt", "Heidelberg", "Solingen", "Herne", "Neuss", "Regensburg", "Paderborn", "Ingolstadt",
+        "Offenbach am Main", "Würzburg", "Fürth", "Ulm", "Heilbronn", "Pforzheim", "Wolfsburg"]),
+    "urlaub": ("Urlaubsorte in Deutschland", "de", 3, [
+        ("Westerland (Sylt)", "Westerland"), "Norderney", ("Binz (Rügen)", "Binz"), ("Heringsdorf (Usedom)", "Heringsdorf"),
+        "Timmendorfer Strand", "Warnemünde", "Stralsund", "Garmisch-Partenkirchen", "Berchtesgaden", "Füssen", "Oberstdorf",
+        "Rothenburg ob der Tauber", "Bamberg", "Konstanz", ("Lindau (Bodensee)", "Lindau"), "Baden-Baden", "Titisee-Neustadt",
+        "Rüdesheim am Rhein", "Cochem", "Wernigerode", "Quedlinburg", ("Rust (Europa-Park)", "Rust, Ortenaukreis"), "Schwaigern"]),
+    "ausland": ("Urlaubsziele im Ausland", "", 5, [
+        ("Palma (Mallorca)", "Palma", "es"), ("Barcelona", None, "es"), ("Rom", None, "it"), ("Venedig", None, "it"),
+        ("Florenz", None, "it"), ("Paris", None, "fr"), ("Wien", None, "at"), ("Salzburg", None, "at"), ("Innsbruck", None, "at"),
+        ("Amsterdam", None, "nl"), ("Prag", None, "cz"), ("London", None, "gb"), ("Lissabon", None, "pt"),
+        ("Kopenhagen", None, "dk"), ("Budapest", None, "hu"), ("Zürich", None, "ch")]),
+}
+
+
+def slugify(name):
+    s = name.lower()
+    for a, b in (("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss")):
+        s = s.replace(a, b)
+    s = "".join(ch if ch.isalnum() else "-" for ch in s.split("(")[0])
+    return "-".join(x for x in s.split("-") if x)
+
+
+def parse_cities():
+    out = []
+    for g, (_, cc, km, places) in GROUPS.items():
+        for x in places:
+            name, query, ccode, radius = (tuple(x) + (None,) * 3)[:4] if isinstance(x, tuple) else (x, None, None, None)
+            out.append({"slug": slugify(name), "name": name, "query": query or name, "cc": ccode or cc, "km": radius or km, "group": g})
+    return out
+
+
+CITIES = parse_cities()
 STATIC_PAGES = ["", "karte.html", "impressum.html", "datenschutz.html"]
 
 
@@ -54,11 +91,37 @@ def yn(v):
     return "yes" if v is True else "no" if v is False else None
 
 
+def supa_all(path):
+    rows, off = [], 0
+    while True:
+        part = supa(f"{path}&order=id&limit=1000&offset={off}")
+        rows += part
+        if len(part) < 1000: return rows
+        off += 1000
+
+
+def tiles_ready(c):
+    """Sind die OSM-Kacheln (1°) dieser Gegend importiert? Fehlende werden angefordert (für den nächsten Lauf)."""
+    a, b, d, e = box(c)
+    keys = sorted({f"{x}_{y}" for x in range(math.floor(d), math.floor(e) + 1) for y in range(math.floor(a), math.floor(b) + 1)})
+    have = {t["key"] for t in supa(f"osm_tiles?select=key,status&status=eq.ok&key=in.({','.join(keys)})")}
+    missing = [k for k in keys if k not in have]
+    if missing:
+        try:
+            body = json.dumps({"keys": missing[:4]}).encode()
+            req = urllib.request.Request(f"{SUPABASE}/rest/v1/rpc/request_osm_tiles", data=body, method="POST",
+                headers={"User-Agent": UA, "apikey": KEY, "Authorization": f"Bearer {KEY}", "Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=60).read()
+        except Exception as ex:
+            print("Import anfordern:", ex, file=sys.stderr)
+    return not missing
+
+
 def load_city(c):
     a, b, d, e = box(c)
     flt = f"lat=gte.{a}&lat=lte.{b}&lon=gte.{d}&lon=lte.{e}"
-    rows = supa(f"osm_toilets?select=id,lat,lon,name,operator,fee,wheelchair,changing_table,opening_hours&{flt}&limit=2000")
-    own = supa(f"toilets?select=id,lat,lon,name,fee,wheelchair,changing_table&{flt}&limit=2000")
+    rows = supa_all(f"osm_toilets?select=id,lat,lon,name,operator,fee,wheelchair,changing_table,opening_hours&{flt}")
+    own = supa_all(f"toilets?select=id,lat,lon,name,fee,wheelchair,changing_table&{flt}")
     rows += [{**o, "id": str(o["id"]), "operator": None, "opening_hours": None,
               "fee": yn(o["fee"]), "wheelchair": yn(o["wheelchair"]), "changing_table": yn(o["changing_table"])} for o in own]
     rows = [r for r in rows if dist_km(c["lat"], c["lon"], r["lat"], r["lon"]) <= c["km"]]
@@ -84,9 +147,27 @@ def from_file(path):
     return out
 
 
-# ---------- Straßennamen (Nominatim) ----------
+# ---------- Nominatim: Stadtmitte und Straßennamen (zwischengespeichert) ----------
 ADDR_FILE = os.path.join(OUT, "adressen.json")
+PLACES_FILE = os.path.join(OUT, "orte.json")
 lookups = 0
+
+
+def geocode(c, places, online):
+    """Mittelpunkt einer Stadt per Nominatim-Suche; Ergebnis bleibt in orte.json gespeichert."""
+    key = f"{c['query']}|{c['cc']}"
+    if key not in places and online:
+        time.sleep(1.1)
+        q = urllib.parse.urlencode({"q": c["query"], "format": "jsonv2", "limit": 1, "countrycodes": c["cc"], "accept-language": "de"})
+        try:
+            res = get_json(f"https://nominatim.openstreetmap.org/search?{q}", {})
+            if res: places[key] = [round(float(res[0]["lat"]), 5), round(float(res[0]["lon"]), 5)]
+        except Exception as ex:
+            print("Ortssuche", c["name"], ex, file=sys.stderr)
+    if key in places:
+        c["lat"], c["lon"] = places[key]
+        return True
+    return False
 
 
 def street(r, cache, online):
@@ -248,15 +329,19 @@ def city_page(c, rows, others, stand):
     wr = nearest_names(rows, lambda r: r.get("wheelchair") in ("yes", "designated"))
     if wr: tips.append(f"<h2>Barrierefreie Toiletten in {E(c['name'])}</h2><p>Rollstuhlgerecht laut Eintrag: {E('; '.join(wr))}.</p>")
     p.append("  " + "\n  ".join(tips) + "\n")
-    p.append(f'  <h2>Alle {n} Toiletten in {E(c["name"])}</h2>\n  <ol class="list">\n')
-    for r in rows:
+    shown = min(n, MAX_LIST)
+    head_txt = f"Alle {n} Toiletten" if n <= MAX_LIST else f"Die {shown} Toiletten nahe der Innenstadt"
+    p.append(f'  <h2>{head_txt} in {E(c["name"])}</h2>\n  <ol class="list">\n')
+    for r in rows[:MAX_LIST]:
         stars = f' · ★ {str(r["avg"]).replace(".", ",")} ({r["n"]} Bewertung{"en" if r["n"] != 1 else ""})' if r.get("n") else ""
         where = (E(r["street"]) + " · " if r.get("street") else "") + f"{str(round(r['km'], 1)).replace('.', ',')} km von der Innenstadt" + stars
         p.append(f"""    <li><h3>{E(label(r))}</h3><p class="where">{where}</p><div class="chips">{chips(r)}</div>
       <a class="go" href="../karte.html?toilette={urllib.parse.quote(r['id'])}">Auf der Karte zeigen und bewerten →</a></li>\n""")
     p.append("  </ol>\n")
+    if len(rows) > shown:
+        p.append(f'  <p class="muted">Gezeigt werden die {shown} Toiletten, die der Innenstadt am nächsten sind. Alle {len(rows)} findest du auf der <a href="{map_url}">Karte</a>.</p>\n')
     if others:
-        p.append('  <h2>Weitere Städte</h2>\n  <div class="cities">' + "".join(f'<a href="{o["slug"]}.html">{E(o["name"])}</a>' for o in others) + "</div>\n")
+        p.append('  <h2>Weitere Orte in der Nähe</h2>\n  <div class="cities">' + "".join(f'<a href="{o["slug"]}.html">{E(o["name"])}</a>' for o in others) + "</div>\n")
     p.append(foot(stand))
     return "".join(p)
 
@@ -265,9 +350,13 @@ def index_page(cities, counts, stand):
     url = f"{BASE}toiletten/"
     p = [head("Öffentliche Toiletten nach Stadt | Rate My Throne",
               "Öffentliche Toiletten nach Stadt: kostenlos, barrierefrei, mit Wickeltisch – mit Karte und Bewertungen der Community.", url)]
-    p.append('  <h1>Öffentliche Toiletten nach Stadt</h1>\n  <p class="lead">Wähle eine Stadt – oder öffne direkt die <a href="../karte.html">Karte</a>, sie funktioniert überall.</p>\n  <div class="cities">')
-    p.append("".join(f'<a href="{c["slug"]}.html">{E(c["name"])} ({counts[c["slug"]]})</a>' for c in cities))
-    p.append("</div>\n")
+    p.append('  <h1>Öffentliche Toiletten nach Stadt</h1>\n  <p class="lead">Wähle eine Stadt – oder öffne direkt die <a href="../karte.html">Karte</a>, sie funktioniert überall.</p>\n')
+    for g, (title, *_ ) in GROUPS.items():
+        sel = sorted((c for c in cities if c["group"] == g), key=lambda c: c["name"])
+        if not sel: continue
+        p.append(f'  <h2>{E(title)}</h2>\n  <div class="cities">')
+        p.append("".join(f'<a href="{c["slug"]}.html">{E(c["name"])} ({counts[c["slug"]]})</a>' for c in sel))
+        p.append("</div>\n")
     p.append(foot(stand))
     return "".join(p)
 
@@ -282,29 +371,55 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     test = "--daten" in sys.argv
     data = from_file(sys.argv[sys.argv.index("--daten") + 1]) if test else None
-    cache = json.load(open(ADDR_FILE, encoding="utf-8")) if os.path.exists(ADDR_FILE) else {}
+    load = lambda f: json.load(open(f, encoding="utf-8")) if os.path.exists(f) else {}
+    cache, places = load(ADDR_FILE), load(PLACES_FILE)
     stand = date.today().strftime("%d.%m.%Y")
-    counts, per = {}, {}
+    counts, per, ready, waiting = {}, {}, [], []
     for c in CITIES:
-        rows = data.get(c["slug"], []) if test else load_city(c)
+        if test:
+            if c["slug"] not in data: continue
+            rows = data[c["slug"]]
+            c["lat"], c["lon"] = rows[0]["lat"], rows[0]["lon"]
+        else:
+            try:
+                if not geocode(c, places, True) or not tiles_ready(c):
+                    waiting.append(c["name"]); continue
+                rows = load_city(c)
+            except Exception as ex:   # eine Stadt mit Fehler überspringen, die anderen trotzdem erzeugen
+                print("Fehler bei", c["name"], ex, file=sys.stderr)
+                waiting.append(c["name"]); continue
+        if not rows:
+            waiting.append(c["name"]); continue
         for r in rows:
             r["km"] = dist_km(c["lat"], c["lon"], r["lat"], r["lon"])
         rows.sort(key=lambda r: r["km"])
-        for r in rows:
-            r["street"] = street(r, cache, not test)
         per[c["slug"]], counts[c["slug"]] = rows, len(rows)
-    for c in CITIES:
-        others = [o for o in CITIES if o is not c]
+        ready.append(c)
+    # Straßennamen: reihum je Stadt von innen nach außen, damit jede Stadt zuerst ihre Innenstadt bekommt
+    order = sorted(((i, r) for c in ready for i, r in enumerate(per[c["slug"]][:MAX_LIST])), key=lambda x: x[0])
+    for _, r in order:
+        r["street"] = street(r, cache, not test)
+    for c in ready:
+        others = sorted((o for o in ready if o is not c), key=lambda o: dist_km(c["lat"], c["lon"], o["lat"], o["lon"]))[:8]
         with open(os.path.join(OUT, c["slug"] + ".html"), "w", encoding="utf-8") as f:
             f.write(city_page(c, per[c["slug"]], others, stand))
+    # Seiten von Orten, die nicht mehr in der Liste stehen, entfernen; noch nicht fertige Orte behalten ihre alte Seite
+    keep = {c["slug"] for c in CITIES}
+    for fn in os.listdir(OUT):
+        if fn.endswith(".html") and fn != "index.html" and fn[:-5] not in keep:
+            os.remove(os.path.join(OUT, fn))
+    listed = [c for c in CITIES if os.path.exists(os.path.join(OUT, c["slug"] + ".html"))]
+    for c in listed:
+        counts.setdefault(c["slug"], "…")
     with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
-        f.write(index_page(CITIES, counts, stand))
+        f.write(index_page(listed, counts, stand))
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
-        f.write(sitemap(CITIES))
+        f.write(sitemap(listed))
     if not test:
-        with open(ADDR_FILE, "w", encoding="utf-8") as f:
-            json.dump(cache, f, ensure_ascii=False, indent=0, sort_keys=True)
-    print("fertig:", counts, "Nominatim-Abfragen:", lookups)
+        for fn, d in ((ADDR_FILE, cache), (PLACES_FILE, places)):
+            with open(fn, "w", encoding="utf-8") as f:
+                json.dump(d, f, ensure_ascii=False, indent=0, sort_keys=True)
+    print("fertig:", len(ready), "Orte", counts, "| wartet noch:", waiting, "| Nominatim-Abfragen:", lookups)
 
 
 if __name__ == "__main__":
