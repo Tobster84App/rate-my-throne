@@ -40,6 +40,8 @@ Stand: 02.11.2026 · Version 0.9
 ## Nächste Schritte
 1. Mail-Limit in Supabase (Authentication → Rate Limits) von 30 auf ca. 100 pro Stunde erhöhen
 2. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten, dann Cookie-Einwilligung nötig
+3. Später: Rankings mit Humor („Thron der Woche“, beste/schlimmste Throne einer Stadt, Ehrentitel für fleißige Bewertende)
+4. In Arbeit: Aktualität (Kurzmeldungen, „zuletzt geprüft“), Detail-Kriterien in Bewertungen, Familienfreundlich-Kennzeichnung
 
 ## Toiletten-Daten (seit 29.10.2026)
 - OSM-Toiletten liegen in unserer Datenbank (Tabelle osm_toilets), die App fragt Overpass nicht mehr direkt
