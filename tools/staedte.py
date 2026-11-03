@@ -213,7 +213,7 @@ def chips(r):
 
 def nearest_names(rows, cond, n=3):
     sel = [r for r in rows if cond(r)][:n]
-    return [label(r) + (f" ({r['street']})" if r.get("street") else "") for r in sel]
+    return [label(r) + (f" – {r['street']}" if r.get("street") else "") for r in sel]
 
 
 def city_page(c, rows, others, stand):
