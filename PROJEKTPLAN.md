@@ -33,7 +33,7 @@ Stand: 03.11.2026 · Version 0.14
 - Mail-Links führen auf die Karte und werden erst nach Klick auf „Weiter“ eingelöst (Schutz vor Link-Scannern in Firmen-Postfächern)
 - Filter: kostenlos, barrierefrei, Wickeltisch, ab 4 Sternen, nur bewertete (Toiletten ohne Angabe bleiben sichtbar, „Nächsten Thron finden“ beachtet die Filter)
 - Mail-Limit in Supabase auf 100 pro Stunde erhöht
-- Nutzer-Übersicht für Admins (Benutzername, Registrierung, letzte Anmeldung, Zahl der Bewertungen/Toiletten; ohne E-Mail-Adressen), Skript supabase/migrations/20261102_admin_users.sql
+- Nutzer-Übersicht für Admins (Benutzername, Registrierung, letzte Anmeldung, Zahl der Bewertungen/Toiletten; ohne E-Mail-Adressen), Skript supabase/migrations/20261102_admin_users.sql (ausgeführt 03.11.2026)
 - Ortssuche (Nominatim/OpenStreetMap) zum Vorplanen: gesuchter Ort ersetzt den eigenen Standort für „Nächsten Thron finden“ und die Entfernungen; Datenschutzerklärung ergänzt
 - Startseite: Abschnitt „Vorab planen“ (Ortssuche, Filter, mit Kind) mit Knopf, der die Ortssuche direkt öffnet; FAQ aktualisiert
 - Aktualität: „zuletzt geprüft“, Kurzmeldungen mit Konto (ok/kein Papier/verschmutzt/geschlossen/defekt, 1 pro Stunde, 48 Std. sichtbar), Daumen hoch/runter ohne Konto (Bremse 30/Stunde je Toilette, 1 pro Tag im Browser)
