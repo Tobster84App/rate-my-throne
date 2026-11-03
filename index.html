@@ -386,6 +386,8 @@ footer a { color: var(--muted); }
 <script src="vendor/supabase.js"></script>
 <script>
 applyI18n();
+// Städte-Übersicht in der passenden Sprache verlinken
+document.querySelector("[data-i18n=\"h.footer.cities\"]").href = LANG === "en" ? "toilets/" : "toiletten/";
 document.title = t("h.title");
 document.getElementById("sampleScore").textContent = fmtNum(4.3, 1);
 document.querySelectorAll(".num1").forEach(el => { el.textContent = fmtNum(+el.dataset.v, 1); });

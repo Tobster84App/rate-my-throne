@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Erzeugt die Städte-Seiten toiletten/<stadt>.html, die Übersicht toiletten/index.html und sitemap.xml.
+"""Erzeugt die Städte-Seiten toiletten/<stadt>.html (Deutsch) und toilets/<city>.html (Englisch), die Übersichten und sitemap.xml.
 
 Daten: Toiletten und Bewertungen aus Supabase (öffentlich lesbar mit dem Publishable Key),
 Straßennamen per Nominatim (Rückwärtssuche, höchstens 1 Anfrage pro Sekunde, Ergebnisse in toiletten/adressen.json zwischengespeichert).
@@ -216,14 +216,70 @@ ol.list h3{font:700 17px/1.3 var(--display);margin:0}
 .cities{display:flex;flex-wrap:wrap;gap:8px}
 .cities a{background:var(--surface);border-radius:999px;padding:6px 14px;text-decoration:none;font-weight:600}
 """
-HEADER = """<header>
-  <a class="brand" href="../"><svg viewBox="86 100 340 332" aria-hidden="true"><path d="M120 300 104 150l84 70 68-110 68 110 84-70-16 150z" fill="#e3b341"/><ellipse cx="256" cy="330" rx="142" ry="74" fill="none" stroke="#e3b341" stroke-width="36"/></svg>Rate My&nbsp;<span>Throne</span></a>
-</header>"""
+# Englische Namen (sonst wie Deutsch)
+EN_NAMES = {"München": "Munich", "Köln": "Cologne", "Nürnberg": "Nuremberg", "Hannover": "Hanover", "Frankfurt am Main": "Frankfurt",
+    "Freiburg im Breisgau": "Freiburg", "Lindau (Bodensee)": "Lindau (Lake Constance)", "Rom": "Rome", "Venedig": "Venice",
+    "Florenz": "Florence", "Wien": "Vienna", "Prag": "Prague", "Lissabon": "Lisbon", "Kopenhagen": "Copenhagen", "Zürich": "Zurich"}
+DIRS = {"de": "toiletten", "en": "toilets"}
+GROUP_EN = {"gross": "Major cities in Germany", "urlaub": "Holiday towns in Germany", "ausland": "Holiday destinations abroad"}
+
+TX = {
+ "de": dict(
+    title="Öffentliche Toiletten in {c} – Karte & Bewertungen | Rate My Throne",
+    desc="{n} öffentliche Toiletten in {c}: {free} kostenlos, {wc} rollstuhlgerecht, {ch} mit Wickeltisch. Mit Öffnungszeiten, Bewertungen und Karte.",
+    h1="Öffentliche Toiletten in {c}",
+    lead="Rate My Throne kennt <strong>{n} öffentliche Toiletten</strong> im Umkreis von {km} km um die Innenstadt von {c}. {free} davon sind kostenlos, {wc} rollstuhlgerecht und {ch} haben einen Wickeltisch. Die Liste ist nach Entfernung zur Innenstadt sortiert.",
+    cta="Karte von {c} öffnen", k_n="Toiletten", k_free="kostenlos", k_wc="rollstuhlgerecht", k_ch="mit Wickeltisch", k_rated="bewertet",
+    q_free="Wo gibt es kostenlose Toiletten in {c}?", a_free="Am nächsten zur Innenstadt: {x}.",
+    q_ch="Wo finde ich einen Wickeltisch in {c}?", a_ch="Zum Beispiel hier: {x}. Für die Planung mit Kind kannst du auf der Karte nach „Wickeltisch“ und „familienfreundlich“ filtern.",
+    q_wc="Barrierefreie Toiletten in {c}", a_wc="Rollstuhlgerecht laut Eintrag: {x}.",
+    all="Alle {n} Toiletten in {c}", near="Die {k} Toiletten nahe der Innenstadt in {c}",
+    more="Gezeigt werden die {k} Toiletten, die der Innenstadt am nächsten sind. Alle {n} findest du auf der <a href=\"{map}\">Karte</a>.",
+    km="{d} km von der Innenstadt", rev1="Bewertung", revn="Bewertungen", go="Auf der Karte zeigen und bewerten →", others="Weitere Orte in der Nähe",
+    t_toilet="Toilette ({op})", t_public="Öffentliche Toilette",
+    c_free="kostenlos", c_fee="kostenpflichtig", c_wc="rollstuhlgerecht", c_wcl="eingeschränkt barrierefrei", c_wcn="nicht barrierefrei",
+    c_ch="Wickeltisch", c_open="geöffnet: {h}", c_none="noch keine Angaben", h247="rund um die Uhr",
+    i_title="Öffentliche Toiletten nach Stadt | Rate My Throne",
+    i_desc="Öffentliche Toiletten nach Stadt: kostenlos, barrierefrei, mit Wickeltisch – mit Karte und Bewertungen der Community.",
+    i_h1="Öffentliche Toiletten nach Stadt", i_lead="Wähle eine Stadt – oder öffne direkt die <a href=\"../karte.html\">Karte</a>, sie funktioniert überall.",
+    src="Toilettendaten: © <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap-Mitwirkende</a> (ODbL), ergänzt und bewertet von der Rate-My-Throne-Community. Angaben ohne Gewähr, Stand {d}.",
+    nav=[("../", "Startseite"), ("../karte.html", "Karte"), ("./", "Alle Städte"), ("../impressum.html", "Impressum"), ("../datenschutz.html", "Datenschutz")],
+    q="", locale="de_DE", other="EN", other_label="English version"),
+ "en": dict(
+    title="Public toilets in {c} – map & reviews | Rate My Throne",
+    desc="{n} public toilets in {c}: {free} free, {wc} wheelchair accessible, {ch} with baby changing. With opening hours, reviews and a map.",
+    h1="Public toilets in {c}",
+    lead="Rate My Throne knows <strong>{n} public toilets</strong> within {km} km of the centre of {c}. {free} of them are free, {wc} are wheelchair accessible and {ch} have baby changing facilities. The list is sorted by distance from the centre.",
+    cta="Open the map of {c}", k_n="toilets", k_free="free", k_wc="wheelchair accessible", k_ch="baby changing", k_rated="reviewed",
+    q_free="Where are free public toilets in {c}?", a_free="Closest to the centre: {x}.",
+    q_ch="Where can I change a baby in {c}?", a_ch="For example here: {x}. Planning with kids? Filter the map by “baby changing” and “family-friendly”.",
+    q_wc="Accessible toilets in {c}", a_wc="Wheelchair accessible according to the listing: {x}.",
+    all="All {n} toilets in {c}", near="The {k} toilets closest to the centre of {c}",
+    more="Showing the {k} toilets closest to the centre. You’ll find all {n} on the <a href=\"{map}\">map</a>.",
+    km="{d} km from the centre", rev1="review", revn="reviews", go="Show on the map and rate →", others="More places nearby",
+    t_toilet="Toilet ({op})", t_public="Public toilet",
+    c_free="free", c_fee="paid", c_wc="wheelchair accessible", c_wcl="limited accessibility", c_wcn="not accessible",
+    c_ch="baby changing", c_open="open: {h}", c_none="no details yet", h247="24/7",
+    i_title="Public toilets by city | Rate My Throne",
+    i_desc="Public toilets by city: free, accessible, with baby changing – with a map and community reviews.",
+    i_h1="Public toilets by city", i_lead="Pick a city – or go straight to the <a href=\"../karte.html?lang=en\">map</a>, it works everywhere.",
+    src="Toilet data: © <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap contributors</a> (ODbL), added to and rated by the Rate My Throne community. No guarantee of accuracy, as of {d}.",
+    nav=[("../?lang=en", "Home"), ("../karte.html?lang=en", "Map"), ("./", "All cities"), ("../impressum.html?lang=en", "Legal notice"), ("../datenschutz.html?lang=en", "Privacy policy")],
+    q="lang=en&amp;", locale="en_GB", other="DE", other_label="Deutsche Version"),
+}
 
 
-def head(title, desc, url):
+def num(x, lang):
+    s = str(x)
+    return s.replace(".", ",") if lang == "de" else s
+
+
+def head(lang, title, desc, url, alt):
+    """alt: {"de": url, "en": url} der Sprachfassungen"""
+    other = "en" if lang == "de" else "de"
+    links = "\n".join(f'<link rel="alternate" hreflang="{l}" href="{u}">' for l, u in alt.items())
     return f"""<!doctype html>
-<html lang="de">
+<html lang="{lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -231,13 +287,15 @@ def head(title, desc, url):
 <title>{E(title)}</title>
 <meta name="description" content="{E(desc)}">
 <link rel="canonical" href="{url}">
+{links}
+<link rel="alternate" hreflang="x-default" href="{alt["en"]}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Rate My Throne">
 <meta property="og:title" content="{E(title)}">
 <meta property="og:description" content="{E(desc)}">
 <meta property="og:url" content="{url}">
 <meta property="og:image" content="{BASE}media/rate-my-throne-werbefilm-16x9-poster.jpg">
-<meta property="og:locale" content="de_DE">
+<meta property="og:locale" content="{TX[lang]["locale"]}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="../icons/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../vendor/fonts.css">
@@ -245,35 +303,42 @@ def head(title, desc, url):
 <style>{CSS}</style>
 </head>
 <body>
-{HEADER}
+<header>
+  <a class="brand" href="../{"?lang=en" if lang == "en" else ""}"><svg viewBox="86 100 340 332" aria-hidden="true"><path d="M120 300 104 150l84 70 68-110 68 110 84-70-16 150z" fill="#e3b341"/><ellipse cx="256" cy="330" rx="142" ry="74" fill="none" stroke="#e3b341" stroke-width="36"/></svg>Rate My&nbsp;<span>Throne</span></a>
+  <a class="lang" href="{alt[other].replace(BASE, "../")}" hreflang="{other}" lang="{other}" aria-label="{TX[lang]["other_label"]}">{TX[lang]["other"]}</a>
+</header>
 <main>
 """
 
 
-def foot(stand):
+def foot(lang, stand):
+    t = TX[lang]
+    nav = "".join(f'<a href="{h}">{E(x)}</a>' for h, x in t["nav"])
     return f"""
-  <p class="muted">Toilettendaten: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap-Mitwirkende</a> (ODbL), ergänzt und bewertet von der Rate-My-Throne-Community. Angaben ohne Gewähr, Stand {stand}.</p>
-  <nav class="back"><a href="../">Startseite</a><a href="../karte.html">Karte</a><a href="./">Alle Städte</a><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a></nav>
+  <p class="muted">{t["src"].format(d=stand)}</p>
+  <nav class="back">{nav}</nav>
 </main>
 </body>
 </html>
 """
 
 
-def label(r):
+def label(r, lang):
     if r.get("name"):
         return r["name"]
     if r.get("operator"):
-        return f"Toilette ({r['operator']})"
-    return "Öffentliche Toilette"
+        return TX[lang]["t_toilet"].format(op=r["operator"])
+    return TX[lang]["t_public"]
 
 
-def hours(oh):
+def hours(oh, lang="de"):
     if not oh:
         return None
     oh = oh.strip('"')
     if oh == "24/7":
-        return "rund um die Uhr"
+        return TX[lang]["h247"]
+    if lang == "en":
+        return oh
     # OSM-Schreibweise (englische Kürzel) lesbar auf Deutsch
     import re
     words = {"Tu": "Di", "We": "Mi", "Th": "Do", "Su": "So", "PH": "Feiertag", "off": "geschlossen", "closed": "geschlossen",
@@ -281,98 +346,103 @@ def hours(oh):
     return re.sub(r"\b(" + "|".join(words) + r")\b", lambda m: words[m.group(1)], oh)
 
 
-def chips(r):
-    out = []
+def chips(r, lang):
+    t, out = TX[lang], []
     f, w, c = r.get("fee"), r.get("wheelchair"), r.get("changing_table")
-    if f == "no": out.append(("ok", "kostenlos"))
-    elif f == "yes": out.append(("", "kostenpflichtig"))
-    if w in ("yes", "designated"): out.append(("ok", "rollstuhlgerecht"))
-    elif w == "limited": out.append(("", "eingeschränkt barrierefrei"))
-    elif w == "no": out.append(("no", "nicht barrierefrei"))
-    if c == "yes": out.append(("ok", "Wickeltisch"))
-    h = hours(r.get("opening_hours"))
-    if h: out.append(("", "geöffnet: " + h))
-    if not out: out.append(("", "noch keine Angaben"))
-    return "".join(f'<span class="chip {k}">{E(t)}</span>' for k, t in out)
+    if f == "no": out.append(("ok", t["c_free"]))
+    elif f == "yes": out.append(("", t["c_fee"]))
+    if w in ("yes", "designated"): out.append(("ok", t["c_wc"]))
+    elif w == "limited": out.append(("", t["c_wcl"]))
+    elif w == "no": out.append(("no", t["c_wcn"]))
+    if c == "yes": out.append(("ok", t["c_ch"]))
+    h = hours(r.get("opening_hours"), lang)
+    if h: out.append(("", t["c_open"].format(h=h)))
+    if not out: out.append(("", t["c_none"]))
+    return "".join(f'<span class="chip {k}">{E(x)}</span>' for k, x in out)
 
 
-def nearest_names(rows, cond, n=3):
+def nearest_names(rows, cond, lang, n=3):
     sel = [r for r in rows if cond(r)][:n]
-    return [label(r) + (f" – {r['street']}" if r.get("street") else "") for r in sel]
+    return [label(r, lang) + (f" – {r['street']}" if r.get("street") else "") for r in sel]
 
 
-def city_page(c, rows, others, stand):
+def page_url(c, lang):
+    return f"{BASE}{DIRS[lang]}/{c['slugs'][lang]}.html"
+
+
+def city_page(c, rows, others, stand, lang):
+    t, name = TX[lang], c["names"][lang]
     n = len(rows)
     free = sum(1 for r in rows if r.get("fee") == "no")
     wc = sum(1 for r in rows if r.get("wheelchair") in ("yes", "designated"))
     ch = sum(1 for r in rows if r.get("changing_table") == "yes")
     rated = sum(1 for r in rows if r.get("n"))
-    url = f"{BASE}toiletten/{c['slug']}.html"
-    title = f"Öffentliche Toiletten in {c['name']} – Karte & Bewertungen | Rate My Throne"
-    desc = (f"{n} öffentliche Toiletten in {c['name']}: {free} kostenlos, {wc} rollstuhlgerecht, {ch} mit Wickeltisch. "
-            "Mit Öffnungszeiten, Bewertungen und Karte.")
-    map_url = f"../karte.html?lat={c['lat']}&amp;lon={c['lon']}"
-    p = [head(title, desc, url)]
-    p.append(f"""  <h1>Öffentliche Toiletten in {E(c['name'])}</h1>
-  <p class="lead">Rate My Throne kennt <strong>{n} öffentliche Toiletten</strong> im Umkreis von {c['km']} km um die Innenstadt von {E(c['name'])}.
-  {free} davon sind kostenlos, {wc} rollstuhlgerecht und {ch} haben einen Wickeltisch. Die Liste ist nach Entfernung zur Innenstadt sortiert.</p>
-  <a class="cta" href="{map_url}">Karte von {E(c['name'])} öffnen</a>
+    v = dict(c=E(name), n=n, free=free, wc=wc, ch=ch, km=c["km"])
+    map_url = f"../karte.html?{t['q']}lat={c['lat']}&amp;lon={c['lon']}"
+    alt = {l: page_url(c, l) for l in DIRS}
+    p = [head(lang, t["title"].format(**{**v, "c": name}), t["desc"].format(**{**v, "c": name}), alt[lang], alt)]
+    p.append(f"""  <h1>{t["h1"].format(**v)}</h1>
+  <p class="lead">{t["lead"].format(**v)}</p>
+  <a class="cta" href="{map_url}">{t["cta"].format(**v)}</a>
   <div class="kpis">
-    <div class="kpi"><b>{n}</b><span>Toiletten</span></div>
-    <div class="kpi"><b>{free}</b><span>kostenlos</span></div>
-    <div class="kpi"><b>{wc}</b><span>rollstuhlgerecht</span></div>
-    <div class="kpi"><b>{ch}</b><span>mit Wickeltisch</span></div>
-    <div class="kpi"><b>{rated}</b><span>bewertet</span></div>
+    <div class="kpi"><b>{n}</b><span>{t["k_n"]}</span></div>
+    <div class="kpi"><b>{free}</b><span>{t["k_free"]}</span></div>
+    <div class="kpi"><b>{wc}</b><span>{t["k_wc"]}</span></div>
+    <div class="kpi"><b>{ch}</b><span>{t["k_ch"]}</span></div>
+    <div class="kpi"><b>{rated}</b><span>{t["k_rated"]}</span></div>
   </div>
 """)
     tips = []
-    fr = nearest_names(rows, lambda r: r.get("fee") == "no")
-    if fr: tips.append(f"<h2>Wo gibt es kostenlose Toiletten in {E(c['name'])}?</h2><p>Am nächsten zur Innenstadt: {E('; '.join(fr))}.</p>")
-    cr = nearest_names(rows, lambda r: r.get("changing_table") == "yes")
-    if cr: tips.append(f"<h2>Wo finde ich einen Wickeltisch in {E(c['name'])}?</h2><p>Zum Beispiel hier: {E('; '.join(cr))}. Für die Planung mit Kind kannst du auf der Karte nach „Wickeltisch“ und „familienfreundlich“ filtern.</p>")
-    wr = nearest_names(rows, lambda r: r.get("wheelchair") in ("yes", "designated"))
-    if wr: tips.append(f"<h2>Barrierefreie Toiletten in {E(c['name'])}</h2><p>Rollstuhlgerecht laut Eintrag: {E('; '.join(wr))}.</p>")
+    for key, cond in (("free", lambda r: r.get("fee") == "no"), ("ch", lambda r: r.get("changing_table") == "yes"),
+                      ("wc", lambda r: r.get("wheelchair") in ("yes", "designated"))):
+        x = nearest_names(rows, cond, lang)
+        if x: tips.append(f'<h2>{t["q_" + key].format(**v)}</h2><p>{t["a_" + key].format(x=E("; ".join(x)))}</p>')
     p.append("  " + "\n  ".join(tips) + "\n")
     shown = min(n, MAX_LIST)
-    head_txt = f"Alle {n} Toiletten" if n <= MAX_LIST else f"Die {shown} Toiletten nahe der Innenstadt"
-    p.append(f'  <h2>{head_txt} in {E(c["name"])}</h2>\n  <ol class="list">\n')
+    p.append(f'  <h2>{(t["all"] if n <= MAX_LIST else t["near"]).format(**v, k=shown)}</h2>\n  <ol class="list">\n')
     for r in rows[:MAX_LIST]:
-        stars = f' · ★ {str(r["avg"]).replace(".", ",")} ({r["n"]} Bewertung{"en" if r["n"] != 1 else ""})' if r.get("n") else ""
-        where = (E(r["street"]) + " · " if r.get("street") else "") + f"{str(round(r['km'], 1)).replace('.', ',')} km von der Innenstadt" + stars
-        p.append(f"""    <li><h3>{E(label(r))}</h3><p class="where">{where}</p><div class="chips">{chips(r)}</div>
-      <a class="go" href="../karte.html?toilette={urllib.parse.quote(r['id'])}">Auf der Karte zeigen und bewerten →</a></li>\n""")
+        stars = f' · ★ {num(r["avg"], lang)} ({r["n"]} {t["rev1"] if r["n"] == 1 else t["revn"]})' if r.get("n") else ""
+        where = (E(r["street"]) + " · " if r.get("street") else "") + t["km"].format(d=num(round(r["km"], 1), lang)) + stars
+        p.append(f"""    <li><h3>{E(label(r, lang))}</h3><p class="where">{where}</p><div class="chips">{chips(r, lang)}</div>
+      <a class="go" href="../karte.html?{t["q"]}toilette={urllib.parse.quote(r['id'])}">{t["go"]}</a></li>\n""")
     p.append("  </ol>\n")
-    if len(rows) > shown:
-        p.append(f'  <p class="muted">Gezeigt werden die {shown} Toiletten, die der Innenstadt am nächsten sind. Alle {len(rows)} findest du auf der <a href="{map_url}">Karte</a>.</p>\n')
+    if n > shown:
+        p.append(f'  <p class="muted">{t["more"].format(k=shown, n=n, map=map_url)}</p>\n')
     if others:
-        p.append('  <h2>Weitere Orte in der Nähe</h2>\n  <div class="cities">' + "".join(f'<a href="{o["slug"]}.html">{E(o["name"])}</a>' for o in others) + "</div>\n")
-    p.append(foot(stand))
+        p.append(f'  <h2>{t["others"]}</h2>\n  <div class="cities">' + "".join(f'<a href="{o["slugs"][lang]}.html">{E(o["names"][lang])}</a>' for o in others) + "</div>\n")
+    p.append(foot(lang, stand))
     return "".join(p)
 
 
-def index_page(cities, counts, stand):
-    url = f"{BASE}toiletten/"
-    p = [head("Öffentliche Toiletten nach Stadt | Rate My Throne",
-              "Öffentliche Toiletten nach Stadt: kostenlos, barrierefrei, mit Wickeltisch – mit Karte und Bewertungen der Community.", url)]
-    p.append('  <h1>Öffentliche Toiletten nach Stadt</h1>\n  <p class="lead">Wähle eine Stadt – oder öffne direkt die <a href="../karte.html">Karte</a>, sie funktioniert überall.</p>\n')
+def index_page(cities, counts, stand, lang):
+    t = TX[lang]
+    alt = {l: f"{BASE}{DIRS[l]}/" for l in DIRS}
+    p = [head(lang, t["i_title"], t["i_desc"], alt[lang], alt)]
+    p.append(f'  <h1>{t["i_h1"]}</h1>\n  <p class="lead">{t["i_lead"]}</p>\n')
     for g, (title, *_ ) in GROUPS.items():
-        sel = sorted((c for c in cities if c["group"] == g), key=lambda c: c["name"])
+        sel = sorted((c for c in cities if c["group"] == g), key=lambda c: c["names"][lang])
         if not sel: continue
-        p.append(f'  <h2>{E(title)}</h2>\n  <div class="cities">')
-        p.append("".join(f'<a href="{c["slug"]}.html">{E(c["name"])} ({counts[c["slug"]]})</a>' for c in sel))
+        p.append(f'  <h2>{E(title if lang == "de" else GROUP_EN[g])}</h2>\n  <div class="cities">')
+        p.append("".join(f'<a href="{c["slugs"][lang]}.html">{E(c["names"][lang])} ({counts[c["slug"]]})</a>' for c in sel))
         p.append("</div>\n")
-    p.append(foot(stand))
+    p.append(foot(lang, stand))
     return "".join(p)
 
 
 def sitemap(cities):
-    urls = [BASE + s for s in STATIC_PAGES] + [BASE + "toiletten/"] + [f"{BASE}toiletten/{c['slug']}.html" for c in cities]
-    body = "\n".join(f"  <url><loc>{u}</loc></url>" for u in urls)
+    urls = [BASE + s for s in STATIC_PAGES] + [BASE + s + "?lang=en" for s in STATIC_PAGES]
+    for lang in DIRS:
+        urls += [f"{BASE}{DIRS[lang]}/"] + [page_url(c, lang) for c in cities]
+    body = "\n".join(f"  <url><loc>{u.replace('&', '&amp;')}</loc></url>" for u in urls)
     return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{body}\n</urlset>\n'
 
 
 def main():
-    os.makedirs(OUT, exist_ok=True)
+    for d in DIRS.values():
+        os.makedirs(os.path.join(ROOT, d), exist_ok=True)
+    for c in CITIES:
+        c["names"] = {"de": c["name"], "en": EN_NAMES.get(c["name"], c["name"])}
+        c["slugs"] = {"de": c["slug"], "en": slugify(c["names"]["en"])}
     test = "--daten" in sys.argv
     data = from_file(sys.argv[sys.argv.index("--daten") + 1]) if test else None
     load = lambda f: json.load(open(f, encoding="utf-8")) if os.path.exists(f) else {}
@@ -405,18 +475,21 @@ def main():
         r["street"] = street(r, cache, not test)
     for c in ready:
         others = sorted((o for o in ready if o is not c), key=lambda o: dist_km(c["lat"], c["lon"], o["lat"], o["lon"]))[:8]
-        with open(os.path.join(OUT, c["slug"] + ".html"), "w", encoding="utf-8") as f:
-            f.write(city_page(c, per[c["slug"]], others, stand))
+        for lang, d in DIRS.items():
+            with open(os.path.join(ROOT, d, c["slugs"][lang] + ".html"), "w", encoding="utf-8") as f:
+                f.write(city_page(c, per[c["slug"]], others, stand, lang))
     # Seiten von Orten, die nicht mehr in der Liste stehen, entfernen; noch nicht fertige Orte behalten ihre alte Seite
-    keep = {c["slug"] for c in CITIES}
-    for fn in os.listdir(OUT):
-        if fn.endswith(".html") and fn != "index.html" and fn[:-5] not in keep:
-            os.remove(os.path.join(OUT, fn))
-    listed = [c for c in CITIES if os.path.exists(os.path.join(OUT, c["slug"] + ".html"))]
+    for lang, d in DIRS.items():
+        keep = {c["slugs"][lang] for c in CITIES}
+        for fn in os.listdir(os.path.join(ROOT, d)):
+            if fn.endswith(".html") and fn != "index.html" and fn[:-5] not in keep:
+                os.remove(os.path.join(ROOT, d, fn))
+    listed = [c for c in CITIES if all(os.path.exists(os.path.join(ROOT, d, c["slugs"][l] + ".html")) for l, d in DIRS.items())]
     for c in listed:
         counts.setdefault(c["slug"], "…")
-    with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
-        f.write(index_page(listed, counts, stand))
+    for lang, d in DIRS.items():
+        with open(os.path.join(ROOT, d, "index.html"), "w", encoding="utf-8") as f:
+            f.write(index_page(listed, counts, stand, lang))
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write(sitemap(listed))
     if not test:

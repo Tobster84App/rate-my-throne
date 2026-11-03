@@ -1,6 +1,6 @@
 # Rate My Throne – Projektplan
 
-Stand: 03.11.2026 · Version 0.13
+Stand: 03.11.2026 · Version 0.14
 
 ## ⚠️ Vor dem offiziellen Start (Pflicht)
 - [x] Impressum: Name, Anschrift, E-Mail eingetragen (30.10.2026)
@@ -41,12 +41,13 @@ Stand: 03.11.2026 · Version 0.13
 - Seitenaufrufe je Tag (Startseite/Karte) ohne Personendaten, Admin-Ansicht „Statistik“; Skript supabase/migrations/20261103_page_views.sql
 - Suchmaschinen: Titel mit Suchbegriffen, Vorschaubild für geteilte Links (Open Graph), Sprachfassungen (hreflang), kanonische Adressen
 - Städte-Seiten für alle 64 Großstädte ab Heilbronn-Größe, 23 Urlaubsorte in Deutschland (z. B. Sylt, Rügen, Garmisch, Rust/Europa-Park) und 16 Urlaubsziele im Ausland (z. B. Mallorca, Rom, Paris, Wien) + Übersicht toiletten/: Liste mit Straße, Merkmalen, Öffnungszeiten, Bewertungen; Link öffnet die Toilette auf der Karte (karte.html?toilette=…). Erzeugt von tools/staedte.py, automatisch jede Woche per GitHub Action (.github/workflows/staedte.yml), inkl. sitemap.xml
+- Städte-Seiten zusätzlich auf Englisch unter toilets/ (z. B. toilets/munich.html), gegenseitig verlinkt mit hreflang
 - Startseite: Werbefilm (stumm, Endlosschleife) unter den Zahlen; auf Handys im Hochformat die Fassung 9x16; Dateien in media/ (je ca. 2 MB, ohne Tonspur, Poster = Schlussbild)
 
 ## Nächste Schritte
 1. Google Search Console: eingerichtet und Sitemap eingereicht (03.11.2026); Status „Konnte nicht abgerufen werden“ beobachten, Indexierung für Startseite und /toiletten/ beantragt
 2. Links von anderen Seiten sammeln (Tobias plant das)
-3. Städte-Seiten auch auf Englisch; weitere Orte bei Bedarf in tools/staedte.py ergänzen
+3. Weitere Orte bei Bedarf in tools/staedte.py ergänzen
 4. Vor Werbung prüfen: GitHub Pages ist nicht für überwiegend kommerzielle Seiten gedacht – ggf. Hoster wechseln
 5. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten, dann Cookie-Einwilligung nötig
 6. Später: Rankings mit Humor („Thron der Woche“, beste/schlimmste Throne einer Stadt, Ehrentitel für fleißige Bewertende)
