@@ -21,6 +21,7 @@ MAX_LOOKUPS = 1000  # Nominatim-Straßenabfragen pro Lauf (Rest folgt in den nä
 MAX_LIST = 300      # höchstens so viele Toiletten pro Seite auflisten (die nächsten zur Innenstadt)
 
 # Orte je Gruppe: (Gruppentitel, Ländercode, Umkreis km, Orte). Ein Ort ist "Name" oder ("Name", "Suchbegriff", Ländercode, km).
+# Suchbegriff "@Breite,Länge" setzt den Mittelpunkt fest (wenn Nominatim die Gemeindefläche statt des Ortskerns liefert).
 GROUPS = {
     "gross": ("Großstädte in Deutschland", "de", 6, [
         ("Berlin", None, None, 8), ("Hamburg", None, None, 8), ("München", None, None, 8), ("Köln", None, None, 8),
@@ -33,9 +34,9 @@ GROUPS = {
         "Offenbach am Main", "Würzburg", "Fürth", "Ulm", "Heilbronn", "Pforzheim", "Wolfsburg"]),
     "urlaub": ("Urlaubsorte in Deutschland", "de", 3, [
         ("Westerland (Sylt)", "Westerland"), "Norderney", ("Binz (Rügen)", "Binz"), ("Heringsdorf (Usedom)", "Heringsdorf"),
-        "Timmendorfer Strand", "Warnemünde", "Stralsund", "Garmisch-Partenkirchen", "Berchtesgaden", "Füssen", "Oberstdorf",
-        "Rothenburg ob der Tauber", "Bamberg", "Konstanz", ("Lindau (Bodensee)", "Lindau"), "Baden-Baden", "Titisee-Neustadt",
-        "Rüdesheim am Rhein", "Cochem", "Wernigerode", "Quedlinburg", ("Rust (Europa-Park)", "Rust, Ortenaukreis"), "Schwaigern"]),
+        "Timmendorfer Strand", "Warnemünde", "Stralsund", "Garmisch-Partenkirchen", "Berchtesgaden", "Füssen", ("Oberstdorf", "@47.4097,10.2797"),
+        "Rothenburg ob der Tauber", "Bamberg", "Konstanz", ("Lindau (Bodensee)", "Lindau"), "Baden-Baden", ("Titisee-Neustadt", "@47.9003,8.1546"),
+        ("Rüdesheim am Rhein", "@49.9790,7.9236"), "Cochem", "Wernigerode", "Quedlinburg", ("Rust (Europa-Park)", "Rust, Ortenaukreis"), "Schwaigern"]),
     "ausland": ("Urlaubsziele im Ausland", "", 5, [
         ("Palma (Mallorca)", "Palma", "es"), ("Barcelona", None, "es"), ("Rom", None, "it"), ("Venedig", None, "it"),
         ("Florenz", None, "it"), ("Paris", None, "fr"), ("Wien", None, "at"), ("Salzburg", None, "at"), ("Innsbruck", None, "at"),
@@ -155,6 +156,9 @@ lookups = 0
 
 def geocode(c, places, online):
     """Mittelpunkt einer Stadt per Nominatim-Suche; Ergebnis bleibt in orte.json gespeichert."""
+    if c["query"].startswith("@"):
+        c["lat"], c["lon"] = map(float, c["query"][1:].split(","))
+        return True
     key = f"{c['query']}|{c['cc']}"
     if key not in places and online:
         time.sleep(1.1)
