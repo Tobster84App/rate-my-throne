@@ -1,0 +1,5 @@
+# Alle Suchmaschinen dürfen die Seite lesen.
+User-agent: *
+Allow: /
+
+Sitemap: https://www.rate-my-throne.com/sitemap.xml

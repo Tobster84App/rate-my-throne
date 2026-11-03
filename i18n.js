@@ -124,6 +124,7 @@ const I18N = {
 
     // Karte
     "m.title": "Karte · Rate My Throne",
+    "m.osmCredit": "OpenStreetMap-Mitwirkende",
     "m.info.aria": "Übersicht für den Kartenausschnitt", "m.info.heading": "Hier in der Gegend",
     "m.info.toilets": "Toiletten", "m.info.toiletsNote": "im sichtbaren Kartenausschnitt",
     "m.info.avg": "Ø Bewertung", "m.info.noReviews": "noch keine Bewertungen", "m.info.ratedOf": "{n} von {m} bewertet",
@@ -278,6 +279,7 @@ const I18N = {
     "h.footer.map": "Map", "h.footer.imprint": "Legal notice", "h.footer.privacy": "Privacy policy", "h.footer.soon": "Coming before the official launch",
 
     "m.title": "Map · Rate My Throne",
+    "m.osmCredit": "OpenStreetMap contributors",
     "m.info.aria": "Overview of the visible map area", "m.info.heading": "Around here",
     "m.info.toilets": "Toilets", "m.info.toiletsNote": "in the visible map area",
     "m.info.avg": "Avg. rating", "m.info.noReviews": "no reviews yet", "m.info.ratedOf": "{n} of {m} rated",
