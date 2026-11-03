@@ -32,7 +32,7 @@ Stand: 03.11.2026. Diese Datei kurz halten und bei wichtigen Änderungen selbst 
 - Neue Texte immer in `i18n.js` für DE und EN; Projektplan in `PROJEKTPLAN.md` mitpflegen.
 
 ## Aktueller Stand
-Karte mit OSM- und eigenen Toiletten, Bewertungen mit Trend, Detail-Kriterien und Familien-Abzeichen, Filter (kostenlos, barrierefrei, Wickeltisch, familienfreundlich, ab 4 Sternen, nur bewertete), Ortssuche zum Vorplanen, Kurzmeldungen/Daumen, Konten (Registrierung, Passwort vergessen/ändern, Benutzername ändern, Konto löschen), Moderation, Admin-Statistik (Seitenaufrufe), Städte-Seiten (Heilbronn, Stuttgart, Schwaigern), Startseite mit Werbefilm und „Vorab planen“, Impressum, Datenschutz, robots.txt/sitemap.xml.
+Karte mit OSM- und eigenen Toiletten, Bewertungen mit Trend, Detail-Kriterien und Familien-Abzeichen, Filter (kostenlos, barrierefrei, Wickeltisch, familienfreundlich, ab 4 Sternen, nur bewertete), Ortssuche zum Vorplanen, Kurzmeldungen/Daumen, Konten (Registrierung, Passwort vergessen/ändern, Benutzername ändern, Konto löschen), Moderation, Admin-Statistik (Seitenaufrufe), Städte-Seiten (64 Großstädte ab Heilbronn-Größe, 23 Urlaubsorte in DE, 16 Urlaubsziele im Ausland), Startseite mit Werbefilm und „Vorab planen“, Impressum, Datenschutz, robots.txt/sitemap.xml.
 
 ## Offene Punkte
 - Datenschutz: Brevo-Support-Bestätigung ausstehend; Rechtstexte prüfen lassen. (Erledigt: Supabase – DPA in den AGB, SCC Modul 2 laut TIA; GitHub – DPF-zertifiziert plus SCC laut GitHub Privacy Statement.)
@@ -40,5 +40,5 @@ Karte mit OSM- und eigenen Toiletten, Bewertungen mit Trend, Detail-Kriterien un
 - All-Inkl-Stammdaten: Ort „Bruchsal“ → Schwaigern korrigieren, AV-Vertrag neu erzeugen.
 - SQL `20261102_admin_users.sql` (Nutzer-Übersicht) noch nicht ausgeführt; Knopf „Nutzer“ zeigt bis dahin einen Fehler.
 - Google Search Console einrichten (Mail-Limit auf 100/Std. erledigt).
-- Städte-Seiten: weitere Städte in `CITIES` (tools/staedte.py) ergänzen; später alle Städte automatisch.
+- Städte-Seiten: Orte stehen in `GROUPS` (tools/staedte.py). Stadtmitte und Straßen kommen per Nominatim (Cache `toiletten/orte.json`, `adressen.json`, max. 1000 Straßenabfragen pro Lauf). Orte, deren OSM-Kacheln noch fehlen (Ausland), werden angefordert und erscheinen beim nächsten Lauf. Seiten nur auf Deutsch.
 - Später: Rankings mit Humor; Werbung (vorher Gewerbe-Frage klären, Cookie-Einwilligung, Datenschutz ergänzen).

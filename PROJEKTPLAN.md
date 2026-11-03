@@ -1,6 +1,6 @@
 # Rate My Throne – Projektplan
 
-Stand: 03.11.2026 · Version 0.11
+Stand: 03.11.2026 · Version 0.12
 
 ## ⚠️ Vor dem offiziellen Start (Pflicht)
 - [x] Impressum: Name, Anschrift, E-Mail eingetragen (30.10.2026)
@@ -40,13 +40,13 @@ Stand: 03.11.2026 · Version 0.11
 - Bewertungen mit Detail-Kriterien (Papier, Seife, Handtrocknung, Geruch, Schloss) und Familie (Kinderwagen, Kindersitz, familienfreundlich); Abzeichen und Filter „Familienfreundlich“; Skript supabase/migrations/20261103_status_details.sql
 - Seitenaufrufe je Tag (Startseite/Karte) ohne Personendaten, Admin-Ansicht „Statistik“; Skript supabase/migrations/20261103_page_views.sql
 - Suchmaschinen: Titel mit Suchbegriffen, Vorschaubild für geteilte Links (Open Graph), Sprachfassungen (hreflang), kanonische Adressen
-- Städte-Seiten toiletten/heilbronn.html, stuttgart.html, schwaigern.html + Übersicht toiletten/: Liste mit Straße, Merkmalen, Öffnungszeiten, Bewertungen; Link öffnet die Toilette auf der Karte (karte.html?toilette=…). Erzeugt von tools/staedte.py, automatisch jede Woche per GitHub Action (.github/workflows/staedte.yml), inkl. sitemap.xml
+- Städte-Seiten für alle 64 Großstädte ab Heilbronn-Größe, 23 Urlaubsorte in Deutschland (z. B. Sylt, Rügen, Garmisch, Rust/Europa-Park) und 16 Urlaubsziele im Ausland (z. B. Mallorca, Rom, Paris, Wien) + Übersicht toiletten/: Liste mit Straße, Merkmalen, Öffnungszeiten, Bewertungen; Link öffnet die Toilette auf der Karte (karte.html?toilette=…). Erzeugt von tools/staedte.py, automatisch jede Woche per GitHub Action (.github/workflows/staedte.yml), inkl. sitemap.xml
 - Startseite: Werbefilm (stumm, Endlosschleife) unter den Zahlen; auf Handys im Hochformat die Fassung 9x16; Dateien in media/ (je ca. 2 MB, ohne Tonspur, Poster = Schlussbild)
 
 ## Nächste Schritte
 1. Google Search Console einrichten (Domain-Bestätigung per TXT bei All-Inkl), sitemap.xml einreichen
 2. Links von anderen Seiten sammeln (Tobias plant das)
-3. Weitere Städte-Seiten (Liste in tools/staedte.py ergänzen; später automatisch für alle Städte)
+3. Städte-Seiten auch auf Englisch; weitere Orte bei Bedarf in tools/staedte.py ergänzen
 4. Vor Werbung prüfen: GitHub Pages ist nicht für überwiegend kommerzielle Seiten gedacht – ggf. Hoster wechseln
 5. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten, dann Cookie-Einwilligung nötig
 6. Später: Rankings mit Humor („Thron der Woche“, beste/schlimmste Throne einer Stadt, Ehrentitel für fleißige Bewertende)
