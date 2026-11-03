@@ -34,8 +34,8 @@ Stand: 03.11.2026. Diese Datei kurz halten und bei wichtigen Änderungen selbst 
 Karte mit OSM- und eigenen Toiletten, Bewertungen mit Trend, Detail-Kriterien und Familien-Abzeichen, Filter (kostenlos, barrierefrei, Wickeltisch, familienfreundlich, ab 4 Sternen, nur bewertete), Ortssuche zum Vorplanen, Kurzmeldungen/Daumen, Konten (Registrierung, Passwort vergessen/ändern, Benutzername ändern, Konto löschen), Moderation, Admin-Statistik (Seitenaufrufe), Startseite mit Werbefilm und „Vorab planen“, Impressum, Datenschutz, robots.txt/sitemap.xml.
 
 ## Offene Punkte
-- Datenschutz: Übermittlungsgrundlagen GitHub und Supabase-DPA prüfen; Brevo-Support-Bestätigung ausstehend; Rechtstexte prüfen lassen.
+- Datenschutz: Übermittlungsgrundlage GitHub prüfen; Brevo-Support-Bestätigung ausstehend; Rechtstexte prüfen lassen. (Supabase erledigt: DPA in den AGB, Übermittlung per SCC Modul 2 laut TIA vom 14.03.2025.)
 - All-Inkl-Stammdaten: Ort „Bruchsal“ → Schwaigern korrigieren, AV-Vertrag neu erzeugen.
-- SQL noch nicht ausgeführt: `20261102_admin_users.sql` (Nutzer-Übersicht), `20261103_page_views.sql` (Statistik); die Admin-Knöpfe zeigen bis dahin einen Fehler.
+- SQL `20261102_admin_users.sql` (Nutzer-Übersicht) noch nicht ausgeführt; Knopf „Nutzer“ zeigt bis dahin einen Fehler.
 - Supabase-Mail-Limit auf ca. 100/Stunde erhöhen; Google Search Console einrichten.
 - Später: Rankings mit Humor; Werbung (vorher Gewerbe-Frage klären, Cookie-Einwilligung, Datenschutz ergänzen).
