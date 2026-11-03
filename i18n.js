@@ -84,7 +84,7 @@ const I18N = {
     "toilet.deleteFailed": "Löschen fehlgeschlagen: {e}",
 
     // Startseite
-    "h.title": "Rate My Throne – Du musst. Wir wissen, wo.",
+    "h.title": "Rate My Throne – öffentliche Toiletten finden & bewerten",
     "h.description": "Öffentliche Toiletten in jeder Stadt finden und bewerten – mit der Community von Rate My Throne.",
     "h.nav.how": "So geht's", "h.nav.join": "Anmelden", "h.nav.map": "Zur Karte",
     "h.eyebrow": "Öffentliche Toiletten · ehrlich bewertet",
@@ -134,10 +134,10 @@ const I18N = {
     "h.faq.q4": "In welchen Städten funktioniert das?", "h.faq.a4": "Überall, wo OpenStreetMap öffentliche Toiletten kennt – also in sehr vielen Städten weltweit. Bewertungen gibt es dort, wo unsere Community schon war – jede neue Bewertung macht die Karte für alle besser. Fehlt ein Thron, trägst du ihn mit einem Tipp selbst ein.",
     "h.faq.q5": "Muss ich meinen Standort freigeben?", "h.faq.a5": "Nein. Den Standort brauchst du nur, wenn du den nächsten Thron von dort aus finden willst – sonst suchst du einfach nach einem Ort. Dein Standort wird nur in deinem Browser verwendet und nicht gespeichert.",
     "h.footer.osm": "Kartendaten © <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap</a>-Mitwirkende",
-    "h.footer.map": "Karte", "h.footer.imprint": "Impressum", "h.footer.privacy": "Datenschutz", "h.footer.soon": "Folgt vor dem offiziellen Start",
+    "h.footer.map": "Karte", "h.footer.cities": "Toiletten nach Stadt", "h.footer.imprint": "Impressum", "h.footer.privacy": "Datenschutz", "h.footer.soon": "Folgt vor dem offiziellen Start",
 
     // Karte
-    "m.title": "Karte · Rate My Throne",
+    "m.title": "Toiletten-Karte · Rate My Throne",
     "m.osmCredit": "OpenStreetMap-Mitwirkende",
     "m.info.aria": "Übersicht für den Kartenausschnitt", "m.info.heading": "Hier in der Gegend",
     "m.info.toilets": "Toiletten", "m.info.toiletsNote": "im sichtbaren Kartenausschnitt",
@@ -254,7 +254,7 @@ const I18N = {
     "toilet.notAllowed": "Others have already reviewed this toilet. Only an admin can delete it now.",
     "toilet.deleteFailed": "Couldn't delete: {e}",
 
-    "h.title": "Rate My Throne – You gotta go. We know where.",
+    "h.title": "Rate My Throne – find & rate public toilets",
     "h.description": "Find and rate public toilets in any city – with the Rate My Throne community.",
     "h.nav.how": "How it works", "h.nav.join": "Sign in", "h.nav.map": "Open map",
     "h.eyebrow": "Public toilets · honestly rated",
@@ -304,9 +304,9 @@ const I18N = {
     "h.faq.q4": "Which cities does it work in?", "h.faq.a4": "Anywhere OpenStreetMap knows public toilets – that's a lot of cities worldwide. Reviews exist wherever our community has already been – every new review makes the map better for everyone. Missing a throne? Add it yourself with one tap.",
     "h.faq.q5": "Do I have to share my location?", "h.faq.a5": "No. You only need it to find the nearest throne from where you are – otherwise just search for a place. Your location is used in your browser only and never stored.",
     "h.footer.osm": "Map data © <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap</a> contributors",
-    "h.footer.map": "Map", "h.footer.imprint": "Legal notice", "h.footer.privacy": "Privacy policy", "h.footer.soon": "Coming before the official launch",
+    "h.footer.map": "Map", "h.footer.cities": "Toilets by city", "h.footer.imprint": "Legal notice", "h.footer.privacy": "Privacy policy", "h.footer.soon": "Coming before the official launch",
 
-    "m.title": "Map · Rate My Throne",
+    "m.title": "Toilet map · Rate My Throne",
     "m.osmCredit": "OpenStreetMap contributors",
     "m.info.aria": "Overview of the visible map area", "m.info.heading": "Around here",
     "m.info.toilets": "Toilets", "m.info.toiletsNote": "in the visible map area",
@@ -353,6 +353,15 @@ const LANG = (() => {
   return (navigator.language || "").toLowerCase().startsWith("de") ? "de" : "en";
 })();
 const LOCALE = LANG === "de" ? "de-DE" : "en-GB";
+
+// Für Suchmaschinen: kanonische Adresse dieser Sprachfassung (?lang=de/en), ohne Sprachangabe die Standardadresse
+try {
+  const q = new URLSearchParams(location.search).get("lang");
+  const link = document.createElement("link");
+  link.rel = "canonical";
+  link.href = "https://www.rate-my-throne.com" + location.pathname.replace(/index\.html$/, "") + (q && I18N[q] ? "?lang=" + q : "");
+  document.head.appendChild(link);
+} catch {}
 
 // Text holen; {name}-Platzhalter werden ersetzt
 function t(key, vars = {}) {

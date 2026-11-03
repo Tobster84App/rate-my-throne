@@ -1,0 +1,28 @@
+# Erzeugt die Städte-Seiten (toiletten/*.html) und sitemap.xml neu – jede Woche und bei Änderungen am Skript.
+name: Städte-Seiten
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * 1"   # montags 03:17 UTC
+  push:
+    branches: [main]
+    paths: ["tools/staedte.py"]
+permissions:
+  contents: write
+concurrency: staedte
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Seiten erzeugen
+        run: python3 tools/staedte.py
+      - name: Speichern, falls sich etwas geändert hat
+        run: |
+          git add toiletten sitemap.xml
+          if git diff --cached --quiet; then echo "keine Änderungen"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Städte-Seiten aktualisiert"
+          git push
