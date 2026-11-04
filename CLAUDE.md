@@ -8,7 +8,7 @@ Stand: 03.11.2026. Diese Datei kurz halten und bei wichtigen Änderungen selbst 
 - Zielgruppe: alle unterwegs, besonders Familien mit Kindern (Wickeltisch, vorab planen) und Menschen mit Mobilitätseinschränkung.
 
 ## Technik
-- **Hosting:** GitHub Pages, Repo `Tobster84App/rate-my-throne`, Branch `main` = live. Domain www.rate-my-throne.com (DNS bei All-Inkl; .de/.net/ratemythrone.de leiten dort weiter).
+- **Hosting:** GitHub Pages, Repo `Tobster84App/rate-my-throne`, Branch `main` = live. Domain www.rate-my-throne.com (DNS bei All-Inkl; .de/.net/ratemythrone.de leiten dort weiter, mit Let's-Encrypt-SSL bei All-Inkl; .com bekommt HTTPS von GitHub – dort kein All-Inkl-Zertifikat).
 - **Frontend:** reines HTML/CSS/JS ohne Build. `index.html` (Startseite), `karte.html` (App), `impressum.html`, `datenschutz.html`, `i18n.js` (alle Texte DE/EN), `sw.js` (Service Worker, network-first), `media/` (Werbefilm 16x9/9x16), `toiletten/` + `toilets/` (Städte-Seiten DE/EN, erzeugt von `tools/staedte.py` per GitHub Action `.github/workflows/staedte.yml`, wöchentlich; nicht von Hand bearbeiten).
 - **Bibliotheken lokal** in `vendor/` (Leaflet 1.9.4, supabase-js 2.45.4, Schriften) – keine CDNs, kein Google Fonts.
 - **Datenbank/Konten:** Supabase, Projekt `bzgeqaseogawdptaqzgq`, eu-west-1. Tabellen u. a. `profiles`, `toilets` (eigene Einträge), `reviews`, `review_reports`, `toilet_reports` (Kurzmeldungen), `toilet_votes` (Daumen), `page_views` (Seitenaufrufe je Tag), `osm_toilets`/`osm_tiles` (OSM-Kopie). Zugriff über RLS und RPCs (`security definer`).
@@ -44,5 +44,4 @@ Karte mit OSM- und eigenen Toiletten, Bewertungen mit Trend, Detail-Kriterien un
 - All-Inkl-Stammdaten: Ort „Bruchsal“ → Schwaigern korrigieren, AV-Vertrag neu erzeugen.
 - Google Search Console eingerichtet (03.11.2026, Domain-Property per TXT). Sitemap anfangs „Konnte nicht abgerufen werden“ (bei neuen Domains üblich); Indexierung für / und /toiletten/ beantragt. Falls nach einigen Tagen weiter Fehler: zweite Sitemap mit anderem Namen anlegen.
 - Städte-Seiten: Orte stehen in `GROUPS` (tools/staedte.py). Stadtmitte und Straßen kommen per Nominatim (Cache `toiletten/orte.json`, `adressen.json`, max. 1000 Straßenabfragen pro Lauf). Orte, deren OSM-Kacheln noch fehlen (Ausland), werden angefordert und erscheinen beim nächsten Lauf. Englische Namen in `EN_NAMES`, Texte in `TX`.
-- SQL `20261104_rankings.sql` (Ranglisten) muss Tobias noch ausführen; bis dahin bleiben Thron der Woche, Ranglisten und Titel unsichtbar bzw. zeigen „konnte nicht geladen werden“.
 - Später: Werbung (vorher Gewerbe-Frage klären, Cookie-Einwilligung, Datenschutz ergänzen).

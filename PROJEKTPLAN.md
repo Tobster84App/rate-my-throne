@@ -47,7 +47,8 @@ Stand: 04.11.2026 · Version 0.16
 - Startseite: Hauptknopf „🗺️ Nächsten Thron finden“ mit Erklärzeile „Öffentliche Toilette in der Nähe · Karte öffnen“, zweiter Knopf „Kostenlos mitmachen und bewerten“; Kartenknopf mit 🚽
 - Startseiten-Texte auf „Live & Familie & Humor“ geschärft (live gemeldet, jetzt geöffnet, Bewerten & melden, 👪-Abzeichen, neue FAQ zu Öffnung/Live-Meldungen)
 - Maschinenlesbare Auszeichnung (JSON-LD, schema.org): Städte-Seiten mit Brotkrumen-Pfad und Liste der 50 nächsten Toiletten (PublicToilet mit Lage, Straße, kostenlos, rollstuhlgerecht/Wickeltisch, einfache Öffnungszeiten, Bewertungsschnitt); Startseite als WebSite/WebApplication (kostenlos)
-- Ranglisten mit Humor: Thron der Woche (Startseite), Goldene Throne und Hofstaat des Monats (🏆 auf der Karte), Ehrentitel neben dem Benutzernamen und „Dein Rang“ im Konto, jeweils mit Erklärung; neue FAQ. Ohne Tatort-Liste. Skript supabase/migrations/20261104_rankings.sql
+- Ranglisten mit Humor: Thron der Woche (Startseite), Goldene Throne und Hofstaat des Monats (🏆 auf der Karte), Ehrentitel neben dem Benutzernamen und „Dein Rang“ im Konto, jeweils mit Erklärung; neue FAQ. Ohne Tatort-Liste. Skript supabase/migrations/20261104_rankings.sql (ausgeführt 04.11.2026)
+- Weiterleitungs-Domains rate-my-throne.de/.net und ratemythrone.de mit SSL (Let's Encrypt bei All-Inkl) – keine Browser-Warnung mehr
 - Wettbewerbsanalyse PeeFinder (04.11.2026): Positionierung „Live & Familie & Humor“ beschlossen
 - Startseite: Werbefilm (stumm, Endlosschleife) unter den Zahlen; auf Handys im Hochformat die Fassung 9x16; Dateien in media/ (je ca. 2 MB, ohne Tonspur, Poster = Schlussbild)
 
