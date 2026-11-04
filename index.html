@@ -52,6 +52,8 @@ h2 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; letter-spacing: -.5px;
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 14px; padding: 14px 22px; font-weight: 700; text-decoration: none; border: 2px solid transparent; }
 .btn.gold { background: var(--gold); color: var(--royal); }
 .btn.gold:hover { background: var(--gold-soft); }
+.btn.stack { flex-direction: column; gap: 2px; line-height: 1.2; padding-block: 10px; }
+.btn.stack small { font-weight: 600; font-size: 12.5px; opacity: .8; }
 .btn.ghost { border-color: rgba(255,255,255,.35); color: #fff; }
 .btn.ghost:hover { border-color: #fff; }
 .btn.royal { background: var(--royal); color: #fff; }
@@ -207,8 +209,8 @@ footer a { color: var(--muted); }
       <h1 data-i18n="h.h1">Du musst.<br><em>Wir wissen, wo.</em></h1>
       <p data-i18n="h.lead"></p>
       <div class="ctas">
-        <a class="btn gold" href="karte.html" data-i18n="h.cta.find">Nächsten Thron finden</a>
-        <a class="btn ghost" href="#mitmachen" data-i18n="h.cta.join">Kostenlos mitmachen</a>
+        <a class="btn gold stack" href="karte.html"><span><span aria-hidden="true">🗺️</span> <span data-i18n="h.cta.find">Nächsten Thron finden</span></span><small data-i18n="h.cta.findSub">Öffentliche Toilette in der Nähe · Karte öffnen</small></a>
+        <a class="btn ghost" href="#mitmachen" data-i18n="h.cta.join">Kostenlos mitmachen und bewerten</a>
       </div>
     </div>
   </div>

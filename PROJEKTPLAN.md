@@ -44,6 +44,7 @@ Stand: 04.11.2026 · Version 0.15
 - Städte-Seiten zusätzlich auf Englisch unter toilets/ (z. B. toilets/munich.html), gegenseitig verlinkt mit hreflang
 - Filter und Anzeige „Jetzt geöffnet / geschlossen“ aus den OSM-Öffnungszeiten (oh.js; Unverständliches = unbekannt)
 - Startseite: oben Toiletten gesamt / kostenlos / mit Wickeltisch; Block „Der Hofstaat wächst“ vor „Mitmachen“, Community-Zahlen erst ab 500 Bewertungen
+- Startseite: Hauptknopf „🗺️ Nächsten Thron finden“ mit Erklärzeile „Öffentliche Toilette in der Nähe · Karte öffnen“, zweiter Knopf „Kostenlos mitmachen und bewerten“; Kartenknopf mit 🚽
 - Wettbewerbsanalyse PeeFinder (04.11.2026): Positionierung „Live & Familie & Humor“ beschlossen
 - Startseite: Werbefilm (stumm, Endlosschleife) unter den Zahlen; auf Handys im Hochformat die Fassung 9x16; Dateien in media/ (je ca. 2 MB, ohne Tonspur, Poster = Schlussbild)
 
