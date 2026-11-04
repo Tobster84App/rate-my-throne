@@ -260,6 +260,7 @@ legend { font-weight: 600; font-size: 14px; padding: 0 4px; }
 <div id="sheet" hidden></div>
 
 <script src="i18n.js"></script>
+<script src="oh.js"></script>
 <script src="vendor/leaflet.js"></script>
 <script src="vendor/supabase.js"></script>
 <script>
@@ -314,7 +315,7 @@ function markerIcon(tl) {
 
 // ===== Filter: kostenlos, barrierefrei, Wickeltisch, ab 4 Sternen, nur bewertete =====
 // Toiletten ohne Angabe bleiben bei den Ausstattungs-Filtern sichtbar; ausgeblendet wird nur, was ausdrücklich nicht passt.
-const FILTERS = ["free", "wheelchair", "changing", "family", "good", "rated"];
+const FILTERS = ["open", "free", "wheelchair", "changing", "family", "good", "rated"];
 let filters = new Set();
 try { filters = new Set(JSON.parse(localStorage.getItem("rmt-filters") || "[]").filter(f => FILTERS.includes(f))); } catch {}
 
@@ -335,6 +336,7 @@ function feature(tl, key) {
 }
 function passes(tl) {
   for (const f of filters) {
+    if (f === "open" && OH.isOpen(tl.hours) === false) return false;   // ohne verständliche Öffnungszeiten bleibt sie sichtbar
     if (f === "rated" && avg(tl.id) == null) return false;
     if (f === "good" && !(avg(tl.id) >= 4)) return false;
     if (f === "family" && feature(tl, "family") !== "yes") return false;
@@ -620,6 +622,8 @@ const sheet = document.getElementById("sheet");
 function closeSheet() { sheet.hidden = true; sheet.innerHTML = ""; }
 const throneMark = `<svg viewBox="86 100 340 332" aria-hidden="true"><path d="M120 300 104 150l84 70 68-110 68 110 84-70-16 150z" fill="#e3b341"/><ellipse cx="256" cy="330" rx="142" ry="74" fill="none" stroke="#e3b341" stroke-width="36"/></svg>`;
 const closeBtn = () => `<button class="close" type="button" onclick="closeSheet()" aria-label="${t("close")}">✕</button>`;
+// „Jetzt geöffnet/geschlossen“ aus den Öffnungszeiten (nur wenn sie verständlich sind)
+const openChip = tl => { const o = OH.isOpen(tl.hours); return o == null ? "" : `<span class="chip ${o ? "yes" : "no"}">${t(o ? "m.chip.openNow" : "m.chip.closedNow")}</span>`; };
 const chip = (label, v) => `<span class="chip ${v === "yes" ? "yes" : v === "no" ? "no" : ""}">${label}: ${v === "yes" ? t("yes") : v === "no" ? t("no") : v === "limited" ? t("m.chip.limited") : t("m.chip.unknown")}</span>`;
 
 function showToilet(tl, dist) {
@@ -630,8 +634,8 @@ function showToilet(tl, dist) {
   sheet.innerHTML = `
     ${closeBtn()}
     <h2>${esc(tl.name)}</h2>
-    <div class="muted">${d != null ? t(planPos ? "m.detail.awayPlan" : "m.detail.away", { d: fmtDist(d), min: walkMin(d) }) : ""}${t("m.detail.source", { s: esc(tl.source) })}${tl.hours ? t("m.detail.hours", { h: esc(tl.hours) }) : ""}</div>
-    <div class="chips">${chip(t("m.chip.free"), feature(tl, "free"))}${chip(t("m.chip.wheelchair"), feature(tl, "wheelchair"))}${chip(t("m.chip.changing"), feature(tl, "changing"))}${feature(tl, "family") === "yes" ? `<span class="chip yes">${t("m.chip.family")}</span>` : ""}</div>
+    <div class="muted">${d != null ? t(planPos ? "m.detail.awayPlan" : "m.detail.away", { d: fmtDist(d), min: walkMin(d) }) : ""}${t("m.detail.source", { s: esc(tl.source) })}${tl.hours ? t("m.detail.hours", { h: esc(OH.format(tl.hours, LANG)) }) : ""}</div>
+    <div class="chips">${openChip(tl)}${chip(t("m.chip.free"), feature(tl, "free"))}${chip(t("m.chip.wheelchair"), feature(tl, "wheelchair"))}${chip(t("m.chip.changing"), feature(tl, "changing"))}${feature(tl, "family") === "yes" ? `<span class="chip yes">${t("m.chip.family")}</span>` : ""}</div>
     <div class="live" id="liveBox">${liveHtml(tl)}</div>
     ${a == null ? `<p class="muted empty">${throneMark}<span>${t("m.detail.noReviews")}</span></p>` : `
       <div class="score"><div class="big" style="color:${scoreColor(a)}">${fmtNum(a, 1)}<small> / 5</small></div>
