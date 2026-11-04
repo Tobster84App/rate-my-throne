@@ -56,7 +56,7 @@ Stand: 04.11.2026 · Version 0.15
 3. Weitere Orte bei Bedarf in tools/staedte.py ergänzen
 4. Vor Werbung prüfen: GitHub Pages ist nicht für überwiegend kommerzielle Seiten gedacht – ggf. Hoster wechseln
 5. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten, dann Cookie-Einwilligung nötig
-6. Werbe-Frage strategisch klären (Mitbewerber ist werbefrei)
+6. Geld: Ziel kleiner Nebenverdienst; Stufenplan (jetzt werbefrei → ab ca. 10–20 Tsd. Seitenaufrufen/Monat eigene Sponsoren ohne Tracking auf Städte-Seiten → ggf. Banner mit Einwilligung nur auf Städte-Seiten). Vorher Gewerbe-Frage klären. Kein Spenden-Link vorerst
 7. Rankings mit Humor („Thron der Woche“, beste/schlimmste Throne einer Stadt, Ehrentitel für fleißige Bewertende)
 
 ## Toiletten-Daten (seit 29.10.2026)
