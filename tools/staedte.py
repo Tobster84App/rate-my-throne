@@ -8,7 +8,7 @@ Aufruf:  python3 tools/staedte.py                 (lädt alles aus dem Netz)
          python3 tools/staedte.py --daten x.json  (Testdaten statt Supabase, ohne Nominatim)
 Läuft automatisch über .github/workflows/staedte.yml (wöchentlich und bei Änderungen an dieser Datei).
 """
-import html, json, math, os, sys, time, urllib.parse, urllib.request
+import html, json, math, os, re, sys, time, urllib.parse, urllib.request
 from datetime import date
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -274,8 +274,8 @@ def num(x, lang):
     return s.replace(".", ",") if lang == "de" else s
 
 
-def head(lang, title, desc, url, alt):
-    """alt: {"de": url, "en": url} der Sprachfassungen"""
+def head(lang, title, desc, url, alt, ld=None):
+    """alt: {"de": url, "en": url} der Sprachfassungen; ld: Liste maschinenlesbarer Angaben (JSON-LD) für Suchmaschinen"""
     other = "en" if lang == "de" else "de"
     links = "\n".join(f'<link rel="alternate" hreflang="{l}" href="{u}">' for l, u in alt.items())
     return f"""<!doctype html>
@@ -301,7 +301,7 @@ def head(lang, title, desc, url, alt):
 <link rel="stylesheet" href="../vendor/fonts.css">
 <link rel="stylesheet" href="../legal.css">
 <style>{CSS}</style>
-</head>
+{"".join(jsonld(x) for x in (ld or []))}</head>
 <body>
 <header>
   <a class="brand" href="../{"?lang=en" if lang == "en" else ""}"><svg viewBox="86 100 340 332" aria-hidden="true"><path d="M120 300 104 150l84 70 68-110 68 110 84-70-16 150z" fill="#e3b341"/><ellipse cx="256" cy="330" rx="142" ry="74" fill="none" stroke="#e3b341" stroke-width="36"/></svg>Rate My&nbsp;<span>Throne</span></a>
@@ -370,6 +370,44 @@ def page_url(c, lang):
     return f"{BASE}{DIRS[lang]}/{c['slugs'][lang]}.html"
 
 
+def jsonld(obj):
+    """JSON-LD-Block; "</" wird maskiert, damit Namen aus OSM das Script nicht beenden können"""
+    return '<script type="application/ld+json">' + json.dumps(obj, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/") + "</script>\n"
+
+
+SIMPLE_OH = re.compile(r"^(?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))?(?:,(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))?)* )?\d\d:\d\d-\d\d:\d\d$")
+LD_ITEMS = 50   # so viele Toiletten maschinenlesbar auszeichnen (hält die Seiten schlank)
+
+
+def breadcrumb(lang, name=None, url=None):
+    t = TX[lang]
+    items = [("Rate My Throne", BASE + ("?lang=en" if lang == "en" else "")), (t["i_h1"], f"{BASE}{DIRS[lang]}/")]
+    if name: items.append((name, url))
+    return {"@context": "https://schema.org", "@type": "BreadcrumbList",
+            "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": n, "item": u} for i, (n, u) in enumerate(items)]}
+
+
+def toilet_ld(r, lang, city):
+    o = {"@type": "PublicToilet", "name": label(r, lang),
+         "geo": {"@type": "GeoCoordinates", "latitude": r["lat"], "longitude": r["lon"]},
+         "url": f"{BASE}karte.html?{'lang=en&' if lang == 'en' else ''}toilette={urllib.parse.quote(r['id'])}"}
+    addr = {"@type": "PostalAddress", "addressLocality": city}
+    if r.get("street"): addr["streetAddress"] = r["street"].split(",")[0]
+    o["address"] = addr
+    if r.get("fee") == "no": o["isAccessibleForFree"] = True
+    elif r.get("fee") == "yes": o["isAccessibleForFree"] = False
+    feats = []
+    if r.get("wheelchair") in ("yes", "designated"): feats.append("wheelchair accessible")
+    if r.get("changing_table") == "yes": feats.append("baby changing table")
+    if feats: o["amenityFeature"] = [{"@type": "LocationFeatureSpecification", "name": f, "value": True} for f in feats]
+    oh = (r.get("opening_hours") or "").strip()
+    if oh == "24/7": o["openingHours"] = "Mo-Su 00:00-23:59"
+    elif SIMPLE_OH.match(oh): o["openingHours"] = oh
+    if r.get("n"):
+        o["aggregateRating"] = {"@type": "AggregateRating", "ratingValue": r["avg"], "reviewCount": r["n"], "bestRating": 5, "worstRating": 1}
+    return o
+
+
 def city_page(c, rows, others, stand, lang):
     t, name = TX[lang], c["names"][lang]
     n = len(rows)
@@ -380,7 +418,10 @@ def city_page(c, rows, others, stand, lang):
     v = dict(c=E(name), n=n, free=free, wc=wc, ch=ch, km=c["km"])
     map_url = f"../karte.html?{t['q']}lat={c['lat']}&amp;lon={c['lon']}"
     alt = {l: page_url(c, l) for l in DIRS}
-    p = [head(lang, t["title"].format(**{**v, "c": name}), t["desc"].format(**{**v, "c": name}), alt[lang], alt)]
+    ld = [breadcrumb(lang, name, alt[lang]),
+          {"@context": "https://schema.org", "@type": "ItemList", "name": t["h1"].format(**{**v, "c": name}), "numberOfItems": n,
+           "itemListElement": [{"@type": "ListItem", "position": i + 1, "item": toilet_ld(r, lang, name)} for i, r in enumerate(rows[:LD_ITEMS])]}]
+    p = [head(lang, t["title"].format(**{**v, "c": name}), t["desc"].format(**{**v, "c": name}), alt[lang], alt, ld)]
     p.append(f"""  <h1>{t["h1"].format(**v)}</h1>
   <p class="lead">{t["lead"].format(**v)}</p>
   <a class="cta" href="{map_url}">{t["cta"].format(**v)}</a>
@@ -417,7 +458,7 @@ def city_page(c, rows, others, stand, lang):
 def index_page(cities, counts, stand, lang):
     t = TX[lang]
     alt = {l: f"{BASE}{DIRS[l]}/" for l in DIRS}
-    p = [head(lang, t["i_title"], t["i_desc"], alt[lang], alt)]
+    p = [head(lang, t["i_title"], t["i_desc"], alt[lang], alt, [breadcrumb(lang)])]
     p.append(f'  <h1>{t["i_h1"]}</h1>\n  <p class="lead">{t["i_lead"]}</p>\n')
     for g, (title, *_ ) in GROUPS.items():
         sel = sorted((c for c in cities if c["group"] == g), key=lambda c: c["names"][lang])
