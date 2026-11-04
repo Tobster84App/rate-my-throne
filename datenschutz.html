@@ -122,10 +122,17 @@
 </main>
 
 <script src="i18n.js"></script>
+<script src="toc.js"></script>
 <script>
 applyI18n();
 document.querySelectorAll("[data-show]").forEach(a => { a.hidden = a.dataset.show !== LANG; });
 document.title = (LANG === "de" ? "Datenschutz" : "Privacy policy") + " · Rate My Throne";
+// Inhaltsverzeichnis aus den Überschriften der sichtbaren Sprachfassung
+const art = document.querySelector(`[data-show="${LANG}"]`);
+const heads = [...art.querySelectorAll("h2")];
+heads.forEach((h, i) => { h.id = `${LANG}-abschnitt-${i + 1}`; });
+buildToc({ title: t("toc.title"), mount: nav => document.querySelector("header").after(nav),
+           items: heads.map(h => ({ id: h.id, label: h.textContent, text: h.textContent })) });
 </script>
 </body>
 </html>

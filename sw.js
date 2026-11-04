@@ -1,6 +1,6 @@
 // Minimaler Service Worker: macht die App installierbar und hält die eigenen Seiten bei Funkloch bereit.
-const CACHE = "rmt-v3";
-const SHELL = ["./", "index.html", "karte.html", "impressum.html", "datenschutz.html", "legal.css", "i18n.js", "oh.js", "manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png",
+const CACHE = "rmt-v4";
+const SHELL = ["./", "index.html", "karte.html", "impressum.html", "datenschutz.html", "legal.css", "i18n.js", "oh.js", "toc.js", "manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png",
                "vendor/fonts.css", "vendor/leaflet.css", "vendor/leaflet.js", "vendor/supabase.js"];
 
 self.addEventListener("install", e => {

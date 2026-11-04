@@ -91,6 +91,24 @@ nav .lang:hover { color: #fff; border-color: #fff; }
 .stat span { color: var(--muted); font-size: 14px; }
 
 section { padding-block: clamp(64px, 9vw, 104px); }
+section[id] { scroll-margin-top: 64px; }
+/* Inhaltsverzeichnis (toc.js): PC = Leiste, Handy = Knopf mit aufklappender Liste */
+nav.toc { display: block; padding-block: 0; gap: 0; }
+.toc .toc-in { width: 100%; }
+.toc { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 93%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.toc-in { position: relative; max-width: 1080px; margin: 0 auto; padding: 10px max(16px, env(safe-area-inset-left, 0px)); }
+.toc-bar { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.toc-bar::-webkit-scrollbar { display: none; }
+.toc a { flex: none; text-decoration: none; color: var(--fg); font-weight: 700; font-size: 14px; padding: 7px 12px; border-radius: 999px; background: var(--surface); box-shadow: 0 1px 4px rgba(42,31,77,.08); }
+.toc a.on { background: var(--royal); color: #fff; }
+.toc a[hidden] { display: none; }
+.toc-btn { display: none; align-items: center; gap: 8px; width: 100%; border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 12px; padding: 10px 14px; font: 700 15px/1.2 var(--body); text-align: left; }
+.toc-cur { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toc-menu { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); top: calc(100% - 4px); background: var(--surface); border-radius: 14px; box-shadow: 0 12px 32px rgba(0,0,0,.18); padding: 8px; display: grid; gap: 4px; max-height: 70vh; overflow-y: auto; }
+.toc-menu[hidden] { display: none; }
+.toc-menu a { box-shadow: none; border-radius: 10px; padding: 10px 12px; }
+@media (max-width: 760px) { .toc-bar { display: none; } .toc-btn { display: flex; } }
+@media (prefers-color-scheme: dark) { .toc a.on { background: var(--gold); color: var(--royal); } }
 .tow { padding-block: clamp(32px, 5vw, 56px) 0; }
 .tow-card { background: linear-gradient(135deg, var(--royal), var(--royal-2)); color: #fff; border-radius: 24px; padding: clamp(22px, 4vw, 36px); box-shadow: var(--shadow); max-width: 720px; }
 .tow-eye { color: var(--gold); font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
@@ -297,7 +315,7 @@ footer a { color: var(--muted); }
     </div>
   </section>
 
-  <section class="community">
+  <section class="community" id="community">
     <div class="wrap split">
       <div>
         <span class="eyebrow" data-i18n="h.comm.eyebrow">Warum Community?</span>
@@ -409,7 +427,7 @@ footer a { color: var(--muted); }
     </div>
   </section>
 
-  <section>
+  <section id="fragen">
     <div class="wrap">
       <div class="section-head">
         <span class="eyebrow" data-i18n="h.faq.eyebrow"></span>
@@ -441,6 +459,7 @@ footer a { color: var(--muted); }
 </footer>
 
 <script src="i18n.js"></script>
+<script src="toc.js"></script>
 <script src="vendor/supabase.js"></script>
 <script>
 applyI18n();
@@ -454,6 +473,15 @@ document.querySelectorAll(".num1").forEach(el => { el.textContent = fmtNum(+el.d
 const db = supabase.createClient("https://bzgeqaseogawdptaqzgq.supabase.co", "sb_publishable_Uoawl08FsfsJwdv3eLVV0A_Zh5tT6EE");
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// Inhaltsverzeichnis unter den Zahlen
+const toc = buildToc({
+  title: t("toc.title"),
+  mount: nav => document.querySelector(".stats").after(nav),
+  items: [["so-gehts", "🧭", "h.toc.how"], ["thron-der-woche", "👑", "h.toc.tow"], ["community", "💬", "h.toc.comm"],
+          ["vorplanen", "🗺️", "h.toc.plan"], ["mitmachen", "✍️", "h.toc.join"], ["fragen", "❓", "h.toc.faq"]]
+    .map(([id, icon, key]) => ({ id, label: `${icon} ${t(key)}`, text: `${icon} ${t(key)}` }))
+});
 
 // Thron der Woche (Datenbank-Funktion throne_of_week); leer = humorvolle Einladung
 async function loadThrone() {
@@ -566,7 +594,7 @@ if (film.readyState >= 1) $("film").hidden = false;
 film.querySelector("source").addEventListener("error", () => { $("film").hidden = true; });
 if (matchMedia("(prefers-reduced-motion: reduce)").matches) { film.removeAttribute("autoplay"); film.pause(); film.controls = true; }
 
-loadStats(); loadThrone(); showSession();
+loadStats(); loadThrone().then(() => toc.update()); showSession();
 // Seitenaufruf zählen (nur eine Zahl pro Tag, nichts über die Person); bekannte Roboter nicht mitzählen
 if (!navigator.webdriver && !/bot|crawl|spider|slurp|headless|lighthouse|preview/i.test(navigator.userAgent)) db.rpc("count_view", { p: "home" }).then(() => {}, () => {});
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
