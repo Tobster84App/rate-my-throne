@@ -1,6 +1,6 @@
 # Rate My Throne – Projektplan
 
-Stand: 04.11.2026 · Version 0.15
+Stand: 04.11.2026 · Version 0.16
 
 ## ⚠️ Vor dem offiziellen Start (Pflicht)
 - [x] Impressum: Name, Anschrift, E-Mail eingetragen (30.10.2026)
@@ -47,6 +47,7 @@ Stand: 04.11.2026 · Version 0.15
 - Startseite: Hauptknopf „🗺️ Nächsten Thron finden“ mit Erklärzeile „Öffentliche Toilette in der Nähe · Karte öffnen“, zweiter Knopf „Kostenlos mitmachen und bewerten“; Kartenknopf mit 🚽
 - Startseiten-Texte auf „Live & Familie & Humor“ geschärft (live gemeldet, jetzt geöffnet, Bewerten & melden, 👪-Abzeichen, neue FAQ zu Öffnung/Live-Meldungen)
 - Maschinenlesbare Auszeichnung (JSON-LD, schema.org): Städte-Seiten mit Brotkrumen-Pfad und Liste der 50 nächsten Toiletten (PublicToilet mit Lage, Straße, kostenlos, rollstuhlgerecht/Wickeltisch, einfache Öffnungszeiten, Bewertungsschnitt); Startseite als WebSite/WebApplication (kostenlos)
+- Ranglisten mit Humor: Thron der Woche (Startseite), Goldene Throne und Hofstaat des Monats (🏆 auf der Karte), Ehrentitel neben dem Benutzernamen und „Dein Rang“ im Konto, jeweils mit Erklärung; neue FAQ. Ohne Tatort-Liste. Skript supabase/migrations/20261104_rankings.sql
 - Wettbewerbsanalyse PeeFinder (04.11.2026): Positionierung „Live & Familie & Humor“ beschlossen
 - Startseite: Werbefilm (stumm, Endlosschleife) unter den Zahlen; auf Handys im Hochformat die Fassung 9x16; Dateien in media/ (je ca. 2 MB, ohne Tonspur, Poster = Schlussbild)
 
@@ -56,8 +57,7 @@ Stand: 04.11.2026 · Version 0.15
 3. Weitere Orte bei Bedarf in tools/staedte.py ergänzen
 4. Vor Werbung prüfen: GitHub Pages ist nicht für überwiegend kommerzielle Seiten gedacht – ggf. Hoster wechseln
 5. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten, dann Cookie-Einwilligung nötig
-6. Geld: Ziel kleiner Nebenverdienst; Stufenplan (jetzt werbefrei → ab ca. 10–20 Tsd. Seitenaufrufen/Monat eigene Sponsoren ohne Tracking auf Städte-Seiten → ggf. Banner mit Einwilligung nur auf Städte-Seiten). Vorher Gewerbe-Frage klären. Kein Spenden-Link vorerst
-7. Rankings mit Humor („Thron der Woche“, beste/schlimmste Throne einer Stadt, Ehrentitel für fleißige Bewertende)
+6. Geld: Ziel kleiner Nebenverdienst; Stufenplan (jetzt werbefrei → ab ca. 10–20 Tsd. Seitenaufrufen/Monat eigene Sponsoren ohne Tracking auf Städte-Seiten → ggf. Banner mit Einwilligung nur auf Städte-Seiten). Vorher Gewerbe-Frage klären. Kein Spenden-Link vorerst. Konkrete Planung beginnt, wenn die Reichweite erreicht ist
 
 ## Toiletten-Daten (seit 29.10.2026)
 - OSM-Toiletten liegen in unserer Datenbank (Tabelle osm_toilets), die App fragt Overpass nicht mehr direkt

@@ -91,6 +91,15 @@ nav .lang:hover { color: #fff; border-color: #fff; }
 .stat span { color: var(--muted); font-size: 14px; }
 
 section { padding-block: clamp(64px, 9vw, 104px); }
+.tow { padding-block: clamp(32px, 5vw, 56px) 0; }
+.tow-card { background: linear-gradient(135deg, var(--royal), var(--royal-2)); color: #fff; border-radius: 24px; padding: clamp(22px, 4vw, 36px); box-shadow: var(--shadow); max-width: 720px; }
+.tow-eye { color: var(--gold); font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+.tow-card h2 { font: 800 clamp(24px, 3.6vw, 34px)/1.15 var(--display); margin: 8px 0 6px; color: #fff; }
+.tow-score { display: flex; align-items: baseline; gap: 8px; color: rgba(255,255,255,.8); }
+.tow-score b { font: 800 44px/1 var(--display); color: var(--gold); }
+.tow-quote { font-style: italic; font-size: 17px; margin: 12px 0 0; }
+.tow-card .btn { margin-top: 16px; }
+.tow-explain { font-size: 13px; color: rgba(255,255,255,.65); margin: 16px 0 0; }
 .court { padding-block: clamp(40px, 6vw, 64px) clamp(40px, 6vw, 64px); }
 .court-card { background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 28px; display: grid; grid-template-columns: 1fr auto; gap: 16px 24px; align-items: center; }
 .court-card h2 { font: 800 clamp(22px, 3vw, 28px)/1.15 var(--display); margin: 0 0 6px; }
@@ -274,6 +283,20 @@ footer a { color: var(--muted); }
     </div>
   </section>
 
+  <!-- Thron der Woche: wird aus der Datenbank gefüllt; ohne Datenbank-Funktion bleibt der Abschnitt ausgeblendet -->
+  <section class="tow" id="thron-der-woche" hidden>
+    <div class="wrap">
+      <div class="tow-card">
+        <span class="tow-eye" id="towEye"></span>
+        <h2 id="towName"></h2>
+        <div id="towScore" class="tow-score"></div>
+        <p id="towQuote" class="tow-quote" hidden></p>
+        <a class="btn gold" id="towGo" href="karte.html" hidden data-i18n="h.tow.go">Auf der Karte ansehen</a>
+        <p class="tow-explain" data-i18n="h.tow.explain"></p>
+      </div>
+    </div>
+  </section>
+
   <section class="community">
     <div class="wrap split">
       <div>
@@ -399,6 +422,7 @@ footer a { color: var(--muted); }
         <details><summary data-i18n="h.faq.q4"></summary><p data-i18n="h.faq.a4"></p></details>
         <details><summary data-i18n="h.faq.q6"></summary><p data-i18n="h.faq.a6"></p></details>
         <details><summary data-i18n="h.faq.q5"></summary><p data-i18n="h.faq.a5"></p></details>
+        <details><summary data-i18n="h.faq.q7"></summary><p data-i18n="h.faq.a7"></p></details>
       </div>
     </div>
   </section>
@@ -430,6 +454,29 @@ document.querySelectorAll(".num1").forEach(el => { el.textContent = fmtNum(+el.d
 const db = supabase.createClient("https://bzgeqaseogawdptaqzgq.supabase.co", "sb_publishable_Uoawl08FsfsJwdv3eLVV0A_Zh5tT6EE");
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// Thron der Woche (Datenbank-Funktion throne_of_week); leer = humorvolle Einladung
+async function loadThrone() {
+  const { data, error } = await db.rpc("throne_of_week");
+  if (error) return;                                   // Funktion fehlt noch: Abschnitt bleibt verborgen
+  const w = data?.[0], week = w?.week ?? weekNo(new Date());
+  $("towEye").textContent = t("h.tow.eyebrow", { w: week });
+  if (w) {
+    $("towName").textContent = w.name || t("m.toilet.default");
+    $("towScore").innerHTML = `<b>${fmtNum(w.score, 1)}</b><span>${w.reviews === 1 ? t("h.tow.count1") : t("h.tow.count", { n: w.reviews })}</span>`;
+    if (w.quote) { $("towQuote").textContent = "„" + w.quote + "“"; $("towQuote").hidden = false; }
+    $("towGo").href = "karte.html?toilette=" + encodeURIComponent(w.toilet_ref); $("towGo").hidden = false;
+  } else {
+    $("towName").textContent = t("h.tow.emptyTitle");
+    $("towScore").innerHTML = `<span>${t("h.tow.empty")}</span>`;
+    $("towGo").hidden = false;
+  }
+  $("thron-der-woche").hidden = false;
+}
+function weekNo(d) {   // Kalenderwoche nach ISO 8601
+  const x = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const day = x.getUTCDay() || 7;
+  x.setUTCDate(x.getUTCDate() + 4 - day); return Math.ceil(((x - Date.UTC(x.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
+}
 
 // Oben: was die Karte bietet (Toiletten, kostenlos, Wickeltisch). Unten: Community-Zahlen erst ab COURT_MIN Bewertungen.
 const COURT_MIN = 500;
@@ -519,7 +566,7 @@ if (film.readyState >= 1) $("film").hidden = false;
 film.querySelector("source").addEventListener("error", () => { $("film").hidden = true; });
 if (matchMedia("(prefers-reduced-motion: reduce)").matches) { film.removeAttribute("autoplay"); film.pause(); film.controls = true; }
 
-loadStats(); showSession();
+loadStats(); loadThrone(); showSession();
 // Seitenaufruf zählen (nur eine Zahl pro Tag, nichts über die Person); bekannte Roboter nicht mitzählen
 if (!navigator.webdriver && !/bot|crawl|spider|slurp|headless|lighthouse|preview/i.test(navigator.userAgent)) db.rpc("count_view", { p: "home" }).then(() => {}, () => {});
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});

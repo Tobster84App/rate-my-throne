@@ -106,6 +106,20 @@ main { position: relative; flex: 1; min-height: 0; }
 @media (prefers-color-scheme: dark) { .fab { color: var(--gold); } .fab.gold { color: var(--royal); } #btnNearest, #btnNearest:hover { background: var(--gold); color: var(--royal); } }
 .fab.active { outline: 3px solid var(--gold); }
 .fab { position: relative; }
+.card-ish { background: var(--bg); border-radius: 14px; padding: 12px 14px; margin: 10px 0; }
+.rbadge { font-size: 11.5px; font-weight: 700; background: rgba(227,179,65,.2); color: #8a6410; border-radius: 999px; padding: 1px 8px; margin-left: 4px; white-space: nowrap; }
+@media (prefers-color-scheme: dark) { .rbadge { color: var(--gold); } }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 10px; }
+.tabs button { border: none; border-radius: 999px; padding: 7px 12px; font-weight: 700; background: var(--bg); color: var(--fg); }
+.tabs button[aria-pressed="true"] { background: var(--royal); color: #fff; }
+.rank-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); width: 100%; background: none; border-left: 0; border-right: 0; border-top: 0; text-align: left; color: inherit; font: inherit; }
+.rank-row:last-child { border-bottom: 0; }
+.rank-row .pos { font-size: 20px; width: 28px; text-align: center; }
+.rank-row .sc { margin-left: auto; font-weight: 800; padding: 3px 9px; border-radius: 999px; color: #fff; font-size: 13px; }
+.lvl { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; font-size: 14px; }
+.lvl.lvl-me { font-weight: 800; }
+.progress { height: 8px; border-radius: 9px; background: var(--line); overflow: hidden; margin: 6px 0 4px; }
+.progress i { display: block; height: 100%; background: var(--gold); }
 .fab-badge { position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--gold); color: var(--royal); font: 800 12px/20px var(--display); text-align: center; }
 
 #status { position: absolute; z-index: 950; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: calc(100% - 160px);
@@ -241,6 +255,7 @@ legend { font-weight: 600; font-size: 14px; padding: 0 4px; }
   </aside>
 
   <div class="fabs">
+    <button id="btnRank" class="fab" type="button" data-i18n-aria-label="rank.btn" data-i18n-title="rank.btn"><span aria-hidden="true" style="font-size:22px;line-height:1">🏆</span></button>
     <button id="btnFilter" class="fab" type="button" data-i18n-aria-label="f.title" data-i18n-title="f.title">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4z"/></svg>
       <span class="fab-badge" id="filterCount" hidden></span>
@@ -445,6 +460,7 @@ async function loadReviews(ids) {
     if (error) throw new Error(t("m.err.reviews") + ": " + error.message);
     for (const id of chunk) reviews.set(id, []);
     for (const r of data) reviews.get(r.toilet_ref).push(r);
+    await loadCounts(data.map(r => r.user_id));
     // Kurzmeldungen und Daumen (fehlen die Tabellen noch, bleibt es einfach leer)
     const since = new Date(Date.now() - 90 * 864e5).toISOString();
     const [rep, vot] = await Promise.all([
@@ -651,7 +667,7 @@ function showToilet(tl, dist) {
     </div>
     ${canDeleteToilet(tl, list) ? `<div class="actions"><button type="button" class="btn small danger" id="delToilet">${t("toilet.delete")}</button></div><p class="error" id="delToiletMsg"></p>` : ""}
     <div>${list.slice().sort((x, y) => y.created_at.localeCompare(x.created_at)).map(r => `
-      <div class="review" data-id="${r.id}"><span class="rscore" style="background:${scoreColor(revScore(r))}">${fmtNum(revScore(r), 1)}</span><strong>${esc(r.profiles?.username ?? "?")}</strong> <span class="muted">${new Date(r.created_at).toLocaleDateString(LOCALE)}</span>
+      <div class="review" data-id="${r.id}"><span class="rscore" style="background:${scoreColor(revScore(r))}">${fmtNum(revScore(r), 1)}</span><strong>${esc(r.profiles?.username ?? "?")}</strong>${titleBadge(r.user_id)} <span class="muted">${new Date(r.created_at).toLocaleDateString(LOCALE)}</span>
         <div class="muted">${CATS.map(c => c.label + " " + r[c.key]).join(" · ")}${r.free ? " · " + t("m.review.free") : ""}${r.barrierfree ? " · " + t("m.review.barrierfree") : ""}${r.changing ? " · " + t("m.review.changing") : ""}</div>
         ${r.comment ? `<p>${esc(r.comment)}</p>` : ""}
         ${reviewActions(r)}</div>`).join("")}</div>`;
@@ -924,6 +940,7 @@ function showRatingForm(tl) {
       comment: fText.value.trim() || null }).select("*, profiles(username)").single();
     if (error) { err.textContent = error.code === "42501" ? t("hist.tooSoon") : t("m.rate.failed", { e: error.message }); return; }
     reviews.set(tl.id, [...(reviews.get(tl.id) || []), data]);
+    if (userCounts.has(user.id)) userCounts.set(user.id, userCounts.get(user.id) + 1);   // Ehrentitel sofort aktualisieren
     render(); showToilet(tl);
   };
 }
@@ -991,6 +1008,7 @@ document.getElementById("btnUser").onclick = () => {
   sheet.innerHTML = `${closeBtn()}
     <h2 class="hello">${throneMark}${t("m.user.hello", { u: esc(user.username) })}</h2>
     ${user.isAdmin ? `<span class="badge">👑 ${t("mod.admin")}</span>` : ""}
+    <div id="myRank"></div>
     <div class="actions">${user.isAdmin ? `<button type="button" class="btn primary" id="reports">${t("mod.reports", { n: user.openReports })}</button>
     <button type="button" class="btn primary" id="users">${t("adm.users")}</button>
     <button type="button" class="btn primary" id="stats">${t("adm.stats")}</button>` : ""}
@@ -999,12 +1017,77 @@ document.getElementById("btnUser").onclick = () => {
     <button type="button" class="btn" id="changePw">${t("acc.changePw")}</button>
     <button type="button" class="btn danger" id="delAcc">${t("acc.delete")}</button></div>`;
   sheet.hidden = false;
+  loadCounts([user.id]).then(() => { const el = document.getElementById("myRank"); if (el) el.innerHTML = myRankHtml(); });
   document.getElementById("logout").onclick = async () => { await db.auth.signOut(); await refreshUser(); closeSheet(); };
   document.getElementById("changePw").onclick = showNewPassword;
   document.getElementById("rename").onclick = showRename;
   document.getElementById("delAcc").onclick = showDeleteAccount;
   if (user.isAdmin) { document.getElementById("reports").onclick = showReports; document.getElementById("users").onclick = showUsers; document.getElementById("stats").onclick = showStats; }
 };
+
+// ===== Ranglisten mit Humor: Ehrentitel, Goldene Throne, Hofstaat des Monats =====
+// Ehrentitel nach Zahl aller eigenen Bewertungen (höchster zuerst)
+const TITLES = [[60, "👑", "rank.t5"], [30, "🎖️", "rank.t4"], [15, "🏰", "rank.t3"], [5, "⚔️", "rank.t2"], [1, "🪣", "rank.t1"]];
+const userCounts = new Map();
+const titleOf = n => TITLES.find(([min]) => n >= min);
+const titleText = tt => `${tt[1]} ${t(tt[2])}`;
+function titleBadge(uid) {
+  const tt = titleOf(userCounts.get(uid) || 0);
+  return tt ? `<span class="rbadge">${titleText(tt)}</span>` : "";
+}
+async function loadCounts(ids) {
+  const need = [...new Set(ids.filter(id => id && !userCounts.has(id)))];
+  if (!need.length) return;
+  const { data, error } = await db.rpc("review_counts", { ids: need });
+  if (error) return;                       // ohne die Datenbank-Funktion einfach keine Titel
+  need.forEach(id => userCounts.set(id, 0));
+  (data ?? []).forEach(r => userCounts.set(r.user_id, r.reviews));
+}
+function levelsHtml(n) {
+  const me = titleOf(n);
+  return TITLES.slice().reverse().map(tt => `<div class="lvl ${tt === me ? "lvl-me" : ""}"><span>${titleText(tt)}</span><span class="muted">${t("rank.from", { n: tt[0] })}</span></div>`).join("");
+}
+function myRankHtml() {
+  const n = userCounts.get(user.id) || 0, asc = TITLES.slice().reverse(), next = asc.find(([min]) => n < min);
+  const prev = titleOf(n)?.[0] ?? 0, pct = next ? Math.round((n - prev) / (next[0] - prev) * 100) : 100;
+  const line = !n ? t("rank.none") : next ? t("rank.progress", { n, k: next[0] - n, next: titleText(next) }) : t("rank.max", { n });
+  return `<div class="card-ish"><b>${t("rank.mine")}</b>${n ? ` <span class="rbadge">${titleText(titleOf(n))}</span>` : ""}
+    <div class="progress"><i style="width:${pct}%"></i></div><div class="muted">${line}</div>
+    <details style="margin-top:6px"><summary class="muted">${t("rank.titles.title")}</summary><p class="muted">${t("rank.titles.explain")}</p>${levelsHtml(n)}</details></div>`;
+}
+
+const medal = i => ["🥇", "🥈", "🥉"][i] ?? `${i + 1}.`;
+async function showRanks(tab = "gold") {
+  sheet.innerHTML = `${closeBtn()}<h2>${t("rank.title")}</h2>
+    <div class="tabs"><button type="button" data-tab="gold" aria-pressed="${tab === "gold"}">${t("rank.tab.gold")}</button><button type="button" data-tab="court" aria-pressed="${tab === "court"}">${t("rank.tab.court")}</button></div>
+    <p class="muted">${t(tab === "gold" ? "rank.gold.explain" : "rank.court.explain")}</p>
+    <div id="rankList"><p class="muted">…</p></div>
+    ${tab === "court" ? `<details><summary class="muted">${t("rank.titles.title")}</summary><p class="muted">${t("rank.titles.explain")}</p>${levelsHtml(user ? userCounts.get(user.id) || 0 : 0)}</details>` : ""}`;
+  sheet.hidden = false;
+  sheet.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => showRanks(b.dataset.tab));
+  const box = document.getElementById("rankList");
+  if (tab === "gold") {
+    const b = map.getBounds();
+    if (b.getNorth() - b.getSouth() > 2 || b.getEast() - b.getWest() > 3) { box.innerHTML = `<p>${t("rank.gold.zoom")}</p>`; return; }
+    const { data, error } = await db.rpc("top_thrones", { min_lat: b.getSouth(), max_lat: b.getNorth(), min_lon: b.getWest(), max_lon: b.getEast(), lim: 3 });
+    if (!document.getElementById("rankList")) return;
+    if (error) { box.innerHTML = `<p class="error">${t("rank.error")}</p>`; return; }
+    if (!data.length) { box.innerHTML = `<p>${t("rank.gold.empty")}</p>`; return; }
+    box.innerHTML = data.map((r, i) => `<button type="button" class="rank-row" data-ref="${esc(r.toilet_ref)}"><span class="pos">${medal(i)}</span>
+      <span><b>${esc(r.name || t("m.toilet.default"))}</b><br><span class="muted">${r.reviews === 1 ? t("rank.reviews1") : t("rank.reviews", { n: r.reviews })}</span></span>
+      <span class="sc" style="background:${scoreColor(r.score)}">${fmtNum(r.score, 1)}</span></button>`).join("");
+    box.querySelectorAll("[data-ref]").forEach(el => el.onclick = () => focusToilet(el.dataset.ref));
+  } else {
+    if (user) await loadCounts([user.id]);
+    const { data, error } = await db.rpc("court_of_month", { lim: 5 });
+    if (!document.getElementById("rankList")) return;
+    if (error) { box.innerHTML = `<p class="error">${t("rank.error")}</p>`; return; }
+    if (!data.length) { box.innerHTML = `<p>${t("rank.court.empty")}</p>`; return; }
+    box.innerHTML = data.map((r, i) => `<div class="rank-row"><span class="pos">${medal(i)}</span><span><b>${esc(r.username)}</b></span>
+      <span class="muted" style="margin-left:auto">${r.reviews === 1 ? t("rank.reviews1") : t("rank.reviews", { n: r.reviews })}</span></div>`).join("");
+  }
+}
+document.getElementById("btnRank").onclick = () => showRanks("gold");
 
 // Admin: Seitenaufrufe (Startseite und Karte) pro Tag
 async function showStats() {
