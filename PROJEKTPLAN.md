@@ -36,7 +36,7 @@ Stand: 04.11.2026 · Version 0.15
 - Nutzer-Übersicht für Admins (Benutzername, Registrierung, letzte Anmeldung, Zahl der Bewertungen/Toiletten; ohne E-Mail-Adressen), Skript supabase/migrations/20261102_admin_users.sql (ausgeführt 03.11.2026)
 - Ortssuche (Nominatim/OpenStreetMap) zum Vorplanen: gesuchter Ort ersetzt den eigenen Standort für „Nächsten Thron finden“ und die Entfernungen; Datenschutzerklärung ergänzt
 - Startseite: Abschnitt „Vorab planen“ (Ortssuche, Filter, mit Kind) mit Knopf, der die Ortssuche direkt öffnet; FAQ aktualisiert
-- Aktualität: „zuletzt geprüft“, Kurzmeldungen mit Konto (ok/kein Papier/verschmutzt/geschlossen/defekt, 1 pro Stunde, 48 Std. sichtbar), Daumen hoch/runter ohne Konto (Bremse 30/Stunde je Toilette, 1 pro Tag im Browser)
+- Aktualität: „zuletzt geprüft“, Kurzmeldungen mit Konto (ok/kein Papier/verschmutzt/geschlossen/defekt, 1 pro Stunde, 48 Std. sichtbar), Daumen hoch/runter für alle – seit 04.11.2026 auch für Angemeldete (Bremse 30/Stunde je Toilette, 1 pro Tag im Browser)
 - Bewertungen mit Detail-Kriterien (Papier, Seife, Handtrocknung, Geruch, Schloss) und Familie (Kinderwagen, Kindersitz, familienfreundlich); Abzeichen und Filter „Familienfreundlich“; Skript supabase/migrations/20261103_status_details.sql
 - Seitenaufrufe je Tag (Startseite/Karte) ohne Personendaten, Admin-Ansicht „Statistik“; Skript supabase/migrations/20261103_page_views.sql
 - Suchmaschinen: Titel mit Suchbegriffen, Vorschaubild für geteilte Links (Open Graph), Sprachfassungen (hreflang), kanonische Adressen

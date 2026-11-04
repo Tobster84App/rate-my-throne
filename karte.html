@@ -725,10 +725,11 @@ function liveHtml(tl) {
   return `<div><b>${last ? t("live.checked", { ago: ago(last) }) : t("live.never")}</b></div>
     ${latest.length ? `<div class="row">${latest.map(r => `<span class="tag ${r.kind === "ok" ? "" : "warn"}">${t("live.k." + r.kind)} · ${ago(r.created_at)}</span>`).join("")}</div>` : ""}
     ${votes.length ? `<div class="muted">${t("live.votes", { up, down })}</div>` : ""}
-    ${user ? `<div class="row"><button type="button" class="btn small" id="liveAsk">${t("live.ask")}</button></div>
+    <div class="row"><span>${t("live.voteHint")}</span><button type="button" class="btn small" data-vote="1" ${voted ? "disabled" : ""}>👍</button><button type="button" class="btn small" data-vote="0" ${voted ? "disabled" : ""}>👎</button></div>
+    ${user ? `${voted ? `<div class="muted">${t("live.votedAlready")}</div>` : ""}
+      <div class="row"><button type="button" class="btn small" id="liveAsk">${t("live.ask")}</button></div>
       <div class="row" id="liveKinds" hidden>${LIVE_KINDS.map(k => `<button type="button" class="btn small" data-kind="${k}">${t("live.k." + k)}</button>`).join("")}</div>`
-    : `<div class="row"><span>${t("live.voteHint")}</span><button type="button" class="btn small" data-vote="1" ${voted ? "disabled" : ""}>👍</button><button type="button" class="btn small" data-vote="0" ${voted ? "disabled" : ""}>👎</button></div>
-      <div class="muted">${voted ? t("live.votedAlready") : t("live.loginMore")}</div>`}
+    : `<div class="muted">${voted ? t("live.votedAlready") : t("live.loginMore")}</div>`}
     <p class="error" id="liveMsg"></p>`;
 }
 // Ohne Konto: höchstens ein Daumen pro Toilette und Tag (im Browser gemerkt)

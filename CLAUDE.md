@@ -18,7 +18,7 @@ Stand: 03.11.2026. Diese Datei kurz halten und bei wichtigen Änderungen selbst 
 ## Wichtige Entscheidungen
 - **OSM-Daten in eigener DB statt Live-Overpass:** Overpass war überlastet/langsam; Import läuft in der DB, weil Overpass Anfragen von Edge Functions ablehnte (HTTP 406).
 - **Bewertungen:** drei Kategorien (Sauberkeit, Ausstattung, Erreichbarkeit); erneut bewerten frühestens nach 30 Tagen; Verlauf/Trend sichtbar. Detail-Kriterien als ja/nein/keine Angabe – „keine Angabe“ zählt nicht.
-- **Aktualität:** Kurzmeldungen nur mit Konto (1 pro Person/Toilette/Stunde, 48 Std. sichtbar); ohne Konto nur Daumen hoch/runter (ohne Personendaten, Bremse 30/Stunde je Toilette).
+- **Aktualität:** Daumen hoch/runter für alle, mit und ohne Konto (ohne Personendaten, 1 pro Toilette und Tag im Browser, Bremse 30/Stunde je Toilette); Kurzmeldungen zusätzlich nur mit Konto (1 pro Person/Toilette/Stunde); beides 48 Std. sichtbar.
 - **Moderation:** eigene Bewertungen löschen, fremde melden, Admin darf alles. Eingetragene Toiletten löschen: eigene ohne fremde Bewertungen, Admin alle.
 - **Mail-Links** führen auf `karte.html?token_hash=…` und werden erst nach Klick auf „Weiter“ eingelöst (Link-Scanner in Firmen-Postfächern verbrauchten sonst die Einmal-Links).
 - **Positionierung (04.11.2026):** Mitbewerber PeeFinder (peefinder.com, Android, werbefrei, 163.000 WCs, 6 Detailbewertungen) ist funktional breiter. Wir setzen auf **Live-Zustand, Familie/Vorab-Planen und Humor**, nicht auf Funktionsvielfalt.
