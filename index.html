@@ -129,6 +129,7 @@ section { padding-block: clamp(64px, 9vw, 104px); }
 .bar b { text-align: right; font-variant-numeric: tabular-nums; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 4px 10px; background: rgba(31,157,99,.14); color: var(--good); }
+.live-line { margin: 10px 0 0; font-size: 13.5px; color: var(--muted); background: var(--bg); border-radius: 10px; padding: 8px 10px; }
 .quote { margin: 0; font-size: 15px; border-top: 1px solid var(--line); padding-top: 12px; }
 .quote cite { display: block; color: var(--muted); font-style: normal; font-size: 13px; margin-top: 4px; }
 
@@ -293,7 +294,8 @@ footer a { color: var(--muted); }
         <div class="bar"><span data-i18n="cat.clean"></span><i style="--w:90%"></i><b class="num1" data-v="4.5">4,5</b></div>
         <div class="bar"><span data-i18n="cat.equip"></span><i style="--w:80%"></i><b class="num1" data-v="4.0">4,0</b></div>
         <div class="bar"><span data-i18n="cat.access"></span><i style="--w:88%"></i><b class="num1" data-v="4.4">4,4</b></div>
-        <div class="chips"><span class="chip" data-i18n="h.sample.chip1"></span><span class="chip" data-i18n="h.sample.chip2"></span></div>
+        <div class="chips"><span class="chip open" data-i18n="h.sample.open"></span><span class="chip" data-i18n="h.sample.chip1"></span><span class="chip" data-i18n="h.sample.chip2"></span></div>
+        <p class="live-line" data-i18n="h.sample.live"></p>
         <p class="quote"><span data-i18n="h.sample.quote"></span><cite data-i18n="h.sample.cite"></cite></p>
       </aside>
     </div>
@@ -393,6 +395,7 @@ footer a { color: var(--muted); }
         <details><summary data-i18n="h.faq.q2"></summary><p data-i18n="h.faq.a2"></p></details>
         <details><summary data-i18n="h.faq.q3"></summary><p data-i18n="h.faq.a3"></p></details>
         <details><summary data-i18n="h.faq.q4"></summary><p data-i18n="h.faq.a4"></p></details>
+        <details><summary data-i18n="h.faq.q6"></summary><p data-i18n="h.faq.a6"></p></details>
         <details><summary data-i18n="h.faq.q5"></summary><p data-i18n="h.faq.a5"></p></details>
       </div>
     </div>
