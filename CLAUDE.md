@@ -21,6 +21,8 @@ Stand: 03.11.2026. Diese Datei kurz halten und bei wichtigen Änderungen selbst 
 - **Aktualität:** Kurzmeldungen nur mit Konto (1 pro Person/Toilette/Stunde, 48 Std. sichtbar); ohne Konto nur Daumen hoch/runter (ohne Personendaten, Bremse 30/Stunde je Toilette).
 - **Moderation:** eigene Bewertungen löschen, fremde melden, Admin darf alles. Eingetragene Toiletten löschen: eigene ohne fremde Bewertungen, Admin alle.
 - **Mail-Links** führen auf `karte.html?token_hash=…` und werden erst nach Klick auf „Weiter“ eingelöst (Link-Scanner in Firmen-Postfächern verbrauchten sonst die Einmal-Links).
+- **Positionierung (04.11.2026):** Mitbewerber PeeFinder (peefinder.com, Android, werbefrei, 163.000 WCs, 6 Detailbewertungen) ist funktional breiter. Wir setzen auf **Live-Zustand, Familie/Vorab-Planen und Humor**, nicht auf Funktionsvielfalt.
+- **Startseite:** oben Angebot (Toiletten gesamt, davon kostenlos, mit Wickeltisch – live aus der DB); Community-Zahlen (Bewertungen, Mitglieder, eingetragene Throne) erst ab 500 Bewertungen (`COURT_MIN` in index.html), vorher nur Einladung – kleine Zahlen schrecken ab.
 - **Statistik:** nur Seitenaufrufe je Seite und Tag zählen (keine Besucher, keine IP, nichts im Browser) – so ohne Cookie-Banner möglich; sichtbar nur für Admins.
 - **SEO:** Karte ist für Google unsichtbar (JS) → statische Städte-Seiten mit Liste; Links `karte.html?toilette=<id>` bzw. `?lat=&lon=`. Sprachfassungen per `?lang=de/en` mit hreflang, canonical setzt i18n.js.
 - **Datenschutz:** keine Tracking-/Werbe-Cookies, Standort nur im Browser, Ortssuche nur auf Knopfdruck (Nominatim-Regeln).
@@ -32,7 +34,7 @@ Stand: 03.11.2026. Diese Datei kurz halten und bei wichtigen Änderungen selbst 
 - Neue Texte immer in `i18n.js` für DE und EN; Projektplan in `PROJEKTPLAN.md` mitpflegen.
 
 ## Aktueller Stand
-Karte mit OSM- und eigenen Toiletten, Bewertungen mit Trend, Detail-Kriterien und Familien-Abzeichen, Filter (kostenlos, barrierefrei, Wickeltisch, familienfreundlich, ab 4 Sternen, nur bewertete), Ortssuche zum Vorplanen, Kurzmeldungen/Daumen, Konten (Registrierung, Passwort vergessen/ändern, Benutzername ändern, Konto löschen), Moderation, Admin-Statistik (Seitenaufrufe), Städte-Seiten (64 Großstädte ab Heilbronn-Größe, 23 Urlaubsorte in DE, 16 Urlaubsziele im Ausland), Startseite mit Werbefilm und „Vorab planen“, Impressum, Datenschutz, robots.txt/sitemap.xml.
+Karte mit OSM- und eigenen Toiletten, Bewertungen mit Trend, Detail-Kriterien und Familien-Abzeichen, Filter (jetzt geöffnet – Öffnungszeiten-Auswertung in `oh.js`, kostenlos, barrierefrei, Wickeltisch, familienfreundlich, ab 4 Sternen, nur bewertete), Ortssuche zum Vorplanen, Kurzmeldungen/Daumen, Konten (Registrierung, Passwort vergessen/ändern, Benutzername ändern, Konto löschen), Moderation, Admin-Statistik (Seitenaufrufe), Städte-Seiten (64 Großstädte ab Heilbronn-Größe, 23 Urlaubsorte in DE, 16 Urlaubsziele im Ausland), Startseite mit Werbefilm und „Vorab planen“, Impressum, Datenschutz, robots.txt/sitemap.xml.
 
 ## Offene Punkte
 - Datenschutz: Brevo-Support-Bestätigung ausstehend; Rechtstexte prüfen lassen. (Erledigt: Supabase – DPA in den AGB, SCC Modul 2 laut TIA; GitHub – DPF-zertifiziert plus SCC laut GitHub Privacy Statement.)

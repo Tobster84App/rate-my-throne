@@ -87,6 +87,15 @@ nav .lang:hover { color: #fff; border-color: #fff; }
 .stat span { color: var(--muted); font-size: 14px; }
 
 section { padding-block: clamp(64px, 9vw, 104px); }
+.court { padding-block: clamp(40px, 6vw, 64px) clamp(40px, 6vw, 64px); }
+.court-card { background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 28px; display: grid; grid-template-columns: 1fr auto; gap: 16px 24px; align-items: center; }
+.court-card h2 { font: 800 clamp(22px, 3vw, 28px)/1.15 var(--display); margin: 0 0 6px; }
+.court-card p { margin: 0; }
+.court-stats[hidden] { display: none; }
+.court-stats { display: flex; flex-wrap: wrap; gap: 8px; grid-column: 1 / -1; }
+.court-stats > span { background: var(--bg); border-radius: 999px; padding: 8px 14px; font-weight: 600; font-size: 15px; }
+.court-go { font-weight: 700; color: inherit; white-space: nowrap; }
+@media (max-width: 640px) { .court-card { grid-template-columns: 1fr; padding: 22px; } }
 .section-head { display: grid; gap: 12px; margin-bottom: 40px; }
 
 /* Schritte */
@@ -208,9 +217,9 @@ footer a { color: var(--muted); }
 <div class="stats">
   <div class="wrap">
     <div class="stats-card" aria-live="polite">
-      <div class="stat"><strong id="nReviews">–</strong><span data-i18n="h.stat.reviews">Bewertungen</span></div>
-      <div class="stat"><strong id="nMembers">–</strong><span data-i18n="h.stat.members">Mitglieder im Hofstaat</span></div>
-      <div class="stat"><strong id="nToilets">–</strong><span data-i18n="h.stat.toilets">von der Community entdeckte Throne</span></div>
+      <div class="stat"><strong id="nAll">–</strong><span data-i18n="h.stat.all">Toiletten auf der Karte</span></div>
+      <div class="stat"><strong id="nFree">–</strong><span data-i18n="h.stat.free">davon kostenlos</span></div>
+      <div class="stat"><strong id="nChanging">–</strong><span data-i18n="h.stat.changing">mit Wickeltisch</span></div>
     </div>
   </div>
 </div>
@@ -313,6 +322,24 @@ footer a { color: var(--muted); }
     </div>
   </section>
 
+  <!-- Community: Zahlen erst ab 500 Bewertungen zeigen, vorher nur die Einladung (kleine Zahlen schrecken ab) -->
+  <section class="court" id="hofstaat">
+    <div class="wrap">
+      <div class="court-card">
+        <div>
+          <h2 data-i18n="h.court.title">Der Hofstaat wächst 👑</h2>
+          <p class="muted" id="courtText" data-i18n="h.court.new">Rate My Throne ist ganz neu – sei bei den ersten dabei.</p>
+        </div>
+        <div class="court-stats" id="courtStats" hidden>
+          <span>⭐ <b id="nReviews">–</b> <span data-i18n="h.stat.reviews">Bewertungen</span></span>
+          <span>👥 <b id="nMembers">–</b> <span data-i18n="h.stat.members">Mitglieder im Hofstaat</span></span>
+          <span>📍 <b id="nToilets">–</b> <span data-i18n="h.stat.toilets">neu entdeckte Throne</span></span>
+        </div>
+        <a class="court-go" href="#mitmachen" data-i18n="h.court.go">Jetzt mitmachen →</a>
+      </div>
+    </div>
+  </section>
+
   <section class="join" id="mitmachen">
     <svg class="crown-bg" viewBox="86 100 340 332" aria-hidden="true"><path d="M120 300 104 150l84 70 68-110 68 110 84-70-16 150z" fill="#e3b341"/><ellipse cx="256" cy="330" rx="142" ry="74" fill="none" stroke="#e3b341" stroke-width="36"/></svg>
     <div class="wrap split">
@@ -397,12 +424,21 @@ const db = supabase.createClient("https://bzgeqaseogawdptaqzgq.supabase.co", "sb
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+// Oben: was die Karte bietet (Toiletten, kostenlos, Wickeltisch). Unten: Community-Zahlen erst ab COURT_MIN Bewertungen.
+const COURT_MIN = 500;
 async function loadStats() {
-  const counts = await Promise.all(["reviews", "profiles", "toilets"].map(async tbl => {
-    const { count, error } = await db.from(tbl).select("*", { count: "exact", head: true });
-    return error ? null : count;
-  }));
-  [["nReviews", 0], ["nMembers", 1], ["nToilets", 2]].forEach(([id, i]) => { if (counts[i] != null) $(id).textContent = fmtNum(counts[i]); });
+  const n = q => q.then(({ count, error }) => error ? null : count, () => null);
+  const cnt = (tbl, col, val) => { let q = db.from(tbl).select("id", { count: "exact", head: true }); return n(col ? q.eq(col, val) : q); };
+  const [osmAll, ownAll, osmFree, ownFree, osmCh, ownCh, reviews, members] = await Promise.all([
+    cnt("osm_toilets"), cnt("toilets"), cnt("osm_toilets", "fee", "no"), cnt("toilets", "fee", false),
+    cnt("osm_toilets", "changing_table", "yes"), cnt("toilets", "changing_table", true), cnt("reviews"), cnt("profiles")]);
+  const show = (id, a, b) => { if (a != null) $(id).textContent = fmtNum(a + (b ?? 0)); };
+  show("nAll", osmAll, ownAll); show("nFree", osmFree, ownFree); show("nChanging", osmCh, ownCh);
+  if (reviews != null && reviews >= COURT_MIN) {
+    show("nReviews", reviews); show("nMembers", members); show("nToilets", ownAll);
+    $("courtText").textContent = t("h.court.text");
+    $("courtStats").hidden = false;
+  }
 }
 
 let mode = "register";

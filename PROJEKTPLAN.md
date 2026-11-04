@@ -1,6 +1,6 @@
 # Rate My Throne – Projektplan
 
-Stand: 03.11.2026 · Version 0.14
+Stand: 04.11.2026 · Version 0.15
 
 ## ⚠️ Vor dem offiziellen Start (Pflicht)
 - [x] Impressum: Name, Anschrift, E-Mail eingetragen (30.10.2026)
@@ -42,6 +42,9 @@ Stand: 03.11.2026 · Version 0.14
 - Suchmaschinen: Titel mit Suchbegriffen, Vorschaubild für geteilte Links (Open Graph), Sprachfassungen (hreflang), kanonische Adressen
 - Städte-Seiten für alle 64 Großstädte ab Heilbronn-Größe, 23 Urlaubsorte in Deutschland (z. B. Sylt, Rügen, Garmisch, Rust/Europa-Park) und 16 Urlaubsziele im Ausland (z. B. Mallorca, Rom, Paris, Wien) + Übersicht toiletten/: Liste mit Straße, Merkmalen, Öffnungszeiten, Bewertungen; Link öffnet die Toilette auf der Karte (karte.html?toilette=…). Erzeugt von tools/staedte.py, automatisch jede Woche per GitHub Action (.github/workflows/staedte.yml), inkl. sitemap.xml
 - Städte-Seiten zusätzlich auf Englisch unter toilets/ (z. B. toilets/munich.html), gegenseitig verlinkt mit hreflang
+- Filter und Anzeige „Jetzt geöffnet / geschlossen“ aus den OSM-Öffnungszeiten (oh.js; Unverständliches = unbekannt)
+- Startseite: oben Toiletten gesamt / kostenlos / mit Wickeltisch; Block „Der Hofstaat wächst“ vor „Mitmachen“, Community-Zahlen erst ab 500 Bewertungen
+- Wettbewerbsanalyse PeeFinder (04.11.2026): Positionierung „Live & Familie & Humor“ beschlossen
 - Startseite: Werbefilm (stumm, Endlosschleife) unter den Zahlen; auf Handys im Hochformat die Fassung 9x16; Dateien in media/ (je ca. 2 MB, ohne Tonspur, Poster = Schlussbild)
 
 ## Nächste Schritte
@@ -50,7 +53,10 @@ Stand: 03.11.2026 · Version 0.14
 3. Weitere Orte bei Bedarf in tools/staedte.py ergänzen
 4. Vor Werbung prüfen: GitHub Pages ist nicht für überwiegend kommerzielle Seiten gedacht – ggf. Hoster wechseln
 5. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten, dann Cookie-Einwilligung nötig
-6. Später: Rankings mit Humor („Thron der Woche“, beste/schlimmste Throne einer Stadt, Ehrentitel für fleißige Bewertende)
+6. Positionierung „Live & Familie & Humor“ in Startseiten-Texten schärfen
+7. Maschinenlesbare Auszeichnung (JSON-LD) für die Städte-Seiten
+8. Werbe-Frage strategisch klären (Mitbewerber ist werbefrei)
+9. Rankings mit Humor („Thron der Woche“, beste/schlimmste Throne einer Stadt, Ehrentitel für fleißige Bewertende)
 
 ## Toiletten-Daten (seit 29.10.2026)
 - OSM-Toiletten liegen in unserer Datenbank (Tabelle osm_toilets), die App fragt Overpass nicht mehr direkt
