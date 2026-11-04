@@ -25,4 +25,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Städte-Seiten aktualisiert"
-          git pull --rebase origin main && git push
+          # GitHub antwortet gelegentlich mit Serverfehlern: bis zu 4 Versuche mit Pause
+          for wait in 5 15 45 0; do
+            git pull --rebase origin main && git push && exit 0
+            [ "$wait" = 0 ] && exit 1
+            echo "Push fehlgeschlagen, neuer Versuch in ${wait}s"; sleep "$wait"
+          done
