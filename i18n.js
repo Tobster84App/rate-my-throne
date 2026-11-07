@@ -54,6 +54,7 @@ const I18N = {
     "f.title": "Filter", "f.free": "Kostenlos", "f.wheelchair": "Barrierefrei", "f.changing": "Mit Wickeltisch",
     "f.good": "Ab 4 Sternen", "f.rated": "Nur bewertete", "f.apply": "Anwenden", "f.reset": "Alle zurücksetzen",
     "f.family": "Familienfreundlich", "f.open": "Jetzt geöffnet",
+    "pw.show": "Passwort anzeigen", "pw.hide": "Passwort verbergen",
     "toc.title": "Inhalt", "h.toc.how": "So geht's", "h.toc.tow": "Thron der Woche", "h.toc.comm": "Warum Community?", "h.toc.plan": "Vorab planen", "h.toc.join": "Mitmachen", "h.toc.faq": "Fragen",
     "rank.btn": "Ranglisten", "rank.title": "🏆 Ranglisten", "rank.tab.gold": "✨ Goldene Throne", "rank.tab.court": "👑 Hofstaat",
     "rank.gold.explain": "Die bestbewerteten Throne im sichtbaren Kartenausschnitt. Gezählt werden nur Toiletten mit mindestens 3 Bewertungen – damit kein einzelner Glückstreffer gleich gekrönt wird. Tipp: Karte verschieben, dann neu öffnen.",
@@ -252,6 +253,7 @@ const I18N = {
     "f.title": "Filters", "f.free": "Free", "f.wheelchair": "Accessible", "f.changing": "Baby changing",
     "f.good": "4 stars and up", "f.rated": "Rated only", "f.apply": "Apply", "f.reset": "Reset all",
     "f.family": "Family-friendly", "f.open": "Open now",
+    "pw.show": "Show password", "pw.hide": "Hide password",
     "toc.title": "Contents", "h.toc.how": "How it works", "h.toc.tow": "Throne of the week", "h.toc.comm": "Why community?", "h.toc.plan": "Plan ahead", "h.toc.join": "Join", "h.toc.faq": "FAQ",
     "rank.btn": "Rankings", "rank.title": "🏆 Rankings", "rank.tab.gold": "✨ Golden thrones", "rank.tab.court": "👑 Royal court",
     "rank.gold.explain": "The best-rated thrones in the visible map area. Only toilets with at least 3 reviews count – so no single lucky hit gets crowned. Tip: move the map, then open again.",
@@ -440,3 +442,39 @@ function applyI18n(root = document) {
     a.lang = other;
   });
 }
+
+// Passwortfelder: Augen-Knopf zum Anzeigen/Verbergen – gilt automatisch für alle Seiten und auch für später eingeblendete Formulare
+(() => {
+  const css = document.createElement("style");
+  css.textContent = ".pw-wrap{position:relative;display:block}.pw-wrap>input{width:100%;box-sizing:border-box;padding-right:46px}" +
+    ".pw-eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:none;background:transparent;font-size:18px;line-height:1;cursor:pointer;padding:8px;border-radius:8px}" +
+    ".pw-eye:focus-visible{outline:2px solid currentColor}";
+  document.head.appendChild(css);
+  function attach(input) {
+    if (input.dataset.pwToggle) return;
+    input.dataset.pwToggle = "1";
+    const wrap = document.createElement("span");
+    wrap.className = "pw-wrap";
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "pw-eye";
+    const set = show => {
+      input.type = show ? "text" : "password";
+      btn.textContent = show ? "🙈" : "👁";
+      btn.setAttribute("aria-label", t(show ? "pw.hide" : "pw.show"));
+      btn.title = t(show ? "pw.hide" : "pw.show");
+      btn.setAttribute("aria-pressed", String(show));
+    };
+    btn.onclick = () => { const pos = input.selectionStart; set(input.type === "password"); input.focus(); try { input.setSelectionRange(pos, pos); } catch {} };
+    set(false);
+    wrap.appendChild(btn);
+  }
+  const scan = root => root.querySelectorAll?.('input[type="password"]').forEach(attach);
+  scan(document);
+  new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => {
+    if (n.nodeType !== 1) return;
+    if (n.matches?.('input[type="password"]')) attach(n); else scan(n);
+  }))).observe(document.body, { childList: true, subtree: true });
+})();
