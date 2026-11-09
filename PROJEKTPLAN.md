@@ -49,7 +49,7 @@ Stand: 07.11.2026 · Version 0.17
 - Maschinenlesbare Auszeichnung (JSON-LD, schema.org): Städte-Seiten mit Brotkrumen-Pfad und Liste der 50 nächsten Toiletten (PublicToilet mit Lage, Straße, kostenlos, rollstuhlgerecht/Wickeltisch, einfache Öffnungszeiten, Bewertungsschnitt); Startseite als WebSite/WebApplication (kostenlos)
 - Ranglisten mit Humor: Thron der Woche (Startseite), Goldene Throne und Hofstaat des Monats (🏆 auf der Karte), Ehrentitel neben dem Benutzernamen und „Dein Rang“ im Konto, jeweils mit Erklärung; neue FAQ. Ohne Tatort-Liste. Skript supabase/migrations/20261104_rankings.sql (ausgeführt 04.11.2026)
 - Teilen-Knopf 📤 bei jeder Toilette (Handy: Teilen-Menü des Systems, sonst WhatsApp oder Link kopieren); Link öffnet genau diese Toilette
-- Seitenaufrufe auch für die Städte-Seiten (Admin-Statistik: Spalte „Städte“ und beliebteste Städte-Seiten); Skript supabase/migrations/20261109_city_views.sql
+- Seitenaufrufe auch für die Städte-Seiten (Admin-Statistik: Spalte „Städte“ und beliebteste Städte-Seiten); Skript supabase/migrations/20261109_city_views.sql (ausgeführt 09.11.2026)
 - Passwortfelder mit Augen-Knopf 👁/🙈 zum Anzeigen und Verbergen (Anmeldung, Registrierung, neues Passwort; Startseite und Karte)
 - Inhaltsverzeichnis auf Startseite und Datenschutzerklärung: am PC Leiste mit allen Abschnitten (bleibt beim Scrollen oben, aktueller Abschnitt markiert), am Handy Knopf „☰ Inhalt“ mit aufklappender Liste
 - Weiterleitungs-Domains rate-my-throne.de/.net und ratemythrone.de mit SSL (Let's Encrypt bei All-Inkl) – keine Browser-Warnung mehr
