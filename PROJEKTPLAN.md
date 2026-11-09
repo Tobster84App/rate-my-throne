@@ -58,7 +58,7 @@ Stand: 07.11.2026 · Version 0.17
 
 ## Nächste Schritte
 1. Google Search Console: eingerichtet und Sitemap eingereicht (03.11.2026); Status „Konnte nicht abgerufen werden“ beobachten, Indexierung für Startseite und /toiletten/ beantragt
-2. Mehr Besucher: 30–50 Bewertungen mit Familie/Freunden; Instagram-Konto (Tobias); Pressemitteilung (z. B. Heilbronner Stimme); Eltern-, Rollstuhl- und CED-Gruppen (z. B. DCCV); Verzeichnisse wie AlternativeTo; Links von anderen Seiten sammeln
+2. Mehr Besucher: 30–50 Bewertungen mit Familie/Freunden; Instagram @ratemythrone_ger (angelegt 09.11.2026, verlinkt auf der Startseite); Pressemitteilung (z. B. Heilbronner Stimme); Eltern-, Rollstuhl- und CED-Gruppen (z. B. DCCV); Verzeichnisse wie AlternativeTo; Links von anderen Seiten sammeln
 3. Weitere Orte bei Bedarf in tools/staedte.py ergänzen
 4. Vor Werbung prüfen: GitHub Pages ist nicht für überwiegend kommerzielle Seiten gedacht – ggf. Hoster wechseln
 5. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten, dann Cookie-Einwilligung nötig

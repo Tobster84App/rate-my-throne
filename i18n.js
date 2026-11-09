@@ -165,7 +165,7 @@ const I18N = {
     "h.faq.q6": "Woher weiß ich, ob die Toilette gerade offen und benutzbar ist?", "h.faq.a6": "Wo Öffnungszeiten hinterlegt sind, zeigen wir „Jetzt geöffnet“ oder „Jetzt geschlossen“ – und der Filter blendet Geschlossenes aus. Was gerade los ist (kein Papier, defekt, alles top), melden Besucher live; Meldungen bleiben 48 Stunden sichtbar.",
     "h.faq.q5": "Muss ich meinen Standort freigeben?", "h.faq.a5": "Nein. Den Standort brauchst du nur, wenn du den nächsten Thron von dort aus finden willst – sonst suchst du einfach nach einem Ort. Dein Standort wird nur in deinem Browser verwendet und nicht gespeichert.",
     "h.footer.osm": "Kartendaten © <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap</a>-Mitwirkende",
-    "h.footer.map": "Karte", "h.footer.cities": "Toiletten nach Stadt", "h.footer.imprint": "Impressum", "h.footer.privacy": "Datenschutz", "h.footer.soon": "Folgt vor dem offiziellen Start",
+    "h.footer.map": "Karte", "h.footer.cities": "Toiletten nach Stadt", "h.footer.insta": "📸 Instagram", "h.footer.imprint": "Impressum", "h.footer.privacy": "Datenschutz", "h.footer.soon": "Folgt vor dem offiziellen Start",
 
     // Karte
     "m.title": "Toiletten-Karte · Rate My Throne",
@@ -366,7 +366,7 @@ const I18N = {
     "h.faq.q6": "How do I know whether a toilet is open and usable right now?", "h.faq.a6": "Where opening hours are known, we show “Open now” or “Closed now” – and the filter hides closed ones. What's happening right now (no paper, broken, all good) is reported live by visitors; reports stay visible for 48 hours.",
     "h.faq.q5": "Do I have to share my location?", "h.faq.a5": "No. You only need it to find the nearest throne from where you are – otherwise just search for a place. Your location is used in your browser only and never stored.",
     "h.footer.osm": "Map data © <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap</a> contributors",
-    "h.footer.map": "Map", "h.footer.cities": "Toilets by city", "h.footer.imprint": "Legal notice", "h.footer.privacy": "Privacy policy", "h.footer.soon": "Coming before the official launch",
+    "h.footer.map": "Map", "h.footer.cities": "Toilets by city", "h.footer.insta": "📸 Instagram", "h.footer.imprint": "Legal notice", "h.footer.privacy": "Privacy policy", "h.footer.soon": "Coming before the official launch",
 
     "m.title": "Toilet map · Rate My Throne",
     "m.osmCredit": "OpenStreetMap contributors",
