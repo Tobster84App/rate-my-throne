@@ -451,8 +451,16 @@ def city_page(c, rows, others, stand, lang):
         p.append(f'  <p class="muted">{t["more"].format(k=shown, n=n, map=map_url)}</p>\n')
     if others:
         p.append(f'  <h2>{t["others"]}</h2>\n  <div class="cities">' + "".join(f'<a href="{o["slugs"][lang]}.html">{E(o["names"][lang])}</a>' for o in others) + "</div>\n")
+    p.append(view_counter(c["slug"]))
     p.append(foot(lang, stand))
     return "".join(p)
+
+
+def view_counter(slug):
+    """Zählt den Aufruf (nur eine Zahl pro Seite und Tag, keine Personendaten); bekannte Roboter zählen nicht."""
+    return ('<script>if(!navigator.webdriver&&!/bot|crawl|spider|slurp|headless|lighthouse|preview/i.test(navigator.userAgent))'
+            f'fetch("{SUPABASE}/rest/v1/rpc/count_view",{{method:"POST",headers:{{"apikey":"{KEY}","Authorization":"Bearer {KEY}",'
+            f'"Content-Type":"application/json"}},body:JSON.stringify({{p:"city:{slug}"}})}}).catch(()=>{{}});</script>\n')
 
 
 def index_page(cities, counts, stand, lang):

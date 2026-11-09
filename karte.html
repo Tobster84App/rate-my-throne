@@ -663,8 +663,10 @@ function showToilet(tl, dist) {
       }).join("")}</div>${critHtml(list)}`}
     <div class="actions">
       <a class="btn gold" href="${mapsLink(tl)}" target="_blank" rel="noopener">${t("m.detail.route")}</a>
+      <button type="button" class="btn" id="shareBtn">${t("share.btn")}</button>
       <span id="formArea"></span>
     </div>
+    <div class="actions" id="shareAlt" hidden></div>
     ${canDeleteToilet(tl, list) ? `<div class="actions"><button type="button" class="btn small danger" id="delToilet">${t("toilet.delete")}</button></div><p class="error" id="delToiletMsg"></p>` : ""}
     <div>${list.slice().sort((x, y) => y.created_at.localeCompare(x.created_at)).map(r => `
       <div class="review" data-id="${r.id}"><span class="rscore" style="background:${scoreColor(revScore(r))}">${fmtNum(revScore(r), 1)}</span><strong>${esc(r.profiles?.username ?? "?")}</strong>${titleBadge(r.user_id)} <span class="muted">${new Date(r.created_at).toLocaleDateString(LOCALE)}</span>
@@ -675,6 +677,7 @@ function showToilet(tl, dist) {
   bindReviewActions(tl);
   bindToiletDelete(tl);
   bindLive(tl);
+  document.getElementById("shareBtn").onclick = () => shareToilet(tl);
   const area = document.getElementById("formArea");
   if (!user) {
     area.innerHTML = `<button type="button" class="btn primary" id="loginToRate">${t("m.detail.loginToRate")}</button>`;
@@ -1025,6 +1028,25 @@ document.getElementById("btnUser").onclick = () => {
   if (user.isAdmin) { document.getElementById("reports").onclick = showReports; document.getElementById("users").onclick = showUsers; document.getElementById("stats").onclick = showStats; }
 };
 
+// ===== Teilen: Link auf genau diese Toilette (Handy: Teilen-Menü des Systems, sonst WhatsApp oder Link kopieren) =====
+async function shareToilet(tl) {
+  const url = `https://www.rate-my-throne.com/karte.html?${LANG === "en" ? "lang=en&" : ""}toilette=${encodeURIComponent(tl.id)}`;
+  const a = avg(tl.id);
+  const text = a != null ? t("share.textRated", { name: tl.name, s: fmtNum(a, 1) }) : t("share.text", { name: tl.name });
+  if (navigator.share) {
+    try { await navigator.share({ title: "Rate My Throne", text, url }); return; }
+    catch (e) { if (e.name === "AbortError") return; }   // abgebrochen: nichts tun; sonst Ersatz zeigen
+  }
+  const alt = document.getElementById("shareAlt");
+  alt.innerHTML = `<a class="btn small" href="https://wa.me/?text=${encodeURIComponent(text + " " + url)}" target="_blank" rel="noopener">💬 ${t("share.whatsapp")}</a>
+    <button type="button" class="btn small" id="shareCopy">🔗 ${t("share.copy")}</button><span class="muted" id="shareMsg"></span>`;
+  alt.hidden = false;
+  document.getElementById("shareCopy").onclick = async () => {
+    try { await navigator.clipboard.writeText(text + " " + url); document.getElementById("shareMsg").textContent = t("share.copied"); }
+    catch { prompt(t("share.copy"), url); }
+  };
+}
+
 // ===== Ranglisten mit Humor: Ehrentitel, Goldene Throne, Hofstaat des Monats =====
 // Ehrentitel nach Zahl aller eigenen Bewertungen (höchster zuerst)
 const TITLES = [[60, "👑", "rank.t5"], [30, "🎖️", "rank.t4"], [15, "🏰", "rank.t3"], [5, "⚔️", "rank.t2"], [1, "🪣", "rank.t1"]];
@@ -1094,15 +1116,22 @@ async function showStats() {
   const { data, error } = await db.rpc("admin_page_views");
   const rows = data ?? [];
   const dayOf = n => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);   // Tage in UTC wie in der Datenbank
-  const sum = (from, page) => rows.filter(r => r.day >= from && (!page || r.page === page)).reduce((s, r) => s + Number(r.views), 0);
+  const match = (r, page) => !page || (page === "city" ? r.page.startsWith("city:") : r.page === page);
+  const sum = (from, page) => rows.filter(r => r.day >= from && match(r, page)).reduce((s, r) => s + Number(r.views), 0);
   const perDay = [...Array(14)].map((_, i) => { const d = dayOf(i); return { d, n: sum(d, null) - sum(dayOf(i - 1), null) }; });
   const max = Math.max(1, ...perDay.map(x => x.n));
   const cell = (label, from) => `<div class="kpi"><span>${label}</span><strong>${fmtNum(sum(from))}</strong>
-    <small>${t("adm.pHome")} ${fmtNum(sum(from, "home"))} · ${t("adm.pMap")} ${fmtNum(sum(from, "map"))}</small></div>`;
+    <small>${t("adm.pHome")} ${fmtNum(sum(from, "home"))} · ${t("adm.pMap")} ${fmtNum(sum(from, "map"))} · ${t("adm.pCity")} ${fmtNum(sum(from, "city"))}</small></div>`;
+  // Beliebteste Städte-Seiten der letzten 30 Tage
+  const cityTotals = {};
+  rows.filter(r => r.day >= dayOf(29) && r.page.startsWith("city:")).forEach(r => { const k = r.page.slice(5); cityTotals[k] = (cityTotals[k] || 0) + Number(r.views); });
+  const topCities = Object.entries(cityTotals).sort((a, b) => b[1] - a[1]).slice(0, 10);
   sheet.innerHTML = `${closeBtn()}<h2>${t("adm.statsTitle")}</h2>
     ${error ? `<p class="error">${t("adm.failed", { e: esc(error.message) })}</p>` : !rows.length ? `<p class="muted">${t("adm.noData")}</p>` : `
     <div class="kpis">${cell(t("adm.today"), dayOf(0))}${cell(t("adm.week"), dayOf(6))}${cell(t("adm.month"), dayOf(29))}${cell(t("adm.total"), "0000")}</div>
-    <div class="bars">${perDay.map(x => `<div class="bar"><span>${new Date(x.d + "T12:00:00Z").toLocaleDateString(LOCALE, { weekday: "short", day: "numeric", month: "numeric" })}</span><i style="--w:${x.n / max * 100}%"></i><b>${fmtNum(x.n)}</b></div>`).join("")}</div>`}
+    <div class="bars">${perDay.map(x => `<div class="bar"><span>${new Date(x.d + "T12:00:00Z").toLocaleDateString(LOCALE, { weekday: "short", day: "numeric", month: "numeric" })}</span><i style="--w:${x.n / max * 100}%"></i><b>${fmtNum(x.n)}</b></div>`).join("")}</div>
+    <h3 style="margin-top:16px">${t("adm.topCities")}</h3>
+    ${topCities.length ? `<div class="bars">${topCities.map(([k, n]) => `<div class="bar"><span>${esc(k)}</span><i style="--w:${n / topCities[0][1] * 100}%"></i><b>${fmtNum(n)}</b></div>`).join("")}</div>` : `<p class="muted">${t("adm.noCities")}</p>`}`}
     <p class="muted">${t("adm.statsHint")}</p>`;
   sheet.hidden = false;
 }

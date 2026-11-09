@@ -25,7 +25,7 @@ Stand: 03.11.2026. Diese Datei kurz halten und bei wichtigen Änderungen selbst 
 - **Startseite:** oben Angebot (Toiletten gesamt, davon kostenlos, mit Wickeltisch – live aus der DB); Community-Zahlen (Bewertungen, Mitglieder, eingetragene Throne) erst ab 500 Bewertungen (`COURT_MIN` in index.html), vorher nur Einladung – kleine Zahlen schrecken ab.
 - **Geld (04.11.2026):** Ziel kleiner Nebenverdienst. Vorschlag Stufenplan: jetzt keine Werbung (nach außen nicht „werbefrei für immer“ versprechen); ab ca. 10–20 Tsd. Seitenaufrufen/Monat eigene Sponsoren ohne Tracking (Städte-Seiten, als „Gesponsert“ gekennzeichnet); Banner mit Einwilligung höchstens auf Städte-Seiten, nie auf Karte/Details. Kein Spenden-Link vorerst; kein Hinweis „ohne Tracking“ auf der Startseite (Tobias’ Entscheidung). Konkrete Planung erst, wenn die Reichweite erreicht ist.
 - **Ranglisten (04.11.2026):** Thron der Woche (Startseite, beste Durchschnittsnote der laufenden Woche), Goldene Throne (🏆 auf der Karte, Kartenausschnitt, mind. 3 Bewertungen), Hofstaat des Monats (meiste Bewertungen), Ehrentitel nach Anzahl Bewertungen (Knappe 1, Ritter 5, Burgherr*in 15, Herzog*in 30, Majestät 60). **Keine „Tatort-Liste“** (schlechteste Toiletten) – bewusst weggelassen. DB-Funktionen in `20261104_rankings.sql`.
-- **Statistik:** nur Seitenaufrufe je Seite und Tag zählen (keine Besucher, keine IP, nichts im Browser) – so ohne Cookie-Banner möglich; sichtbar nur für Admins.
+- **Statistik:** nur Seitenaufrufe je Seite und Tag zählen – Startseite, Karte, Städte-Seiten als `city:<slug>` (keine Besucher, keine IP, nichts im Browser) – so ohne Cookie-Banner möglich; sichtbar nur für Admins.
 - **SEO:** Karte ist für Google unsichtbar (JS) → statische Städte-Seiten mit Liste; Links `karte.html?toilette=<id>` bzw. `?lat=&lon=`. Sprachfassungen per `?lang=de/en` mit hreflang, canonical setzt i18n.js.
 - **Datenschutz:** keine Tracking-/Werbe-Cookies, Standort nur im Browser, Ortssuche nur auf Knopfdruck (Nominatim-Regeln).
 
@@ -44,4 +44,6 @@ Karte mit OSM- und eigenen Toiletten, Bewertungen mit Trend, Detail-Kriterien un
 - All-Inkl-Stammdaten: Ort „Bruchsal“ → Schwaigern korrigieren, AV-Vertrag neu erzeugen.
 - Google Search Console eingerichtet (03.11.2026, Domain-Property per TXT). Sitemap anfangs „Konnte nicht abgerufen werden“ (bei neuen Domains üblich); Indexierung für / und /toiletten/ beantragt. Falls nach einigen Tagen weiter Fehler: zweite Sitemap mit anderem Namen anlegen.
 - Städte-Seiten: Orte stehen in `GROUPS` (tools/staedte.py). Stadtmitte und Straßen kommen per Nominatim (Cache `toiletten/orte.json`, `adressen.json`, max. 1000 Straßenabfragen pro Lauf). Orte, deren OSM-Kacheln noch fehlen (Ausland), werden angefordert und erscheinen beim nächsten Lauf. Englische Namen in `EN_NAMES`, Texte in `TX`.
+- SQL `20261109_city_views.sql` (Zählung der Städte-Seiten) muss Tobias noch ausführen; bis dahin schlägt die Zählung dort still fehl.
+- Instagram-Konto für die Seite legt Tobias an (Werbefilm 9:16, „Thron der Woche“ als wöchentliches Format).
 - Später: Werbung (vorher Gewerbe-Frage klären, Cookie-Einwilligung, Datenschutz ergänzen).
