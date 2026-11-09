@@ -234,7 +234,7 @@ TX = {
     q_ch="Wo finde ich einen Wickeltisch in {c}?", a_ch="Zum Beispiel hier: {x}. Für die Planung mit Kind kannst du auf der Karte nach „Wickeltisch“ und „familienfreundlich“ filtern.",
     q_wc="Barrierefreie Toiletten in {c}", a_wc="Rollstuhlgerecht laut Eintrag: {x}.",
     all="Alle {n} Toiletten in {c}", near="Die {k} Toiletten nahe der Innenstadt in {c}",
-    more="Gezeigt werden die {k} Toiletten, die der Innenstadt am nächsten sind. Alle {n} findest du auf der <a href=\"{map}\">Karte</a>.",
+    more="Gezeigt werden die {k} Toiletten, die der Innenstadt am nächsten sind. Alle {n} findest du auf der <a rel=\"nofollow\" href=\"{map}\">Karte</a>.",
     km="{d} km von der Innenstadt", rev1="Bewertung", revn="Bewertungen", go="Auf der Karte zeigen und bewerten →", others="Weitere Orte in der Nähe",
     t_toilet="Toilette ({op})", t_public="Öffentliche Toilette",
     c_free="kostenlos", c_fee="kostenpflichtig", c_wc="rollstuhlgerecht", c_wcl="eingeschränkt barrierefrei", c_wcn="nicht barrierefrei",
@@ -255,7 +255,7 @@ TX = {
     q_ch="Where can I change a baby in {c}?", a_ch="For example here: {x}. Planning with kids? Filter the map by “baby changing” and “family-friendly”.",
     q_wc="Accessible toilets in {c}", a_wc="Wheelchair accessible according to the listing: {x}.",
     all="All {n} toilets in {c}", near="The {k} toilets closest to the centre of {c}",
-    more="Showing the {k} toilets closest to the centre. You’ll find all {n} on the <a href=\"{map}\">map</a>.",
+    more="Showing the {k} toilets closest to the centre. You’ll find all {n} on the <a rel=\"nofollow\" href=\"{map}\">map</a>.",
     km="{d} km from the centre", rev1="review", revn="reviews", go="Show on the map and rate →", others="More places nearby",
     t_toilet="Toilet ({op})", t_public="Public toilet",
     c_free="free", c_fee="paid", c_wc="wheelchair accessible", c_wcl="limited accessibility", c_wcn="not accessible",
@@ -389,8 +389,7 @@ def breadcrumb(lang, name=None, url=None):
 
 def toilet_ld(r, lang, city):
     o = {"@type": "PublicToilet", "name": label(r, lang),
-         "geo": {"@type": "GeoCoordinates", "latitude": r["lat"], "longitude": r["lon"]},
-         "url": f"{BASE}karte.html?{'lang=en&' if lang == 'en' else ''}toilette={urllib.parse.quote(r['id'])}"}
+         "geo": {"@type": "GeoCoordinates", "latitude": r["lat"], "longitude": r["lon"]}}
     addr = {"@type": "PostalAddress", "addressLocality": city}
     if r.get("street"): addr["streetAddress"] = r["street"].split(",")[0]
     o["address"] = addr
@@ -424,7 +423,7 @@ def city_page(c, rows, others, stand, lang):
     p = [head(lang, t["title"].format(**{**v, "c": name}), t["desc"].format(**{**v, "c": name}), alt[lang], alt, ld)]
     p.append(f"""  <h1>{t["h1"].format(**v)}</h1>
   <p class="lead">{t["lead"].format(**v)}</p>
-  <a class="cta" href="{map_url}">{t["cta"].format(**v)}</a>
+  <a class="cta" rel="nofollow" href="{map_url}">{t["cta"].format(**v)}</a>
   <div class="kpis">
     <div class="kpi"><b>{n}</b><span>{t["k_n"]}</span></div>
     <div class="kpi"><b>{free}</b><span>{t["k_free"]}</span></div>
@@ -445,7 +444,7 @@ def city_page(c, rows, others, stand, lang):
         stars = f' · ★ {num(r["avg"], lang)} ({r["n"]} {t["rev1"] if r["n"] == 1 else t["revn"]})' if r.get("n") else ""
         where = (E(r["street"]) + " · " if r.get("street") else "") + t["km"].format(d=num(round(r["km"], 1), lang)) + stars
         p.append(f"""    <li><h3>{E(label(r, lang))}</h3><p class="where">{where}</p><div class="chips">{chips(r, lang)}</div>
-      <a class="go" href="../karte.html?{t["q"]}toilette={urllib.parse.quote(r['id'])}">{t["go"]}</a></li>\n""")
+      <a class="go" rel="nofollow" href="../karte.html?{t["q"]}toilette={urllib.parse.quote(r['id'])}">{t["go"]}</a></li>\n""")
     p.append("  </ol>\n")
     if n > shown:
         p.append(f'  <p class="muted">{t["more"].format(k=shown, n=n, map=map_url)}</p>\n')
