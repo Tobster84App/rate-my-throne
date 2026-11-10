@@ -166,6 +166,11 @@ nav.toc { display: block; padding-block: 0; gap: 0; }
 .film { padding-block: clamp(48px, 7vw, 80px) 0; }
 .film video { display: block; width: 100%; height: auto; border-radius: 20px; box-shadow: var(--shadow); background: var(--royal); }
 .film video.portrait { width: auto; max-width: 100%; max-height: 80vh; margin: 0 auto; }
+/* Erklärfilm Bewertung (im Abschnitt „So geht's“, startet erst auf Klick) */
+.explainer { margin: 40px auto 0; max-width: 860px; }
+.explainer video { display: block; width: 100%; height: auto; border-radius: 20px; box-shadow: var(--shadow); background: var(--royal); }
+.explainer video.portrait { width: auto; max-width: 100%; max-height: 80vh; margin: 0 auto; }
+.explainer figcaption { text-align: center; color: var(--muted); font-size: 15px; margin-top: 12px; }
 
 /* Vorab planen */
 .plan-demo { gap: 12px; }
@@ -298,6 +303,22 @@ footer a { color: var(--muted); }
           <p data-i18n="h.step3.text"></p>
         </article>
       </div>
+      <!-- Erklärfilm zur Bewertung (deutsch, mit Ton, startet erst auf Klick). Auf Englisch ausgeblendet. -->
+      <figure class="explainer" id="explainer" hidden>
+        <video controls playsinline preload="none"
+               poster="media/rate-my-throne-erklaerfilm-16x9-poster.jpg" data-i18n-aria-label="h.explain.aria">
+          <source src="media/rate-my-throne-erklaerfilm-16x9.mp4" type="video/mp4">
+        </video>
+        <script>
+          // Handy im Hochformat: Hochformat-Fassung des Erklärfilms
+          if (matchMedia("(max-width: 640px) and (orientation: portrait)").matches) {
+            const v = document.currentScript.previousElementSibling;
+            v.classList.add("portrait"); v.poster = "media/rate-my-throne-erklaerfilm-9x16-poster.jpg";
+            v.querySelector("source").src = "media/rate-my-throne-erklaerfilm-9x16.mp4";
+          }
+        </script>
+        <figcaption data-i18n="h.explain.caption">So funktioniert die Bewertung – in 54 Sekunden.</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -587,6 +608,9 @@ async function showSession() {
   $("navJoin").textContent = t("h.nav.map"); $("navJoin").href = "karte.html";
 }
 $("logout").onclick = async e => { e.preventDefault(); await db.auth.signOut(); location.reload(); };
+
+// Erklärfilm ist deutsch: nur auf der deutschen Seite zeigen
+$("explainer").hidden = LANG !== "de";
 
 // Werbefilm erst zeigen, wenn die Datei geladen werden kann; bei „Bewegung reduzieren“ nicht automatisch abspielen
 const film = document.querySelector("#film video");

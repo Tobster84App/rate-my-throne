@@ -55,6 +55,7 @@ Stand: 07.11.2026 · Version 0.17
 - Weiterleitungs-Domains rate-my-throne.de/.net und ratemythrone.de mit SSL (Let's Encrypt bei All-Inkl) – keine Browser-Warnung mehr
 - Wettbewerbsanalyse PeeFinder (04.11.2026): Positionierung „Live & Familie & Humor“ beschlossen
 - Startseite: Werbefilm (stumm, Endlosschleife) unter den Zahlen; auf Handys im Hochformat die Fassung 9x16; Dateien in media/ (je ca. 2 MB, ohne Tonspur, Poster = Schlussbild)
+- Startseite: Erklärfilm „So funktioniert die Bewertung“ (54 s, mit Ton, startet erst auf Klick) im Abschnitt „So geht's“; nur auf Deutsch sichtbar; Handy hochkant 9x16; Dateien media/rate-my-throne-erklaerfilm-* (je ca. 2,5 MB, Poster = Titelbild). Quelldateien im Drive-Ordner „Rate My Throne/Werbefilm“ (erklaer.html)
 
 ## Nächste Schritte
 1. Google Search Console: eingerichtet und Sitemap eingereicht (03.11.2026); Status „Konnte nicht abgerufen werden“ beobachten, Indexierung für Startseite und /toiletten/ beantragt
