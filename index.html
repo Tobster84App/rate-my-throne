@@ -303,20 +303,12 @@ footer a { color: var(--muted); }
           <p data-i18n="h.step3.text"></p>
         </article>
       </div>
-      <!-- Erklärfilm zur Bewertung (deutsch, mit Ton, startet erst auf Klick). Auf Englisch ausgeblendet. -->
+      <!-- Erklärfilm zur Bewertung (mit Ton, startet erst auf Klick). Sprache und Hoch-/Querformat wählt das Skript unten. -->
       <figure class="explainer" id="explainer" hidden>
         <video controls playsinline preload="none"
                poster="media/rate-my-throne-erklaerfilm-16x9-poster.jpg" data-i18n-aria-label="h.explain.aria">
           <source src="media/rate-my-throne-erklaerfilm-16x9.mp4" type="video/mp4">
         </video>
-        <script>
-          // Handy im Hochformat: Hochformat-Fassung des Erklärfilms
-          if (matchMedia("(max-width: 640px) and (orientation: portrait)").matches) {
-            const v = document.currentScript.previousElementSibling;
-            v.classList.add("portrait"); v.poster = "media/rate-my-throne-erklaerfilm-9x16-poster.jpg";
-            v.querySelector("source").src = "media/rate-my-throne-erklaerfilm-9x16.mp4";
-          }
-        </script>
         <figcaption data-i18n="h.explain.caption">So funktioniert die Bewertung – in 54 Sekunden.</figcaption>
       </figure>
     </div>
@@ -609,8 +601,16 @@ async function showSession() {
 }
 $("logout").onclick = async e => { e.preventDefault(); await db.auth.signOut(); location.reload(); };
 
-// Erklärfilm ist deutsch: nur auf der deutschen Seite zeigen
-$("explainer").hidden = LANG !== "de";
+// Erklärfilm: deutsche oder englische Fassung, auf Handys im Hochformat 9x16
+{
+  const v = document.querySelector("#explainer video");
+  const portrait = matchMedia("(max-width: 640px) and (orientation: portrait)").matches;
+  const name = `media/rate-my-throne-erklaerfilm${LANG === "en" ? "-en" : ""}-${portrait ? "9x16" : "16x9"}`;
+  v.classList.toggle("portrait", portrait);
+  v.poster = name + "-poster.jpg";
+  v.querySelector("source").src = name + ".mp4";
+  $("explainer").hidden = false;
+}
 
 // Werbefilm erst zeigen, wenn die Datei geladen werden kann; bei „Bewegung reduzieren“ nicht automatisch abspielen
 const film = document.querySelector("#film video");

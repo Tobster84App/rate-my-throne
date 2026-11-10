@@ -324,7 +324,7 @@ const I18N = {
     "h.court.title": "The royal court is growing 👑", "h.court.new": "Every review helps the next person in a hurry. Rate My Throne is brand new – be one of the first.",
     "h.court.text": "Every review helps the next person in a hurry. Here’s what the court has achieved so far:", "h.court.go": "Join now →",
     "h.film.aria": "Promo film: how Rate My Throne works",
-    "h.explain.aria": "Explainer video (German): how ratings work", "h.explain.caption": "How ratings work – in 54 seconds (German).",
+    "h.explain.aria": "Explainer video: how ratings work", "h.explain.caption": "How ratings work – in 54 seconds.",
     "h.how.eyebrow": "How it works", "h.how.title": "Three steps. No panic.",
     "h.step1.title": "Find",
     "h.step1.text": "Open the map, hit “Find the nearest throne”. You instantly see how far it is, whether it's open – and whether it's green (paradise), yellow (meh) or red (better hold it).",
