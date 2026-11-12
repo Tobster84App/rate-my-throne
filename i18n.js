@@ -421,9 +421,11 @@ const LOCALE = LANG === "de" ? "de-DE" : "en-GB";
 // Für Suchmaschinen: kanonische Adresse dieser Sprachfassung (?lang=de/en), ohne Sprachangabe die Standardadresse
 try {
   const q = new URLSearchParams(location.search).get("lang");
-  // Vorhandene feste Angabe (z. B. in karte.html) weiterverwenden, sonst neu anlegen; Zusätze wie ?toilette=… gehören nie dazu
-  const link = document.querySelector('link[rel="canonical"]') || document.head.appendChild(Object.assign(document.createElement("link"), { rel: "canonical" }));
-  link.href = "https://www.rate-my-throne.com" + location.pathname.replace(/index\.html$/, "") + (q && I18N[q] ? "?lang=" + q : "");
+  // Steht im Seitencode schon eine feste Angabe (karte.html), NICHT verändern: Google ignoriert sonst beide Angaben.
+  if (!document.querySelector('link[rel="canonical"]')) {
+    const link = document.head.appendChild(Object.assign(document.createElement("link"), { rel: "canonical" }));
+    link.href = "https://www.rate-my-throne.com" + location.pathname.replace(/index\.html$/, "") + (q && I18N[q] ? "?lang=" + q : "");
+  }
 } catch {}
 
 // Text holen; {name}-Platzhalter werden ersetzt

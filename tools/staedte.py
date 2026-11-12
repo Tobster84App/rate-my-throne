@@ -478,7 +478,7 @@ def index_page(cities, counts, stand, lang):
 
 
 def sitemap(cities):
-    urls = [BASE + s for s in STATIC_PAGES] + [BASE + s + "?lang=en" for s in STATIC_PAGES]
+    urls = [BASE + s for s in STATIC_PAGES] + [BASE + s + "?lang=en" for s in STATIC_PAGES if s != "karte.html"]
     for lang in DIRS:
         urls += [f"{BASE}{DIRS[lang]}/"] + [page_url(c, lang) for c in cities]
     body = "\n".join(f"  <url><loc>{u.replace('&', '&amp;')}</loc></url>" for u in urls)
