@@ -10,7 +10,7 @@ Stand: 07.11.2026 · Version 0.17
 - [x] Eigene Domain www.rate-my-throne.com: DNS (All-Inkl), GitHub Pages mit HTTPS, Supabase-URLs (30.10.2026)
 - [x] E-Mail-Versand über Brevo (Absender noreply@rate-my-throne.com), Domain bei Brevo authentifiziert, Test-Registrierung erfolgreich (30.10.2026)
 - [x] AV-Vertrag Supabase: seit 01.08.2026 Bestandteil der Nutzungsbedingungen (Antwort Supabase Privacy Team, 02.11.2026); Übermittlung USA/Singapur per EU-Standardvertragsklauseln Modul 2 (TIA vom 14.03.2025)
-- [x] AV-Vertrag All-Inkl abgeschlossen (30.10.2026, Stand der Bedingungen 25.08.2026; PDF im Drive). Achtung: Stammdaten bei All-Inkl zeigen „74193 Bruchsal“ statt Schwaigern – korrigieren und Vertrag neu erzeugen (Stand 03.11.: hochgeladene PDF zeigt noch Bruchsal)
+- [x] AV-Vertrag All-Inkl abgeschlossen (Stand der Bedingungen 25.08.2026); am 12.11.2026 mit korrigierter Anschrift (Schwaigern) neu erzeugt, PDF im Drive
 - [ ] AV-Vertrag Brevo: laut Brevo Teil der Nutzungsbedingungen; Bestätigung und Firmierung vom Support ausstehend
 
 ## Stand

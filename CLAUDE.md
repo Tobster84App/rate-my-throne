@@ -42,7 +42,6 @@ Karte mit OSM- und eigenen Toiletten, Bewertungen mit Trend, Detail-Kriterien un
 ## Offene Punkte
 - Datenschutz: Brevo-Support-Bestätigung ausstehend; Rechtstexte prüfen lassen. (Erledigt: Supabase – DPA in den AGB, SCC Modul 2 laut TIA; GitHub – DPF-zertifiziert plus SCC laut GitHub Privacy Statement.)
 - **GitHub Pages erlaubt laut Nutzungsgrenzen keine Seiten, die „primarily directed at … commercial transactions“ sind** – vor Werbung prüfen, ggf. Hoster wechseln.
-- All-Inkl-Stammdaten: Ort „Bruchsal“ → Schwaigern korrigieren, AV-Vertrag neu erzeugen.
 - Google Search Console eingerichtet (03.11.2026, Domain-Property per TXT). Sitemap anfangs „Konnte nicht abgerufen werden“ (bei neuen Domains üblich); Indexierung für / und /toiletten/ beantragt. Falls nach einigen Tagen weiter Fehler: zweite Sitemap mit anderem Namen anlegen.
 - Städte-Seiten: Orte stehen in `GROUPS` (tools/staedte.py). Stadtmitte und Straßen kommen per Nominatim (Cache `toiletten/orte.json`, `adressen.json`, max. 1000 Straßenabfragen pro Lauf). Orte, deren OSM-Kacheln noch fehlen (Ausland), werden angefordert und erscheinen beim nächsten Lauf. Englische Namen in `EN_NAMES`, Texte in `TX`.
 - Instagram: @ratemythrone_ger (verlinkt im Fuß der Startseite, `sameAs` im JSON-LD). Inhalte: Werbefilm 9:16, „Thron der Woche“ als wöchentliches Format.
