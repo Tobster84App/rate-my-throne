@@ -57,10 +57,11 @@ Stand: 07.11.2026 · Version 0.17
 - Wettbewerbsanalyse PeeFinder (04.11.2026): Positionierung „Live & Familie & Humor“ beschlossen
 - Startseite: Werbefilm (stumm, Endlosschleife) unter den Zahlen; auf Handys im Hochformat die Fassung 9x16; Dateien in media/ (je ca. 2 MB, ohne Tonspur, Poster = Schlussbild)
 - Startseite: Erklärfilm „So funktioniert die Bewertung“ (54 s, mit Ton, startet erst auf Klick) im Abschnitt „So geht's“; deutsche und englische Fassung (…-erklaerfilm-* bzw. …-erklaerfilm-en-*), Handy hochkant 9x16; Dateien in media/ (je ca. 2,5 MB, Poster = Titelbild). Quelldateien im Drive-Ordner „Rate My Throne/Werbefilm“ (erklaer.html)
+- Maskottchen „Klodwig der Erste“ (11.11.2026): 6 Ausdrücke, Vorstellungsvideo 9:16 (25,5 s) für Instagram, Instagram-Titelbilder für Werbefilm/Erklärfilm/Klodwig; Quelldateien (klodwig-lib.js, klodwig-intro.html, klodwig-bilder.html, cover.html, music_klodwig.py) im Drive-Ordner „Werbefilm“
 
 ## Nächste Schritte
 1. Google Search Console: eingerichtet und Sitemap eingereicht (03.11.2026); Status „Konnte nicht abgerufen werden“ beobachten, Indexierung für Startseite und /toiletten/ beantragt
-2. Mehr Besucher: 30–50 Bewertungen mit Familie/Freunden; Instagram @ratemythrone_ger (angelegt 09.11.2026, verlinkt auf der Startseite); Pressemitteilung (z. B. Heilbronner Stimme); Eltern-, Rollstuhl- und CED-Gruppen (z. B. DCCV); Verzeichnisse wie AlternativeTo; Links von anderen Seiten sammeln
+2. Mehr Besucher: 30–50 Bewertungen mit Familie/Freunden; Instagram @ratemythrone_ger (angelegt 09.11.2026, verlinkt auf der Startseite; Reels mit eigenem Titelbild, Serien mit Klodwig geplant, Name „Klodwig“ im DPMA-Register prüfen); Pressemitteilung (z. B. Heilbronner Stimme); Eltern-, Rollstuhl- und CED-Gruppen (z. B. DCCV); Verzeichnisse wie AlternativeTo; Links von anderen Seiten sammeln
 3. Weitere Orte bei Bedarf in tools/staedte.py ergänzen
 4. Vor Werbung prüfen: GitHub Pages ist nicht für überwiegend kommerzielle Seiten gedacht – ggf. Hoster wechseln
 5. Werbung (z. B. Google AdSense) – erst mit eigener Domain und Rechtstexten, dann Cookie-Einwilligung nötig
