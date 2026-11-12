@@ -298,7 +298,12 @@ const CATS = ["clean", "equip", "access"].map(key => ({ key, label: t("cat." + k
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 // ===== Karte =====
-const map = L.map("map", { zoomControl: false }).setView([52.52, 13.405], 15); // Start: Berlin Mitte
+// Start: zuletzt angesehener Kartenausschnitt (nur im Browser gespeichert), sonst Berlin Mitte
+const lastView = (() => { try { const v = JSON.parse(localStorage.getItem("rmt-view") || "null"); return v && Math.abs(v.lat) <= 90 && Math.abs(v.lon) <= 180 ? v : null; } catch { return null; } })();
+const map = L.map("map", { zoomControl: false }).setView(lastView ? [lastView.lat, lastView.lon] : [52.52, 13.405], lastView ? Math.min(Math.max(lastView.z, 13), 18) : 15);
+let userMoved = false;                       // hat jemand die Karte selbst verschoben? Dann nicht mehr automatisch springen
+map.on("dragstart", () => { userMoved = true; });
+map.getContainer().addEventListener("wheel", () => { userMoved = true; }, { passive: true });
 L.control.zoom({ position: "bottomright" }).addTo(map);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">' + t("m.osmCredit") + '</a>'
@@ -530,7 +535,10 @@ async function loadToilets() {
   updateInfo();
 }
 let moveTimer;
-map.on("moveend", () => { updateInfo(); clearTimeout(moveTimer); moveTimer = setTimeout(loadToilets, 400); });
+map.on("moveend", () => {
+  updateInfo(); clearTimeout(moveTimer); moveTimer = setTimeout(loadToilets, 400);
+  try { const c = map.getCenter(); localStorage.setItem("rmt-view", JSON.stringify({ lat: +c.lat.toFixed(5), lon: +c.lng.toFixed(5), z: map.getZoom() })); } catch {}
+});
 
 // ===== Standort & nächster Thron =====
 function locate() {
@@ -1365,10 +1373,22 @@ async function focusToilet(ref) {
   const q = new URLSearchParams(location.search);
   const ref = q.get("toilette"), lat = parseFloat(q.get("lat")), lon = parseFloat(q.get("lon"));
   if (ref && /^[\w-]{1,64}$/.test(ref)) focusToilet(ref).catch(() => loadToilets());
-  else {
-    if (Math.abs(lat) <= 90 && Math.abs(lon) <= 180) map.setView([lat, lon], 14, { animate: false });
-    loadToilets();
-  }
+  else if (Math.abs(lat) <= 90 && Math.abs(lon) <= 180) { map.setView([lat, lon], 14, { animate: false }); loadToilets(); }
+  else { loadToilets(); if (!q.has("token_hash") && !q.has("suche")) autoLocate(); }
+}
+
+// Beim Öffnen direkt zum eigenen Standort springen. Beim ersten Mal fragt der Browser um Erlaubnis;
+// wurde sie verweigert, fragen wir nicht erneut. Der Standort bleibt im Browser (siehe Datenschutz).
+async function autoLocate() {
+  if (!navigator.geolocation) return;
+  try { const st = await navigator.permissions?.query({ name: "geolocation" }); if (st?.state === "denied") return; } catch {}
+  status(t("m.status.locating"));
+  try {
+    const pos = await locate();
+    if (!userMoved && !planPos) map.setView(pos, 16);
+    status("");
+    updateInfo();
+  } catch { status(""); }
 }
 
 refreshUser(); handleEmailLink();
